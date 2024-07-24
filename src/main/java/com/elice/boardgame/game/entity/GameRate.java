@@ -25,5 +25,5 @@ public class GameRate extends BaseEntity {
     @JoinColumn(name = "game_id", nullable = false)
     private BoardGame boardGame;
 
-    private int rate;
+    private Double rate;
 }
