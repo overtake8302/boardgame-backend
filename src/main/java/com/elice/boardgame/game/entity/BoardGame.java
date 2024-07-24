@@ -53,7 +53,8 @@ public class BoardGame extends BaseEntity{
     @OneToMany(mappedBy = "boardGame", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GameRate> gameRates = new ArrayList<>();
 
-    @OneToMany(mappedBy = "boardGame", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "game_id")
     private List<GameProfilePic> gameProfilePics = new ArrayList<>();
 
     //장르 추가하기

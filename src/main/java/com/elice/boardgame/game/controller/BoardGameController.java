@@ -13,18 +13,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/game")
 @Validated
 @RequiredArgsConstructor
-public class GameController {
+public class BoardGameController {
 
     private final BoardGameService boardGameService;
     private final BoardGameMapper mapper;
 
     @PostMapping
-    public ResponseEntity<GameResponseDto> postGame(@RequestBody @Validated GamePostDto gamePostDto, BindingResult bindingResult) {
+    public ResponseEntity<GameResponseDto> postGame(@RequestBody @Validated GamePostDto gamePostDto, BindingResult bindingResult, @RequestParam(value = "file", required = false) List<MultipartFile> files) throws IOException {
 
         if (bindingResult.hasErrors()) {
             throw new GamePostException(GameErrorMessages.MISSING_REQUIRED_INPUT);
@@ -32,7 +36,13 @@ public class GameController {
 
         BoardGame newBoardGame = mapper.gamePostDtoToBoardGame(gamePostDto);
 
-        BoardGame savedBoardGame = boardGameService.create(newBoardGame);
+        BoardGame savedBoardGame = new BoardGame();
+
+        if (files != null && !files.isEmpty()) {
+            savedBoardGame = boardGameService.create(newBoardGame, files);
+        } else {
+            savedBoardGame = boardGameService.create(newBoardGame);
+        }
 
         GameResponseDto gameResponseDto = mapper.boardGameToGameResponseDto(savedBoardGame);
 

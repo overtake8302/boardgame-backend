@@ -25,7 +25,7 @@ public class BoardGameMapper {
         
         BoardGame newBoardGame = new BoardGame();
         newBoardGame.setName(dto.getName());
-        newBoardGame.setGameProfilePics(dto.getGameProfilePic());
+//        newBoardGame.setGameProfilePics(dto.getGameProfilePic());
         //장르도 추가하기
         newBoardGame.setPlayTime(dto.getPlayTime());
         newBoardGame.setReleaseDate(dto.getReleaseDate());
