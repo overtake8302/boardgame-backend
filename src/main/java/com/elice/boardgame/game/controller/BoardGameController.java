@@ -28,7 +28,7 @@ public class BoardGameController {
     private final BoardGameMapper mapper;
 
     @PostMapping
-    public ResponseEntity<GameResponseDto> postGame(@RequestBody @Validated GamePostDto gamePostDto, BindingResult bindingResult, @RequestParam(value = "file", required = false) List<MultipartFile> files) throws IOException {
+    public ResponseEntity<GameResponseDto> postGame(@RequestPart("gamePostDto") @Validated GamePostDto gamePostDto, BindingResult bindingResult, @RequestPart(value = "file", required = false) List<MultipartFile> files) throws IOException {
 
         if (bindingResult.hasErrors()) {
             throw new GamePostException(GameErrorMessages.MISSING_REQUIRED_INPUT);

@@ -39,3 +39,4 @@ out/
 .DS_Store
 HELP.md
 application.properties
+src/main/resources/application.properties

@@ -32,7 +32,6 @@ public class BoardGameS3Service {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(fileName)
-                .acl("public-read")
                 .build();
 
         PutObjectResponse response = amazonS3Client1.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
