@@ -31,4 +31,12 @@ public class GameExceptionController {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(GamePutException.class)
+    public ResponseEntity<GameErrorResponse> handleGamePutException(GamePutException e) {
+
+        GameErrorResponse errorResponse = new GameErrorResponse(e.getErrorMessage().getErrorCode(), e.getErrorMessage().getErrorMessage());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 }

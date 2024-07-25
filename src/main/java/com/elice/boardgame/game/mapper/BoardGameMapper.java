@@ -2,10 +2,12 @@ package com.elice.boardgame.game.mapper;
 
 import com.elice.boardgame.game.dto.GamePostDto;
 import com.elice.boardgame.game.dto.GameProfilePicResponseDto;
+import com.elice.boardgame.game.dto.GamePutDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameRateRepository;
+import com.elice.boardgame.game.service.BoardGameService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -20,6 +22,7 @@ public class BoardGameMapper {
     private final BoardGameRepository boardGameRepository;
     private final GameRateRepository gameRateRepository;
     private final GameProfilePicMapper gameProfilePicMapper;
+    private final BoardGameService boardGameService;
     
     public BoardGame gamePostDtoToBoardGame(GamePostDto dto) {
         
@@ -64,5 +67,25 @@ public class BoardGameMapper {
         //댓글 후기 공략 질문 모임 중고 판매 기타등등
 
         return gameResponseDto;
+    }
+
+    public BoardGame gamePutDtoToBoardGame(GamePutDto gamePutDto) {
+
+        BoardGame foundGame = boardGameService.findGameByGameId(gamePutDto.getGameId());
+
+        foundGame.setYoutubeLink(gamePutDto.getYoutubeLink());
+        foundGame.setDifficulty(gamePutDto.getDifficulty());
+        foundGame.setPrice(gamePutDto.getPrice());
+        foundGame.setArtwork(gamePutDto.getArtwork());
+        foundGame.setPublisher(gamePutDto.getPublisher());
+        foundGame.setDesigner(gamePutDto.getDesigner());
+        foundGame.setAgeLimit(gamePutDto.getAgeLimit());
+        foundGame.setPlayNum(gamePutDto.getPlayNum());
+        foundGame.setPlayTime(gamePutDto.getPlayTime());
+        foundGame.setReleaseDate(gamePutDto.getReleaseDate());
+        foundGame.setName(gamePutDto.getName());
+
+        return foundGame;
+
     }
 }

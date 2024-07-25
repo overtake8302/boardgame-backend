@@ -35,5 +35,14 @@ public class GameProfilePicService {
     public void deleteByFileName(GameProfilePic pic) {
 
         boardGameS3Service.deleteFileFromBucket1(pic.getFileName());
+        gameProfilePIcRepository.deleteByPicId(pic.getPicId());
+    }
+
+    @Transactional
+    public void deleteFiles(List<GameProfilePic> gameProfilePics) {
+
+        for (GameProfilePic pic : gameProfilePics) {
+            deleteByFileName(pic);
+        }
     }
 }

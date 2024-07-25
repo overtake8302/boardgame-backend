@@ -78,4 +78,35 @@ public class BoardGameService {
             throw new GameDeleteFailException();
         }
     }
+
+    @Transactional
+    public BoardGame editWithoutPics(BoardGame target) {
+
+        gameProfilePicService.deleteFiles(target.getGameProfilePics());
+        target.setGameProfilePics(Collections.emptyList());
+
+        BoardGame updatedGame = boardGameRepository.save(target);
+
+        return updatedGame;
+    }
+
+    @Transactional
+    public BoardGame editWithPics(BoardGame target, List<MultipartFile> files) throws IOException {
+
+        gameProfilePicService.deleteFiles(target.getGameProfilePics());
+        target.setGameProfilePics(Collections.emptyList());
+
+        List<GameProfilePic> pics = new ArrayList<>();
+
+        for (MultipartFile file : files) {
+            GameProfilePic pic = gameProfilePicService.save(file);
+            pics.add(pic);
+        }
+
+        target.setGameProfilePics(pics);
+
+        boardGameRepository.save(target);
+
+        return target;
+    }
 }

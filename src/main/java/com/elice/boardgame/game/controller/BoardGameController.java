@@ -1,12 +1,14 @@
 package com.elice.boardgame.game.controller;
 
 import com.elice.boardgame.game.dto.GamePostDto;
+import com.elice.boardgame.game.dto.GamePutDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
-import com.elice.boardgame.game.exception.GameErrorMessages;
 import com.elice.boardgame.game.exception.GamePostException;
+import com.elice.boardgame.game.exception.GamePutException;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
 import com.elice.boardgame.game.service.BoardGameService;
+import com.elice.boardgame.game.service.GameProfilePicService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,7 @@ public class BoardGameController {
 
     private final BoardGameService boardGameService;
     private final BoardGameMapper mapper;
+    private final GameProfilePicService gameProfilePicService;
 
     @PostMapping
     public ResponseEntity<GameResponseDto> postGame(@RequestPart("gamePostDto") @Validated GamePostDto gamePostDto, BindingResult bindingResult, @RequestPart(value = "file", required = false) List<MultipartFile> files) throws IOException {
@@ -65,5 +68,28 @@ public class BoardGameController {
         boardGameService.deleteGameByGameId(gameId);
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/{gameId}")
+    public ResponseEntity<GameResponseDto> putGame(@RequestPart("gamePutDto") @Validated GamePutDto gamePutDto, @RequestPart(value = "file", required = false) List<MultipartFile> files, BindingResult bindingResult) throws  IOException {
+
+        if (bindingResult.hasErrors()) {
+            throw new GamePutException();
+        }
+
+
+        BoardGame target = mapper.gamePutDtoToBoardGame(gamePutDto);
+
+        BoardGame updatedTarget;
+
+        if (files == null || files.isEmpty()) {
+            updatedTarget = boardGameService.editWithoutPics(target);
+        } else {
+            updatedTarget = boardGameService.editWithPics(target, files);
+        }
+
+        GameResponseDto gameResponseDto = mapper.boardGameToGameResponseDto(updatedTarget);
+
+        return new ResponseEntity<>(gameResponseDto, HttpStatus.OK);
     }
 }
