@@ -1,4 +1,4 @@
-package com.elice.boardgame.category;
+package com.elice.boardgame.category.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

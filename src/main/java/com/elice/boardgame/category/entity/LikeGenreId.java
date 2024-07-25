@@ -2,15 +2,17 @@ package com.elice.boardgame.category.entity;
 
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import java.io.Serializable;
 import java.util.Objects;
 import lombok.Data;
 
-@Embeddable
 @Data
-public class GameGenreId {
+@Embeddable
+public class LikeGenreId implements Serializable {
 
-    @JoinColumn(name = "game_id")
-    private Long gameId;
+    @JoinColumn(name = "member_id")
+    private Long memberId;
 
     @JoinColumn(name = "genre_id")
     private Long genreId;
@@ -19,12 +21,12 @@ public class GameGenreId {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GameGenreId that = (GameGenreId) o;
-        return Objects.equals(gameId, that.gameId) && Objects.equals(genreId, that.genreId);
+        LikeGenreId that = (LikeGenreId) o;
+        return Objects.equals(memberId, that.memberId) && Objects.equals(genreId, that.genreId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gameId, genreId);
+        return Objects.hash(memberId, genreId);
     }
 }
