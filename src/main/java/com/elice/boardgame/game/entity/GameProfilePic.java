@@ -22,4 +22,6 @@ public class GameProfilePic extends BaseEntity {
     private BoardGame boardGame;*/
 
     private String picAddress;
+
+    private String fileName;
 }

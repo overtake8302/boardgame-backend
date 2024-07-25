@@ -9,7 +9,8 @@ public enum GameErrorMessages {
 
     MISSING_REQUIRED_INPUT("E001", "Required input is missing"),
     INVALID_INPUT_FORMAT("E002", "Invalid input format"),
-    GAME_NOT_FOUND("E003", "Game not found");
+    GAME_NOT_FOUND("E003", "Game not found"),
+    GAME_DELETE_FAIL("E004", "Game Delete fail");
 
     private final String errorCode;
     private final String errorMessage;

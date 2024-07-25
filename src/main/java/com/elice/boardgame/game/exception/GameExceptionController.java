@@ -23,4 +23,12 @@ public class GameExceptionController {
 
         return new ResponseEntity<>(gameErrorResponse, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(GameDeleteFailException.class)
+    public ResponseEntity<GameErrorResponse> handleGameDeleteFailException(GameDeleteFailException e) {
+
+        GameErrorResponse errorResponse = new GameErrorResponse(e.getErrorMessage().getErrorCode(), e.getErrorMessage().getErrorMessage());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

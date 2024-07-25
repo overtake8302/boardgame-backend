@@ -58,4 +58,12 @@ public class BoardGameController {
 
         return new ResponseEntity<>(gameResponseDto, HttpStatus.OK);
     }
+
+    @DeleteMapping("/{gameId}")
+    public ResponseEntity<HttpStatus> deleteGame(@PathVariable Long gameId) {
+
+        boardGameService.deleteGameByGameId(gameId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
