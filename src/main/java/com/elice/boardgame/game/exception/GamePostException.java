@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class GamePostException extends GameRootException {
 
-    public GamePostException(GameErrorMessages gameErrorMessages) {
-        super(gameErrorMessages);
+    public GamePostException() {
+        super(GameErrorMessages.MISSING_REQUIRED_INPUT);
     }
 }

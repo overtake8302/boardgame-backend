@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -36,5 +37,18 @@ public class BoardGameS3Service {
 
         PutObjectResponse response = amazonS3Client1.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
         return amazonS3Client1.utilities().getUrl(builder -> builder.bucket(bucketName).key(fileName)).toExternalForm();
+    }
+
+    public void deleteFileFromBucket1(String fileName) {
+        deleteFile(fileName, bucket1Name);
+    }
+
+    private void deleteFile(String fileName, String bucketName) {
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(fileName)
+                .build();
+
+        amazonS3Client1.deleteObject(deleteObjectRequest);
     }
 }

@@ -2,6 +2,7 @@ package com.elice.boardgame.game.service;
 
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameProfilePic;
+import com.elice.boardgame.game.exception.GameNotFoundException;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,5 +41,16 @@ public class BoardGameService {
         BoardGame savedBoardGame = boardGameRepository.save(newBoardGame);
 
         return savedBoardGame;
+    }
+
+    public BoardGame findGameByGameId(Long gameId) {
+
+        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedAtIsNull(gameId);
+
+        if (foundGame == null) {
+            throw new GameNotFoundException();
+        }
+
+        return foundGame;
     }
 }

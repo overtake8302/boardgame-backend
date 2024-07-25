@@ -12,6 +12,15 @@ public class GameExceptionController {
     public ResponseEntity<GameErrorResponse> handleGamePostException(GamePostException gamePostException) {
 
         GameErrorResponse errorResponse = new GameErrorResponse(gamePostException.getErrorMessage().getErrorCode(), gamePostException.getErrorMessage().getErrorMessage());
+
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(GameNotFoundException.class)
+    public ResponseEntity<GameErrorResponse> handleGameNotFoundException(GameNotFoundException gameNotFoundException) {
+
+        GameErrorResponse gameErrorResponse = new GameErrorResponse(gameNotFoundException.getErrorMessage().getErrorCode(), gameNotFoundException.getErrorMessage().getErrorMessage());
+
+        return new ResponseEntity<>(gameErrorResponse, HttpStatus.NOT_FOUND);
     }
 }

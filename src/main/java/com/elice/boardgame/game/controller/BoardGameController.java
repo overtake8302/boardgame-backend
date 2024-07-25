@@ -31,7 +31,7 @@ public class BoardGameController {
     public ResponseEntity<GameResponseDto> postGame(@RequestPart("gamePostDto") @Validated GamePostDto gamePostDto, BindingResult bindingResult, @RequestPart(value = "file", required = false) List<MultipartFile> files) throws IOException {
 
         if (bindingResult.hasErrors()) {
-            throw new GamePostException(GameErrorMessages.MISSING_REQUIRED_INPUT);
+            throw new GamePostException();
         }
 
         BoardGame newBoardGame = mapper.gamePostDtoToBoardGame(gamePostDto);
@@ -47,5 +47,15 @@ public class BoardGameController {
         GameResponseDto gameResponseDto = mapper.boardGameToGameResponseDto(savedBoardGame);
 
         return new ResponseEntity<>(gameResponseDto, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{gameId}")
+    public ResponseEntity<GameResponseDto> getGame(@PathVariable Long gameId) {
+
+        BoardGame foundGame = boardGameService.findGameByGameId(gameId);
+
+        GameResponseDto gameResponseDto = mapper.boardGameToGameResponseDto(foundGame);
+
+        return new ResponseEntity<>(gameResponseDto, HttpStatus.OK);
     }
 }
