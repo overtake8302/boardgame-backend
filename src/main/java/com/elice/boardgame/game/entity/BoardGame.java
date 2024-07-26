@@ -1,6 +1,7 @@
 package com.elice.boardgame.game.entity;
 
 
+import com.elice.boardgame.category.entity.GameGenre;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -59,6 +60,9 @@ public class BoardGame extends BaseEntity{
     private List<GameProfilePic> gameProfilePics = new ArrayList<>();
 
     //장르 추가하기
+    @OneToMany
+    @JoinColumn(name = "game_genre_id")
+    private List<GameGenre> gameGenres;
 
     @AllArgsConstructor
     @Getter

@@ -1,5 +1,6 @@
 package com.elice.boardgame.game.controller;
 
+import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.game.dto.GamePostDto;
 import com.elice.boardgame.game.dto.GamePutDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
@@ -43,9 +44,9 @@ public class BoardGameController {
         BoardGame savedBoardGame = new BoardGame();
 
         if (files != null && !files.isEmpty()) {
-            savedBoardGame = boardGameService.create(newBoardGame, files);
+            savedBoardGame = boardGameService.create(newBoardGame, files, gamePostDto.getGameGenreIds());
         } else {
-            savedBoardGame = boardGameService.create(newBoardGame);
+            savedBoardGame = boardGameService.create(newBoardGame, gamePostDto.getGameGenreIds());
         }
 
         GameResponseDto gameResponseDto = mapper.boardGameToGameResponseDto(savedBoardGame);
@@ -84,9 +85,9 @@ public class BoardGameController {
         BoardGame updatedTarget;
 
         if (files == null || files.isEmpty()) {
-            updatedTarget = boardGameService.editWithoutPics(target);
+            updatedTarget = boardGameService.editWithoutPics(target, gamePutDto.getGameGenreIds());
         } else {
-            updatedTarget = boardGameService.editWithPics(target, files);
+            updatedTarget = boardGameService.editWithPics(target, files, gamePutDto.getGameGenreIds());
         }
 
         GameResponseDto gameResponseDto = mapper.boardGameToGameResponseDto(updatedTarget);
