@@ -15,5 +15,5 @@ public interface BoardGameRepository extends JpaRepository<BoardGame, Long> {
 
     BoardGame findByGameIdAndDeletedAtIsNull(Long gameId);
 
-    List<BoardGame> findByName(String keyword);
+    List<BoardGame> findByNameContaining(String keyword);
 }

@@ -113,7 +113,7 @@ public class BoardGameService {
 
     public List<BoardGame> findGameByName(String keyword) {
 
-        List<BoardGame> foundGames = boardGameRepository.findByName(keyword);
+        List<BoardGame> foundGames = boardGameRepository.findByNameContaining(keyword);
 
         if (foundGames == null || foundGames.isEmpty()) {
             throw new GameNotFoundException();
