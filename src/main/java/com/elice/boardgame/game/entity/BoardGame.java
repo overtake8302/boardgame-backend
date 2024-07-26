@@ -45,6 +45,7 @@ public class BoardGame extends BaseEntity{
 
     private String publisher;
 
+    @Column(length = 500)
     private String youtubeLink;
 
     @OneToMany(mappedBy = "boardGame", cascade = CascadeType.ALL, orphanRemoval = true)
