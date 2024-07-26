@@ -8,9 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SocialRepository extends JpaRepository<Social, SocialId> {
-    // 특정 회원의 친구 목록 조회
-    List<Social> findByMemberId(Long memberId);
-
-    // 친구 삭제: 회원과 친구의 관계 삭제
-    void deleteByMemberIdAndFriendId(Long memberId, Long friendId);
+//    List<Social> findByMemberId(Long memberId);
+//    void deleteByMemberIdAndFriendId(Long memberId, Long friendId);
 }
