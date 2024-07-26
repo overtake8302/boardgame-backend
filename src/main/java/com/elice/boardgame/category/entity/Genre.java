@@ -1,5 +1,6 @@
 package com.elice.boardgame.category.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -8,11 +9,15 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "user")
+@Table(name = "Genres")
 @Data
-public class UserEntity {
+public class Genre {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    @Column(name = "genre_id")
+    private Long genreId;
+
+    @Column(nullable = false, unique = true)
+    private String genre;
 }

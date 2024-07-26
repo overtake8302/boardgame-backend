@@ -1,5 +1,6 @@
 package com.elice.boardgame.category.entity;
 
+import com.elice.boardgame.game.entity.BoardGame;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,14 +16,14 @@ import lombok.Data;
 @Entity
 @Table(name = "LiveView")
 @Data
-public class LiveViewEntity {
+public class LiveView {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long liveViewId;
 
     @ManyToOne
     @JoinColumn(name = "game_id")
-    private BoardGameEntity game;
+    private BoardGame game;
 
     @Temporal(TemporalType.DATE)
     private Date createdDate;

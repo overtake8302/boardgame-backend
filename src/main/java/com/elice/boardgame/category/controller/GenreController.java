@@ -1,6 +1,6 @@
 package com.elice.boardgame.category.controller;
 
-import com.elice.boardgame.category.entity.GenreEntity;
+import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.service.GenreService;
 import java.util.List;
 import java.util.Optional;
@@ -21,13 +21,13 @@ public class GenreController {
     private final GenreService genreService;
 
     @GetMapping
-    public List<GenreEntity> getAllGenres() {
+    public List<Genre> getAllGenres() {
         return genreService.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GenreEntity> getGenreById(@PathVariable Long id) {
-        Optional<GenreEntity> genre = genreService.findById(id);
+    public ResponseEntity<Genre> getGenreById(@PathVariable Long id) {
+        Optional<Genre> genre = genreService.findById(id);
         if (genre.isPresent()) {
             return ResponseEntity.ok(genre.get());
         } else {
@@ -36,8 +36,8 @@ public class GenreController {
     }
 
     @GetMapping("/name/{name}")
-    public ResponseEntity<GenreEntity> getGenreByName(@PathVariable String name) {
-        Optional<GenreEntity> genre = genreService.findByGenreName(name);
+    public ResponseEntity<Genre> getGenreByName(@PathVariable String name) {
+        Optional<Genre> genre = genreService.findByGenreName(name);
         if (genre.isPresent()) {
             return ResponseEntity.ok(genre.get());
         } else {
@@ -46,17 +46,17 @@ public class GenreController {
     }
 
     @PostMapping
-    public GenreEntity createGenre(@RequestBody String genreName) {
-        GenreEntity genre = new GenreEntity();
+    public Genre createGenre(@RequestBody String genreName) {
+        Genre genre = new Genre();
         genre.setGenre(genreName);
         return genreService.save(genre);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GenreEntity> updateGenre(@PathVariable Long id, @RequestBody String newGenreName) {
-        Optional<GenreEntity> genre = genreService.findById(id);
+    public ResponseEntity<Genre> updateGenre(@PathVariable Long id, @RequestBody String newGenreName) {
+        Optional<Genre> genre = genreService.findById(id);
         if (genre.isPresent()) {
-            GenreEntity updatedGenre = genre.get();
+            Genre updatedGenre = genre.get();
             updatedGenre.setGenre(newGenreName);
             genreService.save(updatedGenre);
             return ResponseEntity.ok(updatedGenre);

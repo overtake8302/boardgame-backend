@@ -1,6 +1,6 @@
 package com.elice.boardgame.category.service;
 
-import com.elice.boardgame.category.entity.GenreEntity;
+import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.repository.GenreRepository;
 import java.util.List;
 import java.util.Optional;
@@ -13,19 +13,19 @@ public class GenreService {
 
     private final GenreRepository genreRepository;
 
-    public List<GenreEntity> findAll() {
+    public List<Genre> findAll() {
         return genreRepository.findAll();
     }
 
-    public Optional<GenreEntity> findById(Long id) {
+    public Optional<Genre> findById(Long id) {
         return genreRepository.findById(id);
     }
 
-    public Optional<GenreEntity> findByGenreName(String name) {
+    public Optional<Genre> findByGenreName(String name) {
         return genreRepository.findByGenre(name);
     }
 
-    public GenreEntity save(GenreEntity genre) {
+    public Genre save(Genre genre) {
         return genreRepository.save(genre);
     }
 

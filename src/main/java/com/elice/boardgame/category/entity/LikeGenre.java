@@ -1,5 +1,6 @@
 package com.elice.boardgame.category.entity;
 
+import com.elice.boardgame.auth.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -14,7 +15,7 @@ import lombok.Data;
 @Entity
 @Table(name = "Like_Genre")
 @Data
-public class LikeGenreEntity implements Serializable {
+public class LikeGenre implements Serializable {
 
     @EmbeddedId
     private LikeGenreId id;
@@ -25,12 +26,12 @@ public class LikeGenreEntity implements Serializable {
     @ManyToOne
     @MapsId("userId")
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
-    private UserEntity user;
+    private User user;
 
     @ManyToOne
     @MapsId("genreId")
     @JoinColumn(name = "genre_id", insertable = false, updatable = false)
-    private GenreEntity genre;
+    private Genre genre;
 
     @Override
     public boolean equals(Object o) {
@@ -40,7 +41,7 @@ public class LikeGenreEntity implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        LikeGenreEntity likeGenre = (LikeGenreEntity) o;
+        LikeGenre likeGenre = (LikeGenre) o;
         return Objects.equals(id, likeGenre.id);
     }
 

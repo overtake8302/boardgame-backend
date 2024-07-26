@@ -1,7 +1,7 @@
 package com.elice.boardgame.category.controller;
 
-import com.elice.boardgame.category.entity.BoardGameEntity;
 import com.elice.boardgame.category.service.LiveViewService;
+import com.elice.boardgame.game.entity.BoardGame;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,7 +17,7 @@ public class LiveViewController {
     private final LiveViewService liveViewService;
 
     @PutMapping("/add")
-    public void addViewCount(@RequestBody BoardGameEntity game, HttpServletRequest request) {
+    public void addViewCount(@RequestBody BoardGame game, HttpServletRequest request) {
         String ipAddress = request.getRemoteAddr();
         liveViewService.addViewCount(game, ipAddress);
     }

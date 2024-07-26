@@ -1,12 +1,12 @@
 package com.elice.boardgame.category.service;
 
-import com.elice.boardgame.category.entity.GenreEntity;
-import com.elice.boardgame.category.entity.LikeGenreEntity;
+import com.elice.boardgame.auth.entity.User;
+import com.elice.boardgame.auth.repository.UserRepository;
+import com.elice.boardgame.category.entity.Genre;
+import com.elice.boardgame.category.entity.LikeGenre;
 import com.elice.boardgame.category.entity.LikeGenreId;
-import com.elice.boardgame.category.entity.UserEntity;
 import com.elice.boardgame.category.repository.GenreRepository;
 import com.elice.boardgame.category.repository.LikeGenreRepository;
-import com.elice.boardgame.category.repository.MemberRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,20 +19,20 @@ public class LikeGenreService {
 
     private final GenreRepository genreRepository;
 
-    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
 
     public void addLikeGenreScore(LikeGenreId id) {
-        Optional<LikeGenreEntity> optionalEntity = likeGenreRepository.findById(id);
+        Optional<LikeGenre> optionalEntity = likeGenreRepository.findById(id);
         if (optionalEntity.isPresent()) {
             likeGenreRepository.updateLikeGenreScore(id, 2L);
         } else {
-            LikeGenreEntity newEntity = new LikeGenreEntity();
+            LikeGenre newEntity = new LikeGenre();
             newEntity.setId(id);
             newEntity.setScore(2L);
 
-            UserEntity user = memberRepository.findById(id.getUserId())
+            User user = userRepository.findById(id.getUserId())
                 .orElseThrow(() -> new RuntimeException("Member not found"));
-            GenreEntity genre = genreRepository.findById(id.getGenreId())
+            Genre genre = genreRepository.findById(id.getGenreId())
                 .orElseThrow(() -> new RuntimeException("Genre not found"));
 
             newEntity.setUser(user);
@@ -49,7 +49,7 @@ public class LikeGenreService {
 
     public void addRateGenreScore(LikeGenreId id, int rating) {
         if (rating > 3) {
-            Optional<LikeGenreEntity> optionalEntity = likeGenreRepository.findById(id);
+            Optional<LikeGenre> optionalEntity = likeGenreRepository.findById(id);
             if (optionalEntity.isPresent()) {
                 long delta = 0L;
                 if (rating == 5) {
@@ -59,16 +59,16 @@ public class LikeGenreService {
                 }
                 likeGenreRepository.updateLikeGenreScore(id, delta);
             } else {
-                LikeGenreEntity newEntity = new LikeGenreEntity();
+                LikeGenre newEntity = new LikeGenre();
                 newEntity.setId(id);
                 if (rating == 5) {
                     newEntity.setScore(2L);
                 } else if (rating == 4) {
                     newEntity.setScore(1L);
                 }
-                UserEntity user = memberRepository.findById(id.getUserId())
+                User user = userRepository.findById(id.getUserId())
                     .orElseThrow(() -> new RuntimeException("Member not found"));
-                GenreEntity genre = genreRepository.findById(id.getGenreId())
+                Genre genre = genreRepository.findById(id.getGenreId())
                     .orElseThrow(() -> new RuntimeException("Genre not found"));
 
                 newEntity.setUser(user);

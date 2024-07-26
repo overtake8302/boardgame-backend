@@ -1,8 +1,8 @@
 package com.elice.boardgame.category.service;
 
-import com.elice.boardgame.category.entity.BoardGameEntity;
-import com.elice.boardgame.category.entity.LiveViewEntity;
+import com.elice.boardgame.category.entity.LiveView;
 import com.elice.boardgame.category.repository.LiveViewRepository;
+import com.elice.boardgame.game.entity.BoardGame;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,8 +13,8 @@ public class LiveViewService {
 
     private final LiveViewRepository liveViewRepository;
 
-    public void addViewCount(BoardGameEntity game, String ipAddress) {
-        LiveViewEntity liveViewEntity = new LiveViewEntity();
+    public void addViewCount(BoardGame game, String ipAddress) {
+        LiveView liveViewEntity = new LiveView();
         liveViewEntity.setGame(game);
         liveViewEntity.setCreatedDate(new Date());
         liveViewEntity.setViewCount(1L);
