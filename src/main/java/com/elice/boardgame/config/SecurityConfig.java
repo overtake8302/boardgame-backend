@@ -20,17 +20,17 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
 
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
     public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil){
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
     }
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -53,7 +53,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login", "/", "/join").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
-                        .anyRequest().authenticated());
+//                        .anyRequest().authenticated());
+                        .anyRequest().permitAll());
 
 
         http
