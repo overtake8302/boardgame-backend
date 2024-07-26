@@ -18,7 +18,7 @@ import org.hibernate.annotations.Where;
 public class Comment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long comment_id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "member_id")
