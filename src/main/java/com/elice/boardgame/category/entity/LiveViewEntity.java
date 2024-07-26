@@ -29,4 +29,6 @@ public class LiveViewEntity {
 
     private Long viewCount;
 
+    private String ipAddress;
+
 }

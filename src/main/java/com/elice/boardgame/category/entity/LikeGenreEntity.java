@@ -23,9 +23,9 @@ public class LikeGenreEntity implements Serializable {
     private Long score;
 
     @ManyToOne
-    @MapsId("memberId")
-    @JoinColumn(name = "member_id", insertable = false, updatable = false)
-    private MemberEntity member;
+    @MapsId("userId")
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private UserEntity user;
 
     @ManyToOne
     @MapsId("genreId")

@@ -4,7 +4,7 @@ import com.elice.boardgame.category.entity.GenreEntity;
 import com.elice.boardgame.category.service.GenreService;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequiredArgsConstructor
 public class GenreController {
 
-    @Autowired
-    private GenreService genreService;
+    private final GenreService genreService;
 
     @GetMapping
     public List<GenreEntity> getAllGenres() {

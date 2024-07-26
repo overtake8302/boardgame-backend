@@ -4,14 +4,14 @@ import com.elice.boardgame.category.entity.GenreEntity;
 import com.elice.boardgame.category.repository.GenreRepository;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class GenreService {
 
-    @Autowired
-    private GenreRepository genreRepository;
+    private final GenreRepository genreRepository;
 
     public List<GenreEntity> findAll() {
         return genreRepository.findAll();

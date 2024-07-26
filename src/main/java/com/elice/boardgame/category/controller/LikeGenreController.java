@@ -3,15 +3,15 @@ package com.elice.boardgame.category.controller;
 
 import com.elice.boardgame.category.entity.LikeGenreId;
 import com.elice.boardgame.category.service.LikeGenreService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/like-genre")
+@RequiredArgsConstructor
 public class LikeGenreController {
 
-    @Autowired
-    private LikeGenreService likeGenreService;
+    private final LikeGenreService likeGenreService;
 
     @PutMapping("/like")
     public void addLikeGenreScore(@RequestBody LikeGenreId id) {

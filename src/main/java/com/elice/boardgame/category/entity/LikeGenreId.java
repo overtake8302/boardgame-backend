@@ -2,7 +2,6 @@ package com.elice.boardgame.category.entity;
 
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import java.io.Serializable;
 import java.util.Objects;
 import lombok.Data;
@@ -11,8 +10,8 @@ import lombok.Data;
 @Embeddable
 public class LikeGenreId implements Serializable {
 
-    @JoinColumn(name = "member_id")
-    private Long memberId;
+    @JoinColumn(name = "user_id")
+    private Long userId;
 
     @JoinColumn(name = "genre_id")
     private Long genreId;
@@ -22,11 +21,11 @@ public class LikeGenreId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LikeGenreId that = (LikeGenreId) o;
-        return Objects.equals(memberId, that.memberId) && Objects.equals(genreId, that.genreId);
+        return Objects.equals(userId, that.userId) && Objects.equals(genreId, that.genreId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(memberId, genreId);
+        return Objects.hash(userId, genreId);
     }
 }
