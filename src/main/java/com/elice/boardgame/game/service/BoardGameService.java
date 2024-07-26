@@ -109,4 +109,16 @@ public class BoardGameService {
 
         return target;
     }
+
+
+    public List<BoardGame> findGameByName(String keyword) {
+
+        List<BoardGame> foundGames = boardGameRepository.findByName(keyword);
+
+        if (foundGames == null || foundGames.isEmpty()) {
+            throw new GameNotFoundException();
+        }
+
+        return foundGames;
+    }
 }

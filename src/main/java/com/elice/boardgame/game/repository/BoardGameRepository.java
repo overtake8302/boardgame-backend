@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 
 public interface BoardGameRepository extends JpaRepository<BoardGame, Long> {
 
@@ -12,4 +14,6 @@ public interface BoardGameRepository extends JpaRepository<BoardGame, Long> {
     int countLikesByGameId(@Param("gameId") Long gameId);
 
     BoardGame findByGameIdAndDeletedAtIsNull(Long gameId);
+
+    List<BoardGame> findByName(String keyword);
 }

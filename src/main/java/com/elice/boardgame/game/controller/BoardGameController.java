@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -91,5 +92,20 @@ public class BoardGameController {
         GameResponseDto gameResponseDto = mapper.boardGameToGameResponseDto(updatedTarget);
 
         return new ResponseEntity<>(gameResponseDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<GameResponseDto>> searchByName(@RequestParam String keyword) {
+
+        List<BoardGame> foundGames = boardGameService.findGameByName(keyword);
+
+        List<GameResponseDto> gameResponseDtos = new ArrayList<>();
+
+        for (BoardGame boardGame : foundGames) {
+            GameResponseDto dto = mapper.boardGameToGameResponseDto(boardGame);
+            gameResponseDtos.add(dto);
+        }
+
+        return new ResponseEntity<>(gameResponseDtos, HttpStatus.OK);
     }
 }
