@@ -3,22 +3,19 @@ package com.elice.boardgame.social.entity;
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Embeddable
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class SocialId implements Serializable {
     private Long userId;
     private Long friendId;
-
-    public SocialId() {}
-
-    public SocialId(Long userId, Long friendId) {
-        this.userId = userId;
-        this.friendId = friendId;
-    }
 
     @Override
     public boolean equals(Object o) {

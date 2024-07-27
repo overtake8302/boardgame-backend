@@ -1,2 +1,5 @@
-package com.elice.boardgame.social.dto;public class SocialRequest {
+package com.elice.boardgame.social.dto;
+
+public class SocialRequest {
+
 }
