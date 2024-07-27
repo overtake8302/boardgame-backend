@@ -1,5 +1,6 @@
 package com.elice.boardgame.social.controller;
 
+import com.elice.boardgame.social.dto.SocialRequest;
 import com.elice.boardgame.social.exception.SocialAlreadyExistsException;
 import com.elice.boardgame.social.exception.SocialNotFoundException;
 import com.elice.boardgame.social.service.SocialService;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,10 +37,10 @@ public class SocialController {
         }
     }
     @PostMapping("/add")
-    public ResponseEntity<String> addFriend(@RequestParam Long userId, @RequestParam Long friendId) {
+    public ResponseEntity<String> addFriend(@RequestBody SocialRequest socialRequest) {
         try {
-            socialService.addFriend(userId, friendId);
-            log.info("Friend relationship added between user {} and friend {}", userId, friendId);
+            socialService.addFriend(socialRequest);
+            log.info("Friend relationship added between user {} and friend {}", socialRequest.getUserId(), socialRequest.getFriendId());
             return ResponseEntity.status(HttpStatus.CREATED).body("Friend added successfully.");
         } catch (SocialAlreadyExistsException e) {
             log.error("Failed to add friend: {}", e.getMessage());
