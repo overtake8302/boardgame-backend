@@ -130,9 +130,9 @@ public class BoardGameController {
         ClickLikeResponseDto clickLikeResponseDto = new ClickLikeResponseDto();
 
         if (like) {
-            clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_REMOVED);
+            clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_REMOVED.getMessage());
         } else {
-            clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_ADDED);
+            clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_ADDED.getMessage());
         }
 
         int likeCount = gameLikeRepository.countLikesByBoardGameGameId(gameId);

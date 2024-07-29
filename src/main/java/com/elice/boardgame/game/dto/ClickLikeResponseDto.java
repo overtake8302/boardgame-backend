@@ -13,7 +13,8 @@ public class ClickLikeResponseDto {
 
     private int likeCount;
 
-    private ClickLikeResponseMessages messages;
+//    private ClickLikeResponseMessages messages;
+    private String messages;
 
     @Getter
     @AllArgsConstructor
