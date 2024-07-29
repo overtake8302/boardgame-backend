@@ -50,14 +50,14 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : genreIds) {
-           Optional<Genre> genre = genreService.findById(id);
-           if (genre.isPresent()) {
+           Genre genre = genreService.findById(id);
+           if (genre != null) {
                GameGenre gameGenre = new GameGenre();
                gameGenre.setBoardGame(savedBoardGame);
-               gameGenre.setGenre(genre.get());
+               gameGenre.setGenre(genre);
                GameGenreId gameGenreId = new GameGenreId();
                gameGenreId.setGameId(savedBoardGame.getGameId());
-               gameGenreId.setGenreId(genre.get().getGenreId());
+               gameGenreId.setGenreId(genre.getGenreId());
                gameGenre.setId(gameGenreId);
                gameGenre = gameGenreRepository.save(gameGenre);
                genres.add(gameGenre);
@@ -89,14 +89,14 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : genreIds) {
-            Optional<Genre> genre = genreService.findById(id);
-            if (genre.isPresent()) {
+            Genre genre = genreService.findById(id);
+            if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(savedBoardGame);
-                gameGenre.setGenre(genre.get());
+                gameGenre.setGenre(genre);
                 GameGenreId gameGenreId = new GameGenreId();
                 gameGenreId.setGameId(savedBoardGame.getGameId());
-                gameGenreId.setGenreId(genre.get().getGenreId());
+                gameGenreId.setGenreId(genre.getGenreId());
                 gameGenre.setId(gameGenreId);
                 gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
@@ -165,14 +165,14 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : genreIds) {
-            Optional<Genre> genre = genreService.findById(id);
-            if (genre.isPresent()) {
+            Genre genre = genreService.findById(id);
+            if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(target);
-                gameGenre.setGenre(genre.get());
+                gameGenre.setGenre(genre);
                 GameGenreId gameGenreId = new GameGenreId();
                 gameGenreId.setGameId(target.getGameId());
-                gameGenreId.setGenreId(genre.get().getGenreId());
+                gameGenreId.setGenreId(genre.getGenreId());
                 gameGenre.setId(gameGenreId);
                 gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
@@ -212,14 +212,14 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : genreIds) {
-            Optional<Genre> genre = genreService.findById(id);
-            if (genre.isPresent()) {
+            Genre genre = genreService.findById(id);
+            if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(target);
-                gameGenre.setGenre(genre.get());
+                gameGenre.setGenre(genre);
                 GameGenreId gameGenreId = new GameGenreId();
                 gameGenreId.setGameId(target.getGameId());
-                gameGenreId.setGenreId(genre.get().getGenreId());
+                gameGenreId.setGenreId(genre.getGenreId());
                 gameGenre.setId(gameGenreId);
                 gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
