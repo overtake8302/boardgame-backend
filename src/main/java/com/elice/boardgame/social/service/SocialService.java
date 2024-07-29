@@ -39,9 +39,17 @@ public class SocialService {
     }
 
     public void removeFriend(Long userId, Long friendId) {
-        if (!socialRepository.existsByUserIdAndFriendId(userId, friendId)) {
-            throw new SocialNotFoundException("Social not found.");
+        boolean isUser = socialRepository.existsByUserIdAndFriendId(userId, friendId);
+        boolean isFriend = socialRepository.existsByUserIdAndFriendId(friendId, userId);
+
+        if (!isUser && !isFriend) {
+            throw new SocialNotFoundException("Social relationship not found.");
         }
-        socialRepository.deleteByUserIdAndFriendId(userId, friendId);
+
+        if (isUser) {
+            socialRepository.deleteByUserIdAndFriendId(userId, friendId);
+        } else if (isFriend) {
+            socialRepository.deleteByUserIdAndFriendId(friendId, userId);
+        }
     }
 }
