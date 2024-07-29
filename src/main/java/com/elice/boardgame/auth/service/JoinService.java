@@ -1,7 +1,8 @@
 package com.elice.boardgame.auth.service;
 
-import com.elice.boardgame.auth.dto.JoinDTO;
 import com.elice.boardgame.auth.entity.User;
+
+import com.elice.boardgame.auth.dto.JoinDTO;
 import com.elice.boardgame.auth.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

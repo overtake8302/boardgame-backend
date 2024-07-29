@@ -1,6 +1,7 @@
 package com.elice.boardgame.social.entity;
 
 import com.elice.boardgame.auth.entity.User;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

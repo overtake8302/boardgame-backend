@@ -14,9 +14,12 @@ public class ViewService {
     @Transactional
     public void incrementViewCount(Long postId) {
         View view = viewRepository.findByPostId(postId);
-        if (view != null) {
-            view.setViewCount(view.getViewCount() + 1);
-            viewRepository.save(view);
+        if (view == null) {
+            view = new View();
+            view.setPostId(postId);
+            view.setViewCount(0);
         }
+        view.setViewCount(view.getViewCount() + 1);
+        viewRepository.save(view);
     }
 }

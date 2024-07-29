@@ -1,7 +1,8 @@
 package com.elice.boardgame.post.entity;
 
+import com.elice.boardgame.auth.entity.User;
+
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,11 +19,11 @@ import org.hibernate.annotations.Where;
 public class Comment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long comment_id;
+    private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "post_id")
