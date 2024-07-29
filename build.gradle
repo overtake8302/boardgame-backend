@@ -4,6 +4,10 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.6'
 }
 
+bootRun() {
+	mainClass = "com.elice.boardgame.BoardgameApplication"
+}
+
 group = 'com.elice'
 version = '0.0.1-SNAPSHOT'
 
@@ -25,7 +29,6 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
@@ -40,46 +43,41 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.1.1")
-	// Replace the following with the starter dependencies of specific modules you wish to use
-	implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
-	implementation(platform("software.amazon.awssdk:bom:2.21.1"))
-	implementation 'software.amazon.awssdk:s3'
-<<<<<<< HEAD
 
+	implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.1.1")
+	// AWS SQS Starter
+	implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
+	// AWS SDK BOM
+	implementation platform("software.amazon.awssdk:bom:2.21.1")
+	implementation 'software.amazon.awssdk:s3'
+
+	// QueryDSL 의존성 추가1
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
-=======
-	//Querydsl 의존성 추가
-	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
 
-	//java.lang.NoClassDefFoundError 대응을 위해 추가
-	annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
-	annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
->>>>>>> 4ed9a95655ad6c74f0815e51b00df7ffd7024a66
 }
+
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
 
-//Querydsl Q Class 생성 위치
-def generated = 'src/main/generated'
-
-//Querydsl Q Class 생성 위치 지정
-tasks.withType(JavaCompile) {
-	options.getGeneratedSourceOutputDirectory().set(file(generated))
-}
-
-//java source set 에 Querydsl Q Class 위치 추가
-sourceSets {
-	main.java.srcDirs += [ generated ]
-}
-
-//gradle clean 시, Q Class 디렉토리까지 삭제하도록 설정
-clean {
-	delete file(generated)
-}
+////Querydsl Q Class 생성 위치
+//def generated = 'src/main/generated'
+//
+////Querydsl Q Class 생성 위치 지정
+//tasks.withType(JavaCompile) {
+//	options.getGeneratedSourceOutputDirectory().set(file(generated))
+//}
+//
+////java source set 에 Querydsl Q Class 위치 추가
+//sourceSets {
+//	main.java.srcDirs += [ generated ]
+//}
+//
+////gradle clean 시, Q Class 디렉토리까지 삭제하도록 설정
+//clean {
+//	delete file(generated)
+//}

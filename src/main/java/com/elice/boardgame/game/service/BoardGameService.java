@@ -40,7 +40,7 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : genreIds) {
-           Optional<Genre> genre = genreService.findById(id);
+           Optional<Genre> genre = Optional.ofNullable(genreService.findById(id));
            if (genre.isPresent()) {
                GameGenre gameGenre = new GameGenre();
                gameGenre.setBoardGame(savedBoardGame);
@@ -79,7 +79,7 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : genreIds) {
-            Optional<Genre> genre = genreService.findById(id);
+            Optional<Genre> genre = Optional.ofNullable(genreService.findById(id));
             if (genre.isPresent()) {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(savedBoardGame);
@@ -155,7 +155,7 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : genreIds) {
-            Optional<Genre> genre = genreService.findById(id);
+            Optional<Genre> genre = Optional.ofNullable(genreService.findById(id));
             if (genre.isPresent()) {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(target);
@@ -202,7 +202,7 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : genreIds) {
-            Optional<Genre> genre = genreService.findById(id);
+            Optional<Genre> genre = Optional.ofNullable(genreService.findById(id));
             if (genre.isPresent()) {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(target);
