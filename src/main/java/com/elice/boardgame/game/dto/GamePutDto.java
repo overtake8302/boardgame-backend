@@ -31,7 +31,7 @@ public class GamePutDto {
 
     private String releaseDate;
 
-    private BoardGame.difficulty difficulty;
+    private BoardGame.Difficulty difficulty;
 
     private String publisher;
 

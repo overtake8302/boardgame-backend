@@ -24,6 +24,6 @@ public class GameLike {
 
     @ManyToOne
     @MapsId("userId")
-    @JoinColumn(name = "userr_id")
+    @JoinColumn(name = "user_id")
     private User user;
 }

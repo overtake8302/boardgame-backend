@@ -1,7 +1,9 @@
 package com.elice.boardgame.game.service;
 
 import com.elice.boardgame.category.entity.GameGenre;
+import com.elice.boardgame.category.entity.GameGenreId;
 import com.elice.boardgame.category.entity.Genre;
+import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.service.GenreService;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameProfilePic;
@@ -9,7 +11,6 @@ import com.elice.boardgame.game.exception.GameDeleteFailException;
 import com.elice.boardgame.game.exception.GameNotFoundException;
 import com.elice.boardgame.game.exception.GamePostException;
 import com.elice.boardgame.game.repository.BoardGameRepository;
-import com.elice.boardgame.game.repository.GameGenreRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,11 @@ public class BoardGameService {
                GameGenre gameGenre = new GameGenre();
                gameGenre.setBoardGame(savedBoardGame);
                gameGenre.setGenre(genre.get());
+               GameGenreId gameGenreId = new GameGenreId();
+               gameGenreId.setGameId(savedBoardGame.getGameId());
+               gameGenreId.setGenreId(genre.get().getGenreId());
+               gameGenre.setId(gameGenreId);
+               gameGenre = gameGenreRepository.save(gameGenre);
                genres.add(gameGenre);
            } else {
                throw new GamePostException();
@@ -78,6 +84,11 @@ public class BoardGameService {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(savedBoardGame);
                 gameGenre.setGenre(genre.get());
+                GameGenreId gameGenreId = new GameGenreId();
+                gameGenreId.setGameId(savedBoardGame.getGameId());
+                gameGenreId.setGenreId(genre.get().getGenreId());
+                gameGenre.setId(gameGenreId);
+                gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
             } else {
                 throw new GamePostException();
@@ -108,14 +119,16 @@ public class BoardGameService {
         List<GameProfilePic> targetPics = targetGame.getGameProfilePics();
 
         try {
-            for (GameProfilePic pic : targetPics) {
-                gameProfilePicService.deleteByFileName(pic);
+            if (!targetPics.isEmpty()) {
+                for (GameProfilePic pic : targetPics) {
+                    gameProfilePicService.deleteByFileName(pic);
+                }
             }
 
             List<GameGenre> targetGenres = targetGame.getGameGenres();
 
             for (GameGenre targetGenre : targetGenres) {
-                gameGenreRepository.deleteById_GameIdAndId_GenreId(targetGenre.getId().getGameId(), targetGenre.getId().getGenreId());
+                gameGenreRepository.delete(targetGenre);
             }
 
             targetGame.setGameProfilePics(Collections.emptyList());
@@ -136,7 +149,7 @@ public class BoardGameService {
         List<GameGenre> oldGenres = target.getGameGenres();
 
         for (GameGenre oldGenre : oldGenres) {
-            gameGenreRepository.deleteById_GameIdAndId_GenreId(oldGenre.getId().getGameId(), oldGenre.getId().getGenreId());
+            gameGenreRepository.delete(oldGenre);
         }
 
         List<GameGenre> genres = new ArrayList<>();
@@ -147,6 +160,11 @@ public class BoardGameService {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(target);
                 gameGenre.setGenre(genre.get());
+                GameGenreId gameGenreId = new GameGenreId();
+                gameGenreId.setGameId(target.getGameId());
+                gameGenreId.setGenreId(genre.get().getGenreId());
+                gameGenre.setId(gameGenreId);
+                gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
             } else {
                 throw new GamePostException();
@@ -178,7 +196,7 @@ public class BoardGameService {
         List<GameGenre> oldGenres = target.getGameGenres();
 
         for (GameGenre oldGenre : oldGenres) {
-            gameGenreRepository.deleteById_GameIdAndId_GenreId(oldGenre.getId().getGameId(), oldGenre.getId().getGenreId());
+            gameGenreRepository.delete(oldGenre);
         }
 
         List<GameGenre> genres = new ArrayList<>();
@@ -189,6 +207,11 @@ public class BoardGameService {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(target);
                 gameGenre.setGenre(genre.get());
+                GameGenreId gameGenreId = new GameGenreId();
+                gameGenreId.setGameId(target.getGameId());
+                gameGenreId.setGenreId(genre.get().getGenreId());
+                gameGenre.setId(gameGenreId);
+                gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
             } else {
                 throw new GamePostException();

@@ -44,7 +44,7 @@ public class GamePostDto {
     private String artwork;
 
     @Enumerated(EnumType.STRING)
-    private BoardGame.difficulty difficulty;
+    private BoardGame.Difficulty difficulty;
 
     private String publisher;
 
