@@ -1,7 +1,6 @@
 package com.elice.boardgame.auth.dto;
 
 import com.elice.boardgame.auth.entity.User;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
