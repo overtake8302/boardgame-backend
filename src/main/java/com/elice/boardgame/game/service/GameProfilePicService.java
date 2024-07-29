@@ -17,7 +17,6 @@ public class GameProfilePicService {
     private final GameProfilePIcRepository gameProfilePIcRepository;
     private final BoardGameS3Service boardGameS3Service;
 
-    @Transactional
     public GameProfilePic save(MultipartFile file) throws IOException {
 
         List<String> info = boardGameS3Service.uploadFileToBucket1(file);

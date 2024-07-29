@@ -33,7 +33,11 @@ public class BoardGameController {
     private final GameProfilePicService gameProfilePicService;
 
     @PostMapping
-    public ResponseEntity<GameResponseDto> postGame(@RequestPart("gamePostDto") @Validated GamePostDto gamePostDto, BindingResult bindingResult, @RequestPart(value = "file", required = false) List<MultipartFile> files) throws IOException {
+    public ResponseEntity<GameResponseDto> postGame(
+            @RequestPart("gamePostDto") @Validated GamePostDto gamePostDto,
+            BindingResult bindingResult,
+            @RequestPart(value = "file", required = false) List<MultipartFile> files
+    ) throws IOException {
 
         if (bindingResult.hasErrors()) {
             throw new GamePostException();
@@ -73,7 +77,11 @@ public class BoardGameController {
     }
 
     @PutMapping("/{gameId}")
-    public ResponseEntity<GameResponseDto> putGame(@RequestPart("gamePutDto") @Validated GamePutDto gamePutDto, @RequestPart(value = "file", required = false) List<MultipartFile> files, BindingResult bindingResult) throws  IOException {
+    public ResponseEntity<GameResponseDto> putGame(
+            @RequestPart("gamePutDto") @Validated GamePutDto gamePutDto,
+            @RequestPart(value = "file", required = false) List<MultipartFile> files,
+            BindingResult bindingResult
+    ) throws  IOException {
 
         if (bindingResult.hasErrors()) {
             throw new GamePutException();
