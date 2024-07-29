@@ -1,5 +1,7 @@
 package com.elice.boardgame.game.mapper;
 
+import com.elice.boardgame.category.entity.GameGenre;
+import com.elice.boardgame.category.service.GenreService;
 import com.elice.boardgame.game.dto.GamePostDto;
 import com.elice.boardgame.game.dto.GameProfilePicResponseDto;
 import com.elice.boardgame.game.dto.GamePutDto;
@@ -13,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Component
@@ -23,7 +27,7 @@ public class BoardGameMapper {
     private final GameRateRepository gameRateRepository;
     private final GameProfilePicMapper gameProfilePicMapper;
     private final BoardGameService boardGameService;
-    
+
     public BoardGame gamePostDtoToBoardGame(GamePostDto dto) {
         
         BoardGame newBoardGame = new BoardGame();
@@ -50,6 +54,7 @@ public class BoardGameMapper {
         gameResponseDto.setGameId(boardGame.getGameId());
         gameResponseDto.setName(boardGame.getName());
         //장르 추가하기
+        gameResponseDto.setGameGenres(boardGame.getGameGenres());
         gameResponseDto.setPlayTime(boardGame.getPlayTime());
         gameResponseDto.setReleaseDate(boardGame.getReleaseDate());
         gameResponseDto.setPlayNum(boardGame.getPlayNum());
@@ -84,6 +89,7 @@ public class BoardGameMapper {
         foundGame.setPlayTime(gamePutDto.getPlayTime());
         foundGame.setReleaseDate(gamePutDto.getReleaseDate());
         foundGame.setName(gamePutDto.getName());
+
 
         return foundGame;
 

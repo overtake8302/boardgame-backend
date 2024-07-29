@@ -1,4 +1,4 @@
-package com.elice.boardgame.game.config;
+package com.elice.boardgame.config;
 
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
