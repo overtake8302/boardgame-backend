@@ -10,7 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import java.util.Date;
+import java.time.LocalDate;
 import lombok.Data;
 
 @Entity
@@ -19,16 +19,16 @@ import lombok.Data;
 public class LiveView {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long liveViewId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "game_id")
     private BoardGame game;
 
     @Temporal(TemporalType.DATE)
-    private Date createdDate;
+    private LocalDate createdDate;
 
-    private Long viewCount;
+    private Long viewScore;
 
     private String ipAddress;
 

@@ -17,7 +17,7 @@ import java.io.Serializable;
 @EqualsAndHashCode
 public class GameLikePK implements Serializable {
 
-    /*private Long memberId;*/
+    private Long userId;
 
     private Long gameId;
 

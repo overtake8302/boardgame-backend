@@ -1,6 +1,8 @@
 package com.elice.boardgame.game.entity;
 
 
+import com.elice.boardgame.category.entity.GameGenre;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -41,10 +43,11 @@ public class BoardGame extends BaseEntity{
     private String releaseDate;
 
     @Enumerated(EnumType.STRING)
-    private difficulty difficulty;
+    private Difficulty difficulty;
 
     private String publisher;
 
+    @Column(length = 500)
     private String youtubeLink;
 
     @OneToMany(mappedBy = "boardGame", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -58,6 +61,10 @@ public class BoardGame extends BaseEntity{
     private List<GameProfilePic> gameProfilePics = new ArrayList<>();
 
     //장르 추가하기
+    @OneToMany
+    @JoinColumn(name = "game_genre_id")
+    @JsonManagedReference
+    private List<GameGenre> gameGenres;
 
     @AllArgsConstructor
     @Getter
@@ -73,7 +80,7 @@ public class BoardGame extends BaseEntity{
 
     @AllArgsConstructor
     @Getter
-    public enum difficulty {
+    public enum Difficulty {
 
         EASY("쉬움"),
         MEDIUM("보통"),

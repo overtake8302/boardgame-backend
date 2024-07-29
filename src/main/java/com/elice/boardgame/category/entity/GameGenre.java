@@ -1,6 +1,7 @@
 package com.elice.boardgame.category.entity;
 
 import com.elice.boardgame.game.entity.BoardGame;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -22,6 +23,7 @@ public class GameGenre implements Serializable {
     @ManyToOne
     @MapsId("gameId")
     @JoinColumn(name = "game_id")
+    @JsonBackReference
     private BoardGame boardGame;
 
     @ManyToOne

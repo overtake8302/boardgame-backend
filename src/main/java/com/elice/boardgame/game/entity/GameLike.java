@@ -1,5 +1,6 @@
 package com.elice.boardgame.game.entity;
 
+import com.elice.boardgame.auth.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,8 +22,8 @@ public class GameLike {
     @JoinColumn(name = "game_id")
     private BoardGame boardGame;
 
-    /*@ManyToOne
-    @MapsId("memberId")
-    @JoinColumn(name = "member_id")
-    private Member member;*/
+    @ManyToOne
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
+    private User user;
 }

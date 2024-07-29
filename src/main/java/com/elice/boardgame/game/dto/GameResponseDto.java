@@ -1,5 +1,6 @@
 package com.elice.boardgame.game.dto;
 
+import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameLike;
 import com.elice.boardgame.game.entity.GameProfilePic;
@@ -34,7 +35,7 @@ public class GameResponseDto {
 
     private String releaseDate;
 
-    private BoardGame.difficulty difficulty;
+    private BoardGame.Difficulty difficulty;
 
     private String publisher;
 
@@ -45,4 +46,6 @@ public class GameResponseDto {
     private Double averageRate;
 
     private GameProfilePicResponseDto gameProfilePics;
+
+    List<GameGenre> gameGenres = new ArrayList<>();
 }

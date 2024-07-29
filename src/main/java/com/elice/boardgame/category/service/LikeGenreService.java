@@ -2,12 +2,18 @@ package com.elice.boardgame.category.service;
 
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
+import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.entity.LikeGenre;
 import com.elice.boardgame.category.entity.LikeGenreId;
+import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.repository.GenreRepository;
 import com.elice.boardgame.category.repository.LikeGenreRepository;
+import com.elice.boardgame.game.entity.BoardGame;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +27,16 @@ public class LikeGenreService {
 
     private final UserRepository userRepository;
 
+    private final GameGenreRepository gameGenreRepository;
+
     public void addLikeGenreScore(LikeGenreId id) {
         Optional<LikeGenre> optionalEntity = likeGenreRepository.findById(id);
         if (optionalEntity.isPresent()) {
-            likeGenreRepository.updateLikeGenreScore(id, 2L);
+            LikeGenre likeGenre = optionalEntity.orElseThrow();
+            long score = likeGenre.getScore() + 2;
+            likeGenre.setScore(score);
+
+            likeGenreRepository.save(likeGenre);
         } else {
             LikeGenre newEntity = new LikeGenre();
             newEntity.setId(id);
@@ -44,7 +56,12 @@ public class LikeGenreService {
 
 
     public void subtractLikeGenreScore(LikeGenreId id) {
-        likeGenreRepository.updateLikeGenreScore(id, -2L);
+        Optional<LikeGenre> optionalEntity = likeGenreRepository.findById(id);
+        LikeGenre likeGenre = optionalEntity.orElseThrow();
+        long score = likeGenre.getScore() - 2;
+        likeGenre.setScore(score);
+
+        likeGenreRepository.save(likeGenre);
     }
 
     public void addRateGenreScore(LikeGenreId id, int rating) {
@@ -57,7 +74,10 @@ public class LikeGenreService {
                 } else if (rating == 4) {
                     delta = 1L;
                 }
-                likeGenreRepository.updateLikeGenreScore(id, delta);
+                LikeGenre likeGenre = optionalEntity.orElseThrow();
+                long score = likeGenre.getScore() + delta;
+                likeGenre.setScore(score);
+                likeGenreRepository.save(likeGenre);
             } else {
                 LikeGenre newEntity = new LikeGenre();
                 newEntity.setId(id);
@@ -79,10 +99,48 @@ public class LikeGenreService {
     }
 
     public void subtractRateGenreScore(LikeGenreId id, int rating) {
-        if (rating == 5) {
-            likeGenreRepository.updateLikeGenreScore(id, -2L);
-        } else if (rating == 4) {
-            likeGenreRepository.updateLikeGenreScore(id, -1L);
+        if (rating > 3) {
+            long delta = 0L;
+            if (rating == 5) {
+                delta = 2L;
+            } else if (rating == 4) {
+                delta = 1L;
+            }
+            Optional<LikeGenre> optionalEntity = likeGenreRepository.findById(id);
+            LikeGenre likeGenre = optionalEntity.orElseThrow();
+            Long score = likeGenre.getScore() - delta;
+            likeGenre.setScore(score);
+
+            likeGenreRepository.save(likeGenre);
         }
+    }
+
+    public List<String> getTop3GenreIds(Long userId) {
+        List<LikeGenre> likeGenres = likeGenreRepository.findByUserIdOrderByScoreDesc(userId);
+
+        return likeGenres.stream()
+            .limit(3)
+            .map(likeGenre -> likeGenre.getGenre().getGenre())
+            .collect(Collectors.toList());
+    }
+
+    public List<BoardGame> getGenreGame(Long userId) {
+        List<LikeGenre> likeGenres = likeGenreRepository.findByUserIdOrderByScoreDesc(userId);
+        List<BoardGame> boardGames = new ArrayList<>();
+
+        for (LikeGenre likeGenre : likeGenres) {
+            Optional<List<GameGenre>> gameGenresOpt = gameGenreRepository.findByGenre(
+                likeGenre.getGenre());
+            if (gameGenresOpt.isPresent()) {
+                List<GameGenre> gameGenres = gameGenresOpt.get();
+                for (GameGenre gameGenre : gameGenres) {
+                    boardGames.add(gameGenre.getBoardGame());
+                    if (boardGames.size() >= 5) {
+                        return boardGames;
+                    }
+                }
+            }
+        }
+        return boardGames;
     }
 }
