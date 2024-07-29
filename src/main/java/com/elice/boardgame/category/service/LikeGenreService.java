@@ -1,5 +1,7 @@
 package com.elice.boardgame.category.service;
 
+import com.elice.boardgame.ExceptionHandler.GenreNotFoundException;
+import com.elice.boardgame.ExceptionHandler.MemberNotFoundException;
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
 import com.elice.boardgame.category.entity.GameGenre;
@@ -43,9 +45,9 @@ public class LikeGenreService {
             newEntity.setScore(2L);
 
             User user = userRepository.findById(id.getUserId())
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+                .orElseThrow(() -> new MemberNotFoundException("찾는 멤버가 없습니다."));
             Genre genre = genreRepository.findById(id.getGenreId())
-                .orElseThrow(() -> new RuntimeException("Genre not found"));
+                .orElseThrow(() -> new GenreNotFoundException("찾는 장르가 없습니다."));
 
             newEntity.setUser(user);
             newEntity.setGenre(genre);

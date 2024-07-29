@@ -1,6 +1,5 @@
 package com.elice.boardgame.category.controller;
 
-import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.entity.LikeGenreId;
 import com.elice.boardgame.category.service.LikeGenreService;
 import com.elice.boardgame.game.entity.BoardGame;
