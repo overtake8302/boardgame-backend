@@ -1,22 +1,30 @@
 package com.elice.boardgame.game.service;
 
+import com.elice.boardgame.auth.entity.User;
+import com.elice.boardgame.auth.repository.UserRepository;
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.GameGenreId;
 import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.service.GenreService;
 import com.elice.boardgame.game.entity.BoardGame;
+import com.elice.boardgame.game.entity.GameLike;
+import com.elice.boardgame.game.entity.GameLikePK;
 import com.elice.boardgame.game.entity.GameProfilePic;
 import com.elice.boardgame.game.exception.GameDeleteFailException;
 import com.elice.boardgame.game.exception.GameNotFoundException;
 import com.elice.boardgame.game.exception.GamePostException;
 import com.elice.boardgame.game.repository.BoardGameRepository;
+import com.elice.boardgame.game.repository.GameLikeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +39,8 @@ public class BoardGameService {
     private final GameProfilePicService gameProfilePicService;
     private final GenreService genreService;
     private final GameGenreRepository gameGenreRepository;
+    private final GameLikeRepository gameLikeRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public BoardGame create(BoardGame newBoardGame, List<Long> genreIds) {
@@ -235,5 +245,32 @@ public class BoardGameService {
         }
 
         return foundGames;
+    }
+
+    public boolean clickLike(Long gameId) {
+
+        BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedAtIsNull(gameId);
+        User currentUser = getCurrentUser();
+        GameLikePK gameLikePK = new GameLikePK(currentUser.getId(), gameId);
+
+//        boolean like = gameLikeRepository.existsByGameLikePK(gameLikePK);
+        Optional<GameLike> target = gameLikeRepository.findById(gameLikePK);
+
+        if (target.isPresent()) {
+            gameLikeRepository.delete(target.get());
+            return true;
+        }
+
+        GameLike gameLike = new GameLike(gameLikePK, targetGame, currentUser);
+        gameLikeRepository.save(gameLike);
+
+        return false;
+    }
+
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserName = authentication.getName();
+        User currentUser = userRepository.findByUsername(currentUserName);
+        return currentUser;
     }
 }

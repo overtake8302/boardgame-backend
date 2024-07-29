@@ -1,6 +1,7 @@
 package com.elice.boardgame.game.controller;
 
-import com.elice.boardgame.category.entity.GameGenre;
+import com.elice.boardgame.auth.repository.UserRepository;
+import com.elice.boardgame.game.dto.ClickLikeResponseDto;
 import com.elice.boardgame.game.dto.GamePostDto;
 import com.elice.boardgame.game.dto.GamePutDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
@@ -8,6 +9,7 @@ import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.exception.GamePostException;
 import com.elice.boardgame.game.exception.GamePutException;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
+import com.elice.boardgame.game.repository.GameLikeRepository;
 import com.elice.boardgame.game.service.BoardGameService;
 import com.elice.boardgame.game.service.GameProfilePicService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +34,8 @@ public class BoardGameController {
     private final BoardGameService boardGameService;
     private final BoardGameMapper mapper;
     private final GameProfilePicService gameProfilePicService;
+    private final UserRepository userRepository;
+    private final GameLikeRepository gameLikeRepository;
 
     @PostMapping
     public ResponseEntity<GameResponseDto> postGame(
@@ -116,5 +121,23 @@ public class BoardGameController {
         }
 
         return new ResponseEntity<>(gameResponseDtos, HttpStatus.OK);
+    }
+
+    @PostMapping("/like")
+    public ResponseEntity<ClickLikeResponseDto> clickLike(@RequestParam Long gameId) {
+
+        boolean like = boardGameService.clickLike(gameId);
+        ClickLikeResponseDto clickLikeResponseDto = new ClickLikeResponseDto();
+
+        if (like) {
+            clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_REMOVED);
+        } else {
+            clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_ADDED);
+        }
+
+        int likeCount = gameLikeRepository.countLikesByBoardGameGameId(gameId);
+        clickLikeResponseDto.setLikeCount(likeCount);
+
+        return new ResponseEntity<>(clickLikeResponseDto, HttpStatus.OK);
     }
 }

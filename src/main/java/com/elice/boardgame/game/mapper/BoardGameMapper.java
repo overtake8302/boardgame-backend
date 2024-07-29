@@ -1,21 +1,18 @@
 package com.elice.boardgame.game.mapper;
 
-import com.elice.boardgame.category.entity.GameGenre;
-import com.elice.boardgame.category.service.GenreService;
 import com.elice.boardgame.game.dto.GamePostDto;
 import com.elice.boardgame.game.dto.GameProfilePicResponseDto;
 import com.elice.boardgame.game.dto.GamePutDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.repository.BoardGameRepository;
-import com.elice.boardgame.game.repository.GameRateRepository;
+import com.elice.boardgame.game.repository.GameLikeRepository;
+import com.elice.boardgame.game.repository.GameRateQueryDSLRepository;
 import com.elice.boardgame.game.service.BoardGameService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -24,9 +21,10 @@ import java.util.List;
 public class BoardGameMapper {
 
     private final BoardGameRepository boardGameRepository;
-    private final GameRateRepository gameRateRepository;
+    private final GameRateQueryDSLRepository gameRateRepository;
     private final GameProfilePicMapper gameProfilePicMapper;
     private final BoardGameService boardGameService;
+    private final GameLikeRepository gameLikeRepository;
 
     public BoardGame gamePostDtoToBoardGame(GamePostDto dto) {
         
@@ -65,7 +63,7 @@ public class BoardGameMapper {
         gameResponseDto.setPrice(boardGame.getPrice());
         GameProfilePicResponseDto gameProfilePicResponseDto = gameProfilePicMapper.gameProfilePicToDto(boardGame.getGameProfilePics());
         gameResponseDto.setGameProfilePics(gameProfilePicResponseDto);
-        gameResponseDto.setLikeCount(boardGameRepository.countLikesByGameId(boardGame.getGameId()));
+        gameResponseDto.setLikeCount(gameLikeRepository.countLikesByBoardGameGameId(boardGame.getGameId()));
         gameResponseDto.setYoutubeLink(boardGame.getYoutubeLink());
         gameResponseDto.setAverageRate(gameRateRepository.findAverageRateByGameId(boardGame.getGameId()));
         gameResponseDto.setDifficulty(boardGame.getDifficulty());

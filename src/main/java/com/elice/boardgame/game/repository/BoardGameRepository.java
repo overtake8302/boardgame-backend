@@ -10,8 +10,8 @@ import java.util.List;
 
 public interface BoardGameRepository extends JpaRepository<BoardGame, Long> {
 
-    @Query("select count(gl) from GameLike gl where gl.boardGame.gameId = :gameId")
-    int countLikesByGameId(@Param("gameId") Long gameId);
+    /*@Query("select count(gl) from GameLike gl where gl.boardGame.gameId = :gameId")
+    int countLikesByBoardGameGameId(@Param("gameId") Long gameId);*/
 
     BoardGame findByGameIdAndDeletedAtIsNull(Long gameId);
 
