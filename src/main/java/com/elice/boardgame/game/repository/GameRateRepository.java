@@ -1,12 +1,31 @@
 package com.elice.boardgame.game.repository;
 
 import com.elice.boardgame.game.entity.GameRate;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.stereotype.Repository;
 
-public interface GameRateRepository extends JpaRepository<GameRate, Long> {
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
-    @Query("select avg(gr.rate) from GameRate gr where gr.boardGame.gameId = :gameId")
-    Double findAverageRateByGameId(@Param("gameId") Long gameId);
+import static com.elice.boardgame.game.entity.QGameRate.gameRate;
+
+@Repository
+public class GameRateRepository {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    private final JPAQueryFactory queryFactory;
+
+    public GameRateRepository(JPAQueryFactory queryFactory) {
+        this.queryFactory = queryFactory;
+    }
+
+    public Double findAverageRateByGameId(Long gameId) {
+        return queryFactory
+                .select(gameRate.rate.avg())
+                .from(gameRate)
+                .where(gameRate.boardGame.gameId.eq(gameId))
+                .fetchOne();
+    }
 }

@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,7 +31,7 @@ public class GamePutDto {
 
     private String releaseDate;
 
-    private BoardGame.difficulty difficulty;
+    private BoardGame.Difficulty difficulty;
 
     private String publisher;
 
@@ -39,4 +42,6 @@ public class GamePutDto {
     private Double averageRate;
 
     private GameProfilePicResponseDto gameProfilePics;
+
+    private List<Long> gameGenreIds = new ArrayList<>();
 }

@@ -1,9 +1,15 @@
 package com.elice.boardgame.game.service;
 
+import com.elice.boardgame.category.entity.GameGenre;
+import com.elice.boardgame.category.entity.GameGenreId;
+import com.elice.boardgame.category.entity.Genre;
+import com.elice.boardgame.category.repository.GameGenreRepository;
+import com.elice.boardgame.category.service.GenreService;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameProfilePic;
 import com.elice.boardgame.game.exception.GameDeleteFailException;
 import com.elice.boardgame.game.exception.GameNotFoundException;
+import com.elice.boardgame.game.exception.GamePostException;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,17 +29,41 @@ public class BoardGameService {
 
     private final BoardGameRepository boardGameRepository;
     private final GameProfilePicService gameProfilePicService;
+    private final GenreService genreService;
+    private final GameGenreRepository gameGenreRepository;
 
     @Transactional
-    public BoardGame create(BoardGame newBoardGame) {
+    public BoardGame create(BoardGame newBoardGame, List<Long> genreIds) {
 
         BoardGame savedBoardGame = boardGameRepository.save(newBoardGame);
+
+        List<GameGenre> genres = new ArrayList<>();
+
+        for (Long id : genreIds) {
+           Optional<Genre> genre = genreService.findById(id);
+           if (genre.isPresent()) {
+               GameGenre gameGenre = new GameGenre();
+               gameGenre.setBoardGame(savedBoardGame);
+               gameGenre.setGenre(genre.get());
+               GameGenreId gameGenreId = new GameGenreId();
+               gameGenreId.setGameId(savedBoardGame.getGameId());
+               gameGenreId.setGenreId(genre.get().getGenreId());
+               gameGenre.setId(gameGenreId);
+               gameGenre = gameGenreRepository.save(gameGenre);
+               genres.add(gameGenre);
+           } else {
+               throw new GamePostException();
+           }
+        }
+
+        savedBoardGame.setGameGenres(genres);
+        savedBoardGame = boardGameRepository.save(savedBoardGame);
 
         return savedBoardGame;
     }
 
     @Transactional
-    public BoardGame create(BoardGame newBoardGame, List<MultipartFile> files) throws IOException {
+    public BoardGame create(BoardGame newBoardGame, List<MultipartFile> files, List<Long> genreIds) throws IOException {
 
         List<GameProfilePic> pics = new ArrayList<>();
 
@@ -44,6 +75,28 @@ public class BoardGameService {
         newBoardGame.setGameProfilePics(pics);
 
         BoardGame savedBoardGame = boardGameRepository.save(newBoardGame);
+
+        List<GameGenre> genres = new ArrayList<>();
+
+        for (Long id : genreIds) {
+            Optional<Genre> genre = genreService.findById(id);
+            if (genre.isPresent()) {
+                GameGenre gameGenre = new GameGenre();
+                gameGenre.setBoardGame(savedBoardGame);
+                gameGenre.setGenre(genre.get());
+                GameGenreId gameGenreId = new GameGenreId();
+                gameGenreId.setGameId(savedBoardGame.getGameId());
+                gameGenreId.setGenreId(genre.get().getGenreId());
+                gameGenre.setId(gameGenreId);
+                gameGenre = gameGenreRepository.save(gameGenre);
+                genres.add(gameGenre);
+            } else {
+                throw new GamePostException();
+            }
+        }
+
+        savedBoardGame.setGameGenres(genres);
+        savedBoardGame = boardGameRepository.save(savedBoardGame);
 
         return savedBoardGame;
     }
@@ -66,8 +119,16 @@ public class BoardGameService {
         List<GameProfilePic> targetPics = targetGame.getGameProfilePics();
 
         try {
-            for (GameProfilePic pic : targetPics) {
-                gameProfilePicService.deleteByFileName(pic);
+            if (!targetPics.isEmpty()) {
+                for (GameProfilePic pic : targetPics) {
+                    gameProfilePicService.deleteByFileName(pic);
+                }
+            }
+
+            List<GameGenre> targetGenres = targetGame.getGameGenres();
+
+            for (GameGenre targetGenre : targetGenres) {
+                gameGenreRepository.delete(targetGenre);
             }
 
             targetGame.setGameProfilePics(Collections.emptyList());
@@ -80,10 +141,37 @@ public class BoardGameService {
     }
 
     @Transactional
-    public BoardGame editWithoutPics(BoardGame target) {
+    public BoardGame editWithoutPics(BoardGame target, List<Long> genreIds) {
 
         gameProfilePicService.deleteFiles(target.getGameProfilePics());
         target.setGameProfilePics(Collections.emptyList());
+
+        List<GameGenre> oldGenres = target.getGameGenres();
+
+        for (GameGenre oldGenre : oldGenres) {
+            gameGenreRepository.delete(oldGenre);
+        }
+
+        List<GameGenre> genres = new ArrayList<>();
+
+        for (Long id : genreIds) {
+            Optional<Genre> genre = genreService.findById(id);
+            if (genre.isPresent()) {
+                GameGenre gameGenre = new GameGenre();
+                gameGenre.setBoardGame(target);
+                gameGenre.setGenre(genre.get());
+                GameGenreId gameGenreId = new GameGenreId();
+                gameGenreId.setGameId(target.getGameId());
+                gameGenreId.setGenreId(genre.get().getGenreId());
+                gameGenre.setId(gameGenreId);
+                gameGenre = gameGenreRepository.save(gameGenre);
+                genres.add(gameGenre);
+            } else {
+                throw new GamePostException();
+            }
+        }
+
+        target.setGameGenres(genres);
 
         BoardGame updatedGame = boardGameRepository.save(target);
 
@@ -91,7 +179,7 @@ public class BoardGameService {
     }
 
     @Transactional
-    public BoardGame editWithPics(BoardGame target, List<MultipartFile> files) throws IOException {
+    public BoardGame editWithPics(BoardGame target, List<MultipartFile> files, List<Long> genreIds) throws IOException {
 
         gameProfilePicService.deleteFiles(target.getGameProfilePics());
         target.setGameProfilePics(Collections.emptyList());
@@ -105,8 +193,47 @@ public class BoardGameService {
 
         target.setGameProfilePics(pics);
 
+        List<GameGenre> oldGenres = target.getGameGenres();
+
+        for (GameGenre oldGenre : oldGenres) {
+            gameGenreRepository.delete(oldGenre);
+        }
+
+        List<GameGenre> genres = new ArrayList<>();
+
+        for (Long id : genreIds) {
+            Optional<Genre> genre = genreService.findById(id);
+            if (genre.isPresent()) {
+                GameGenre gameGenre = new GameGenre();
+                gameGenre.setBoardGame(target);
+                gameGenre.setGenre(genre.get());
+                GameGenreId gameGenreId = new GameGenreId();
+                gameGenreId.setGameId(target.getGameId());
+                gameGenreId.setGenreId(genre.get().getGenreId());
+                gameGenre.setId(gameGenreId);
+                gameGenre = gameGenreRepository.save(gameGenre);
+                genres.add(gameGenre);
+            } else {
+                throw new GamePostException();
+            }
+        }
+
+        target.setGameGenres(genres);
+
         boardGameRepository.save(target);
 
         return target;
+    }
+
+
+    public List<BoardGame> findGameByName(String keyword) {
+
+        List<BoardGame> foundGames = boardGameRepository.findByNameContaining(keyword);
+
+        if (foundGames == null || foundGames.isEmpty()) {
+            throw new GameNotFoundException();
+        }
+
+        return foundGames;
     }
 }
