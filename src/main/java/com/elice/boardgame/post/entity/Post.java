@@ -1,9 +1,9 @@
 package com.elice.boardgame.post.entity;
 
 import com.elice.boardgame.auth.entity.User;
+import com.elice.boardgame.enums.Enums;
 import com.elice.boardgame.game.entity.BoardGame;
 
-import com.elice.boardgame.game.entity.BoardGame.PlayTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class Post extends BaseEntity {
     private BoardGame boardGame;
 
     @Enumerated(EnumType.STRING)
-    private Category category;
+    private Enums.Category category;
 
     private String title;
     private String content;
@@ -46,7 +46,7 @@ public class Post extends BaseEntity {
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private View view;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)  //  cascade = CascadeType.???? <- 이게 대댓글이 삭제되는게 아닌 해당하는 댓글만 삭제되는건지는 모르겠음 일단 좀더 알아보자
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
     public Long getUserId() {
@@ -55,15 +55,5 @@ public class Post extends BaseEntity {
 
     public Long getGameId() {
         return boardGame.getGameId();
-    }
-
-    @AllArgsConstructor
-    @Getter
-    public enum Category {
-        FREE("자유 게시판"),
-        USED("중고 거래 게시판"),
-        MEETING("모임 게시판");
-
-        private final String label;
     }
 }

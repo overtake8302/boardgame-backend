@@ -3,6 +3,7 @@ package com.elice.boardgame.post.entity;
 import com.elice.boardgame.auth.entity.User;
 
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,4 +31,11 @@ public class Comment extends BaseEntity {
     private Post post;
 
     private String content;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Comment parent; // 부모 댓글
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Comment> comInComs; // 자식 댓글 리스트
 }

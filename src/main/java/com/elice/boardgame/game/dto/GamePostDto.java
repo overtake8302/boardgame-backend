@@ -1,6 +1,7 @@
 package com.elice.boardgame.game.dto;
 
 
+import com.elice.boardgame.enums.Enums;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameProfilePic;
 import jakarta.persistence.EnumType;
@@ -26,15 +27,15 @@ public class GamePostDto {
 
     //장르 추가하기
 
-    private BoardGame.PlayTime playTime;
+    private Enums.PlayTime playTime;
 
     private String releaseDate;
 
     @NotNull
-    private BoardGame.PlayNum playNum;
+    private Enums.PlayNum playNum;
 
     @NotNull
-    private BoardGame.AgeLimit ageLimit;
+    private Enums.AgeLimit ageLimit;
 
     @Min(1)
     private int price;
@@ -44,7 +45,7 @@ public class GamePostDto {
     private String artwork;
 
     @Enumerated(EnumType.STRING)
-    private BoardGame.Difficulty difficulty;
+    private Enums.Difficulty difficulty;
 
     private String publisher;
 

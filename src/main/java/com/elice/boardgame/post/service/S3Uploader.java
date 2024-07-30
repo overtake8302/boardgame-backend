@@ -2,6 +2,7 @@ package com.elice.boardgame.post.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -9,6 +10,8 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Service
@@ -33,5 +36,17 @@ public class S3Uploader {
 
         PutObjectResponse response = s3Client.putObject(putObjectRequest, Paths.get(filePath));  //  파일을 S3에 업로드
         return s3Client.utilities().getUrl(builder -> builder.bucket(bucketName).key(fileName)).toExternalForm();  //  업로드된 파일의 URL 반환
+    }
+
+    public String uploadFile(MultipartFile file) throws Exception {
+        if (file != null && !file.isEmpty()) {
+            String fileName = file.getOriginalFilename();
+            Path tempFile = Files.createTempFile("temp", fileName);
+            file.transferTo(tempFile.toFile());
+            String imageUrl = upload(tempFile.toString(), fileName);
+            Files.delete(tempFile);
+            return imageUrl;
+        }
+        return null;
     }
 }
