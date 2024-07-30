@@ -53,10 +53,10 @@ public class BoardGameMapper {
         gameResponseDto.setName(boardGame.getName());
         //장르 추가하기
         gameResponseDto.setGameGenres(boardGame.getGameGenres());
-        gameResponseDto.setPlayTime(boardGame.getPlayTime());
+        gameResponseDto.setPlayTime(boardGame.getPlayTime().getLabel());
         gameResponseDto.setReleaseDate(boardGame.getReleaseDate());
-        gameResponseDto.setPlayNum(boardGame.getPlayNum());
-        gameResponseDto.setAgeLimit(boardGame.getAgeLimit());
+        gameResponseDto.setPlayNum(boardGame.getPlayNum().getLabel());
+        gameResponseDto.setAgeLimit(boardGame.getAgeLimit().getLabel());
         gameResponseDto.setDesigner(boardGame.getDesigner());
         gameResponseDto.setArtwork(boardGame.getArtwork());
         gameResponseDto.setPublisher(boardGame.getPublisher());
@@ -66,7 +66,7 @@ public class BoardGameMapper {
         gameResponseDto.setLikeCount(gameLikeRepository.countLikesByBoardGameGameId(boardGame.getGameId()));
         gameResponseDto.setYoutubeLink(boardGame.getYoutubeLink());
         gameResponseDto.setAverageRate(gameRateRepository.findAverageRateByGameId(boardGame.getGameId()));
-        gameResponseDto.setDifficulty(boardGame.getDifficulty());
+        gameResponseDto.setDifficulty(boardGame.getDifficulty().getLabel());
         //댓글 후기 공략 질문 모임 중고 판매 기타등등
 
         return gameResponseDto;

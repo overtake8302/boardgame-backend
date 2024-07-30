@@ -1,6 +1,10 @@
 package com.elice.boardgame.game.dto;
 
 import com.elice.boardgame.category.entity.GameGenre;
+import com.elice.boardgame.enumeration.AgeLimit;
+import com.elice.boardgame.enumeration.Difficulty;
+import com.elice.boardgame.enumeration.PlayNum;
+import com.elice.boardgame.enumeration.PlayTime;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameLike;
 import com.elice.boardgame.game.entity.GameProfilePic;
@@ -21,11 +25,11 @@ public class GameResponseDto {
 
     private String name;
 
-    private BoardGame.PlayTime playTime;
+    private String playTime;
 
-    private BoardGame.PlayNum playNum;
+    private String playNum;
 
-    private BoardGame.AgeLimit ageLimit;
+    private String ageLimit;
 
     private int price;
 
@@ -35,7 +39,7 @@ public class GameResponseDto {
 
     private String releaseDate;
 
-    private BoardGame.Difficulty difficulty;
+    private String difficulty;
 
     private String publisher;
 
