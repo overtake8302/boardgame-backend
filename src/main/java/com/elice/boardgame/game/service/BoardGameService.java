@@ -11,9 +11,8 @@ import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameLike;
 import com.elice.boardgame.game.entity.GameLikePK;
 import com.elice.boardgame.game.entity.GameProfilePic;
-import com.elice.boardgame.game.exception.GameDeleteFailException;
-import com.elice.boardgame.game.exception.GameNotFoundException;
-import com.elice.boardgame.game.exception.GamePostException;
+import com.elice.boardgame.ExceptionHandler.GameErrorMessages;
+import com.elice.boardgame.ExceptionHandler.GameRootException;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,7 +60,7 @@ public class BoardGameService {
                gameGenre = gameGenreRepository.save(gameGenre);
                genres.add(gameGenre);
            } else {
-               throw new GamePostException();
+               throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
            }
         }
 
@@ -101,7 +99,7 @@ public class BoardGameService {
                 gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
             } else {
-                throw new GamePostException();
+                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
             }
         }
 
@@ -116,7 +114,7 @@ public class BoardGameService {
         BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedAtIsNull(gameId);
 
         if (foundGame == null) {
-            throw new GameNotFoundException();
+            throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND);
         }
 
         return foundGame;
@@ -146,7 +144,7 @@ public class BoardGameService {
             boardGameRepository.save(targetGame);
 
         } catch (Exception e) {
-            throw new GameDeleteFailException();
+            throw new GameRootException(GameErrorMessages.GAME_DELETE_FAIL);
         }
     }
 
@@ -177,7 +175,7 @@ public class BoardGameService {
                 gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
             } else {
-                throw new GamePostException();
+                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
             }
         }
 
@@ -224,7 +222,7 @@ public class BoardGameService {
                 gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
             } else {
-                throw new GamePostException();
+                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
             }
         }
 
@@ -241,7 +239,7 @@ public class BoardGameService {
         List<BoardGame> foundGames = boardGameRepository.findByNameContaining(keyword);
 
         if (foundGames == null || foundGames.isEmpty()) {
-            throw new GameNotFoundException();
+            throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND);
         }
 
         return foundGames;

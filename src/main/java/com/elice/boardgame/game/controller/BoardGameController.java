@@ -6,8 +6,8 @@ import com.elice.boardgame.game.dto.GamePostDto;
 import com.elice.boardgame.game.dto.GamePutDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
-import com.elice.boardgame.game.exception.GamePostException;
-import com.elice.boardgame.game.exception.GamePutException;
+import com.elice.boardgame.ExceptionHandler.GameErrorMessages;
+import com.elice.boardgame.ExceptionHandler.GameRootException;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
 import com.elice.boardgame.game.repository.GameLikeRepository;
 import com.elice.boardgame.game.service.BoardGameService;
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +44,7 @@ public class BoardGameController {
     ) throws IOException {
 
         if (bindingResult.hasErrors()) {
-            throw new GamePostException();
+            throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
         }
 
         BoardGame newBoardGame = mapper.gamePostDtoToBoardGame(gamePostDto);
@@ -89,7 +88,7 @@ public class BoardGameController {
     ) throws  IOException {
 
         if (bindingResult.hasErrors()) {
-            throw new GamePutException();
+            throw new GameRootException(GameErrorMessages.MISSING_REQUIRED_INPUT);
         }
 
 
