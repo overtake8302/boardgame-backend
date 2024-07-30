@@ -22,11 +22,11 @@ public class GameResponseDto {
 
     private String name;
 
-    private Enums.PlayTime playTime;
+    private String playTime;
 
-    private Enums.PlayNum playNum;
+    private String playNum;
 
-    private Enums.AgeLimit ageLimit;
+    private String ageLimit;
 
     private int price;
 
@@ -36,7 +36,7 @@ public class GameResponseDto {
 
     private String releaseDate;
 
-    private Enums.Difficulty difficulty;
+    private String difficulty;
 
     private String publisher;
 
