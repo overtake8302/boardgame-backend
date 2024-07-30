@@ -1,13 +1,15 @@
 package com.elice.boardgame.game.controller;
 
-import com.elice.boardgame.category.entity.GameGenre;
+import com.elice.boardgame.auth.repository.UserRepository;
+import com.elice.boardgame.game.dto.ClickLikeResponseDto;
 import com.elice.boardgame.game.dto.GamePostDto;
 import com.elice.boardgame.game.dto.GamePutDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
-import com.elice.boardgame.game.exception.GamePostException;
-import com.elice.boardgame.game.exception.GamePutException;
+import com.elice.boardgame.ExceptionHandler.GameErrorMessages;
+import com.elice.boardgame.ExceptionHandler.GameRootException;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
+import com.elice.boardgame.game.repository.GameLikeRepository;
 import com.elice.boardgame.game.service.BoardGameService;
 import com.elice.boardgame.game.service.GameProfilePicService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,8 @@ public class BoardGameController {
     private final BoardGameService boardGameService;
     private final BoardGameMapper mapper;
     private final GameProfilePicService gameProfilePicService;
+    private final UserRepository userRepository;
+    private final GameLikeRepository gameLikeRepository;
 
     @PostMapping
     public ResponseEntity<GameResponseDto> postGame(
@@ -40,7 +44,7 @@ public class BoardGameController {
     ) throws IOException {
 
         if (bindingResult.hasErrors()) {
-            throw new GamePostException();
+            throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
         }
 
         BoardGame newBoardGame = mapper.gamePostDtoToBoardGame(gamePostDto);
@@ -84,7 +88,7 @@ public class BoardGameController {
     ) throws  IOException {
 
         if (bindingResult.hasErrors()) {
-            throw new GamePutException();
+            throw new GameRootException(GameErrorMessages.MISSING_REQUIRED_INPUT);
         }
 
 
@@ -116,5 +120,23 @@ public class BoardGameController {
         }
 
         return new ResponseEntity<>(gameResponseDtos, HttpStatus.OK);
+    }
+
+    @PostMapping("/like")
+    public ResponseEntity<ClickLikeResponseDto> clickLike(@RequestParam Long gameId) {
+
+        boolean like = boardGameService.clickLike(gameId);
+        ClickLikeResponseDto clickLikeResponseDto = new ClickLikeResponseDto();
+
+        if (like) {
+            clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_REMOVED.getMessage());
+        } else {
+            clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_ADDED.getMessage());
+        }
+
+        int likeCount = gameLikeRepository.countLikesByBoardGameGameId(gameId);
+        clickLikeResponseDto.setLikeCount(likeCount);
+
+        return new ResponseEntity<>(clickLikeResponseDto, HttpStatus.OK);
     }
 }

@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface LikeGenreRepository extends JpaRepository<LikeGenre, LikeGenreId> {
+public interface LikeGenreRepository extends JpaRepository<LikeGenre, LikeGenreId>, CustomLikeGenreRepository{
     List<LikeGenre> findByUserIdOrderByScoreDesc(Long userId);
 }
