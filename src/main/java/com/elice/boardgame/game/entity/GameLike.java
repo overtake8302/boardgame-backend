@@ -2,10 +2,12 @@ package com.elice.boardgame.game.entity;
 
 import com.elice.boardgame.auth.entity.User;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Getter
@@ -27,3 +29,4 @@ public class GameLike extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 }
+

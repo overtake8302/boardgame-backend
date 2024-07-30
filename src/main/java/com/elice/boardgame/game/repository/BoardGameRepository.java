@@ -1,13 +1,11 @@
 package com.elice.boardgame.game.repository;
 
 import com.elice.boardgame.game.entity.BoardGame;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
-
-public interface BoardGameRepository extends JpaRepository<BoardGame, Long>, BoardGameRepositoryCustom {
-
+public interface BoardGameRepository extends JpaRepository<BoardGame, Long>,
+    CustomBoardGameRepository {
 
     /*@Query("select count(gl) from GameLike gl where gl.boardGame.gameId = :gameId")
     int countLikesByBoardGameGameId(@Param("gameId") Long gameId);*/
