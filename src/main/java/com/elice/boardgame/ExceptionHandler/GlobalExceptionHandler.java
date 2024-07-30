@@ -37,4 +37,12 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(responseBody, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(GameRootException.class)
+    public ResponseEntity<GameErrorResponse> handleGamePostException(GameRootException gameRootException) {
+
+        GameErrorResponse errorResponse = new GameErrorResponse(gameRootException.getErrorMessage().getErrorCode(), gameRootException.getErrorMessage().getErrorMessage());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 }

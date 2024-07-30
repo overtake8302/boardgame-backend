@@ -2,6 +2,10 @@ package com.elice.boardgame.game.entity;
 
 
 import com.elice.boardgame.category.entity.GameGenre;
+import com.elice.boardgame.enumeration.AgeLimit;
+import com.elice.boardgame.enumeration.Difficulty;
+import com.elice.boardgame.enumeration.PlayNum;
+import com.elice.boardgame.enumeration.PlayTime;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -65,50 +69,5 @@ public class BoardGame extends BaseEntity{
     @JoinColumn(name = "game_genre_id")
     @JsonManagedReference
     private List<GameGenre> gameGenres;
-
-    @AllArgsConstructor
-    @Getter
-    public enum AgeLimit {
-
-        AGE_ALL("전체 이용가"),
-        AGE_12_PLUS("12세 이용가"),
-        AGE_15_PLUS("15세 이용가"),
-        AGE_18_PLUS("청소년 이용 불가");
-
-        private final String label;
-    }
-
-    @AllArgsConstructor
-    @Getter
-    public enum Difficulty {
-
-        EASY("쉬움"),
-        MEDIUM("보통"),
-        HARD("어려움");
-
-        private final String label;
-    }
-
-    @AllArgsConstructor
-    @Getter
-    public enum PlayNum {
-        ONE_PLAYER("1인용"),
-        TWO_PLAYERS("2인용"),
-        THREE_PLAYERS("3인용"),
-        FOUR_PLAYERS("4인용"),
-        FIVE_PLUS_PLAYERS("5인 이상");
-
-        private final String label;
-    }
-
-    @AllArgsConstructor
-    @Getter
-    public enum PlayTime {
-        SHORT("30분 이하"),
-        MEDIUM("30분 ~ 1시간"),
-        LONG("1시간 이상");
-
-        private final String label;
-    }
 
 }

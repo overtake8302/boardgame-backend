@@ -1,5 +1,9 @@
 package com.elice.boardgame.game.dto;
 
+import com.elice.boardgame.enumeration.AgeLimit;
+import com.elice.boardgame.enumeration.Difficulty;
+import com.elice.boardgame.enumeration.PlayNum;
+import com.elice.boardgame.enumeration.PlayTime;
 import com.elice.boardgame.game.entity.BoardGame;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,11 +21,11 @@ public class GamePutDto {
 
     private String name;
 
-    private BoardGame.PlayTime playTime;
+    private PlayTime playTime;
 
-    private BoardGame.PlayNum playNum;
+    private PlayNum playNum;
 
-    private BoardGame.AgeLimit ageLimit;
+    private AgeLimit ageLimit;
 
     private int price;
 
@@ -31,7 +35,7 @@ public class GamePutDto {
 
     private String releaseDate;
 
-    private BoardGame.Difficulty difficulty;
+    private Difficulty difficulty;
 
     private String publisher;
 

@@ -14,7 +14,7 @@ import org.hibernate.annotations.CreationTimestamp;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameLike {
+public class GameLike extends BaseEntity {
 
     @EmbeddedId
     private GameLikePK gameLikePK;
@@ -28,9 +28,5 @@ public class GameLike {
     @MapsId("userId")
     @JoinColumn(name = "user_id")
     private User user;
-
-    @Column(name = "created_date", updatable = false)
-    @CreationTimestamp
-    private LocalDateTime createdDate;
 }
 
