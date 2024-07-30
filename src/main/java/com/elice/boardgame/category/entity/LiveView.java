@@ -31,5 +31,4 @@ public class LiveView {
     private Long viewScore;
 
     private String ipAddress;
-
 }

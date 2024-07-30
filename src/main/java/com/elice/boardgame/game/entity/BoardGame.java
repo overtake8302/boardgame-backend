@@ -2,10 +2,7 @@ package com.elice.boardgame.game.entity;
 
 
 import com.elice.boardgame.category.entity.GameGenre;
-import com.elice.boardgame.enumeration.AgeLimit;
-import com.elice.boardgame.enumeration.Difficulty;
-import com.elice.boardgame.enumeration.PlayNum;
-import com.elice.boardgame.enumeration.PlayTime;
+import com.elice.boardgame.enums.Enums;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -30,13 +27,13 @@ public class BoardGame extends BaseEntity{
     private String name;
 
     @Enumerated(EnumType.STRING)
-    private PlayTime playTime;
+    private Enums.PlayTime playTime;
 
     @Enumerated(EnumType.STRING)
-    private PlayNum playNum;
+    private Enums.PlayNum playNum;
 
     @Enumerated(EnumType.STRING)
-    private AgeLimit ageLimit;
+    private Enums.AgeLimit ageLimit;
 
     private int price;
 
@@ -47,7 +44,7 @@ public class BoardGame extends BaseEntity{
     private String releaseDate;
 
     @Enumerated(EnumType.STRING)
-    private Difficulty difficulty;
+    private Enums.Difficulty difficulty;
 
     private String publisher;
 

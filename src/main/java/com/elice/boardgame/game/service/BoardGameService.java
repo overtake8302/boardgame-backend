@@ -50,20 +50,20 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : genreIds) {
-           Genre genre = genreService.findById(id);
-           if (genre != null) {
-               GameGenre gameGenre = new GameGenre();
-               gameGenre.setBoardGame(savedBoardGame);
-               gameGenre.setGenre(genre);
-               GameGenreId gameGenreId = new GameGenreId();
-               gameGenreId.setGameId(savedBoardGame.getGameId());
-               gameGenreId.setGenreId(genre.getGenreId());
-               gameGenre.setId(gameGenreId);
-               gameGenre = gameGenreRepository.save(gameGenre);
-               genres.add(gameGenre);
-           } else {
-               throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
-           }
+            Genre genre = genreService.findById(id);
+            if (genre != null) {
+                GameGenre gameGenre = new GameGenre();
+                gameGenre.setBoardGame(savedBoardGame);
+                gameGenre.setGenre(genre);
+                GameGenreId gameGenreId = new GameGenreId();
+                gameGenreId.setGameId(savedBoardGame.getGameId());
+                gameGenreId.setGenreId(genre.getGenreId());
+                gameGenre.setId(gameGenreId);
+                gameGenre = gameGenreRepository.save(gameGenre);
+                genres.add(gameGenre);
+            } else {
+                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
+            }
         }
 
         savedBoardGame.setGameGenres(genres);
