@@ -6,7 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface BoardGameRepository extends JpaRepository<BoardGame, Long>, BoardGameRepositoryCustom {
+public interface BoardGameRepository extends JpaRepository<BoardGame, Long>,
+    CustomBoardGameRepository {
 
 
     @Query("select count(gl) from GameLike gl where gl.boardGame.gameId = :gameId")

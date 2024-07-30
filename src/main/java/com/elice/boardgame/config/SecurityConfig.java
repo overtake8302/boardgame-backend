@@ -1,5 +1,6 @@
 package com.elice.boardgame.config;
 
+import com.elice.boardgame.auth.jwt.JWTFilter;
 import com.elice.boardgame.auth.jwt.JWTUtil;
 import com.elice.boardgame.auth.jwt.LoginFilter;
 import org.springframework.context.annotation.Bean;
@@ -58,6 +59,7 @@ public class SecurityConfig {
 
 
         http
+                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         //세션 stateless 설정

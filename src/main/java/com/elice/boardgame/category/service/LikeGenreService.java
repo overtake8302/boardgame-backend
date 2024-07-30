@@ -12,6 +12,7 @@ import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.repository.GenreRepository;
 import com.elice.boardgame.category.repository.LikeGenreRepository;
 import com.elice.boardgame.game.entity.BoardGame;
+import com.elice.boardgame.game.repository.GameLikeRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,8 @@ public class LikeGenreService {
     private final UserRepository userRepository;
 
     private final GameGenreRepository gameGenreRepository;
+
+    private final GameLikeRepository gameLikeRepository;
 
     public void addLikeGenreScore(LikeGenreId id) {
         Optional<LikeGenre> optionalEntity = likeGenreRepository.findById(id);
@@ -55,7 +58,6 @@ public class LikeGenreService {
             likeGenreRepository.save(newEntity);
         }
     }
-
 
     public void subtractLikeGenreScore(LikeGenreId id) {
         Optional<LikeGenre> optionalEntity = likeGenreRepository.findById(id);
@@ -144,5 +146,9 @@ public class LikeGenreService {
             }
         }
         return boardGames;
+    }
+
+    public List<BoardGame> getGames(Long userId) {
+        return gameLikeRepository.findLikedGamesByUserId(userId);
     }
 }
