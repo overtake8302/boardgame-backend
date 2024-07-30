@@ -7,14 +7,15 @@ import com.elice.boardgame.category.entity.GameGenreId;
 import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.service.GenreService;
-import com.elice.boardgame.game.entity.BoardGame;
-import com.elice.boardgame.game.entity.GameLike;
-import com.elice.boardgame.game.entity.GameLikePK;
-import com.elice.boardgame.game.entity.GameProfilePic;
+import com.elice.boardgame.enumeration.GameRateResponseMessages;
+import com.elice.boardgame.game.dto.GameRatePostDto;
+import com.elice.boardgame.game.dto.GameRateResponseDto;
+import com.elice.boardgame.game.entity.*;
 import com.elice.boardgame.ExceptionHandler.GameErrorMessages;
 import com.elice.boardgame.ExceptionHandler.GameRootException;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
+import com.elice.boardgame.game.repository.GameRateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,6 +40,7 @@ public class BoardGameService {
     private final GameGenreRepository gameGenreRepository;
     private final GameLikeRepository gameLikeRepository;
     private final UserRepository userRepository;
+    private final GameRateRepository gameRateRepository;
 
     @Transactional
     public BoardGame create(BoardGame newBoardGame, List<Long> genreIds) {
@@ -270,5 +272,27 @@ public class BoardGameService {
         String currentUserName = authentication.getName();
         User currentUser = userRepository.findByUsername(currentUserName);
         return currentUser;
+    }
+
+    public GameRateResponseDto clickGameRate(Long gameId, GameRatePostDto gameRatePostDto) {
+
+        BoardGame foundGame = findGameByGameId(gameId);
+        User currentUser = getCurrentUser();
+        GameRate foundGameRate = gameRateRepository.findByUserIdAndBoardGameGameId(gameId, currentUser.getId());
+
+        if (foundGameRate != null) {
+            foundGameRate.setRate(gameRatePostDto.getRate());
+            gameRateRepository.save(foundGameRate);
+
+            return new GameRateResponseDto(GameRateResponseMessages.EDITED.getMessage());
+        }
+
+        GameRate newGameRate = new GameRate();
+        newGameRate.setBoardGame(foundGame);
+        newGameRate.setUser(currentUser);
+        newGameRate.setRate(gameRatePostDto.getRate());
+        gameRateRepository.save(newGameRate);
+
+        return new GameRateResponseDto(GameRateResponseMessages.REGISTERED.getMessage());
     }
 }

@@ -1,10 +1,8 @@
 package com.elice.boardgame.game.controller;
 
 import com.elice.boardgame.auth.repository.UserRepository;
-import com.elice.boardgame.game.dto.ClickLikeResponseDto;
-import com.elice.boardgame.game.dto.GamePostDto;
-import com.elice.boardgame.game.dto.GamePutDto;
-import com.elice.boardgame.game.dto.GameResponseDto;
+import com.elice.boardgame.enumeration.GameRateResponseMessages;
+import com.elice.boardgame.game.dto.*;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.ExceptionHandler.GameErrorMessages;
 import com.elice.boardgame.ExceptionHandler.GameRootException;
@@ -138,5 +136,13 @@ public class BoardGameController {
         clickLikeResponseDto.setLikeCount(likeCount);
 
         return new ResponseEntity<>(clickLikeResponseDto, HttpStatus.OK);
+    }
+
+    @PostMapping("/rate")
+    public ResponseEntity<GameRateResponseDto> postGameRate(@RequestParam Long gameId, @RequestBody GameRatePostDto gameRatePostDto) {
+
+        GameRateResponseDto responseDto = boardGameService.clickGameRate(gameId, gameRatePostDto);
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 }

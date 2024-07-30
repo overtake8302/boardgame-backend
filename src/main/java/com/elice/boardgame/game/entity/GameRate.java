@@ -27,4 +27,5 @@ public class GameRate extends BaseEntity {
     private BoardGame boardGame;
 
     private Double rate;
+
 }
