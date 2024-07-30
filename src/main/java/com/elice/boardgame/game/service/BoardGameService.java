@@ -1,17 +1,23 @@
 package com.elice.boardgame.game.service;
 
+import com.elice.boardgame.auth.entity.User;
+import com.elice.boardgame.auth.repository.UserRepository;
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.GameGenreId;
 import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.service.GenreService;
 import com.elice.boardgame.game.entity.BoardGame;
+import com.elice.boardgame.game.entity.GameLike;
+import com.elice.boardgame.game.entity.GameLikePK;
 import com.elice.boardgame.game.entity.GameProfilePic;
-import com.elice.boardgame.game.exception.GameDeleteFailException;
-import com.elice.boardgame.game.exception.GameNotFoundException;
-import com.elice.boardgame.game.exception.GamePostException;
+import com.elice.boardgame.ExceptionHandler.GameErrorMessages;
+import com.elice.boardgame.ExceptionHandler.GameRootException;
 import com.elice.boardgame.game.repository.BoardGameRepository;
+import com.elice.boardgame.game.repository.GameLikeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +37,8 @@ public class BoardGameService {
     private final GameProfilePicService gameProfilePicService;
     private final GenreService genreService;
     private final GameGenreRepository gameGenreRepository;
+    private final GameLikeRepository gameLikeRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public BoardGame create(BoardGame newBoardGame, List<Long> genreIds) {
@@ -40,19 +48,19 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : genreIds) {
-            Optional<Genre> genre = genreService.findById(id);
-            if (genre.isPresent()) {
+            Genre genre = genreService.findById(id);
+            if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(savedBoardGame);
-                gameGenre.setGenre(genre.get());
+                gameGenre.setGenre(genre);
                 GameGenreId gameGenreId = new GameGenreId();
                 gameGenreId.setGameId(savedBoardGame.getGameId());
-                gameGenreId.setGenreId(genre.get().getGenreId());
+                gameGenreId.setGenreId(genre.getGenreId());
                 gameGenre.setId(gameGenreId);
                 gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
             } else {
-                throw new GamePostException();
+                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
             }
         }
 
@@ -79,19 +87,19 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : genreIds) {
-            Optional<Genre> genre = genreService.findById(id);
-            if (genre.isPresent()) {
+            Genre genre = genreService.findById(id);
+            if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(savedBoardGame);
-                gameGenre.setGenre(genre.get());
+                gameGenre.setGenre(genre);
                 GameGenreId gameGenreId = new GameGenreId();
                 gameGenreId.setGameId(savedBoardGame.getGameId());
-                gameGenreId.setGenreId(genre.get().getGenreId());
+                gameGenreId.setGenreId(genre.getGenreId());
                 gameGenre.setId(gameGenreId);
                 gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
             } else {
-                throw new GamePostException();
+                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
             }
         }
 
@@ -103,10 +111,10 @@ public class BoardGameService {
 
     public BoardGame findGameByGameId(Long gameId) {
 
-        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedAtIsNull(gameId);
+        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
 
         if (foundGame == null) {
-            throw new GameNotFoundException();
+            throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND);
         }
 
         return foundGame;
@@ -132,11 +140,11 @@ public class BoardGameService {
             }
 
             targetGame.setGameProfilePics(Collections.emptyList());
-            targetGame.setDeletedAt(LocalDateTime.now());
+            targetGame.setDeletedDate(LocalDateTime.now());
             boardGameRepository.save(targetGame);
 
         } catch (Exception e) {
-            throw new GameDeleteFailException();
+            throw new GameRootException(GameErrorMessages.GAME_DELETE_FAIL);
         }
     }
 
@@ -155,19 +163,19 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : genreIds) {
-            Optional<Genre> genre = genreService.findById(id);
-            if (genre.isPresent()) {
+            Genre genre = genreService.findById(id);
+            if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(target);
-                gameGenre.setGenre(genre.get());
+                gameGenre.setGenre(genre);
                 GameGenreId gameGenreId = new GameGenreId();
                 gameGenreId.setGameId(target.getGameId());
-                gameGenreId.setGenreId(genre.get().getGenreId());
+                gameGenreId.setGenreId(genre.getGenreId());
                 gameGenre.setId(gameGenreId);
                 gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
             } else {
-                throw new GamePostException();
+                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
             }
         }
 
@@ -202,19 +210,19 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : genreIds) {
-            Optional<Genre> genre = genreService.findById(id);
-            if (genre.isPresent()) {
+            Genre genre = genreService.findById(id);
+            if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(target);
-                gameGenre.setGenre(genre.get());
+                gameGenre.setGenre(genre);
                 GameGenreId gameGenreId = new GameGenreId();
                 gameGenreId.setGameId(target.getGameId());
-                gameGenreId.setGenreId(genre.get().getGenreId());
+                gameGenreId.setGenreId(genre.getGenreId());
                 gameGenre.setId(gameGenreId);
                 gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
             } else {
-                throw new GamePostException();
+                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
             }
         }
 
@@ -231,9 +239,36 @@ public class BoardGameService {
         List<BoardGame> foundGames = boardGameRepository.findByNameContaining(keyword);
 
         if (foundGames == null || foundGames.isEmpty()) {
-            throw new GameNotFoundException();
+            throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND);
         }
 
         return foundGames;
+    }
+
+    public boolean clickLike(Long gameId) {
+
+        BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
+        User currentUser = getCurrentUser();
+        GameLikePK gameLikePK = new GameLikePK(currentUser.getId(), gameId);
+
+//        boolean like = gameLikeRepository.existsByGameLikePK(gameLikePK);
+        Optional<GameLike> target = gameLikeRepository.findById(gameLikePK);
+
+        if (target.isPresent()) {
+            gameLikeRepository.delete(target.get());
+            return true;
+        }
+
+        GameLike gameLike = new GameLike(gameLikePK, targetGame, currentUser);
+        gameLikeRepository.save(gameLike);
+
+        return false;
+    }
+
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserName = authentication.getName();
+        User currentUser = userRepository.findByUsername(currentUserName);
+        return currentUser;
     }
 }

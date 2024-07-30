@@ -8,13 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SocialRepository extends JpaRepository<Social, SocialId> {
-    List<Social> findByUserId(Long userId);
+public interface SocialRepository extends JpaRepository<Social, SocialId>, SocialRepositoryCustom {
 
-    @Query("SELECT s.id.friendId FROM Social s WHERE s.id.userId = :userId")
-    List<Long> findFriendIdsByUserId(Long userId);
-
-    boolean existsByUserIdAndFriendId(Long userId, Long friendId); // 친구인 경우 MyPage 볼 수 있도록
+    // 예외처리, 친구인 경우에만 다른 유저의 MyPage 볼 수 있도록
+    boolean existsByUserIdAndFriendId(Long userId, Long friendId);
 
     void deleteByUserIdAndFriendId(Long userId, Long friendId);
 }
