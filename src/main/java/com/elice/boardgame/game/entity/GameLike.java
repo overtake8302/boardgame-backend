@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameLike {
+public class GameLike extends BaseEntity {
 
     @EmbeddedId
     private GameLikePK gameLikePK;

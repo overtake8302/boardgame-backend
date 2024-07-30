@@ -111,7 +111,7 @@ public class BoardGameService {
 
     public BoardGame findGameByGameId(Long gameId) {
 
-        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedAtIsNull(gameId);
+        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
 
         if (foundGame == null) {
             throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND);
@@ -140,7 +140,7 @@ public class BoardGameService {
             }
 
             targetGame.setGameProfilePics(Collections.emptyList());
-            targetGame.setDeletedAt(LocalDateTime.now());
+            targetGame.setDeletedDate(LocalDateTime.now());
             boardGameRepository.save(targetGame);
 
         } catch (Exception e) {
@@ -247,7 +247,7 @@ public class BoardGameService {
 
     public boolean clickLike(Long gameId) {
 
-        BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedAtIsNull(gameId);
+        BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
         User currentUser = getCurrentUser();
         GameLikePK gameLikePK = new GameLikePK(currentUser.getId(), gameId);
 
