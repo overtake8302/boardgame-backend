@@ -1,7 +1,6 @@
 package com.elice.boardgame.game.controller;
 
 import com.elice.boardgame.auth.repository.UserRepository;
-import com.elice.boardgame.enumeration.GameRateResponseMessages;
 import com.elice.boardgame.game.dto.*;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.ExceptionHandler.GameErrorMessages;

@@ -1,4 +1,4 @@
-package com.elice.boardgame.enumeration;
+package com.elice.boardgame.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

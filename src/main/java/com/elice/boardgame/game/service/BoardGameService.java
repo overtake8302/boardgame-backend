@@ -7,7 +7,7 @@ import com.elice.boardgame.category.entity.GameGenreId;
 import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.service.GenreService;
-import com.elice.boardgame.enumeration.GameRateResponseMessages;
+import com.elice.boardgame.enums.GameRateResponseMessages;
 import com.elice.boardgame.game.dto.GameRatePostDto;
 import com.elice.boardgame.game.dto.GameRateResponseDto;
 import com.elice.boardgame.game.entity.*;
@@ -278,7 +278,7 @@ public class BoardGameService {
 
         BoardGame foundGame = findGameByGameId(gameId);
         User currentUser = getCurrentUser();
-        GameRate foundGameRate = gameRateRepository.findByUserIdAndBoardGameGameId(gameId, currentUser.getId());
+        GameRate foundGameRate = gameRateRepository.findByUserIdAndBoardGameGameId(currentUser.getId(), gameId);
 
         if (foundGameRate != null) {
             foundGameRate.setRate(gameRatePostDto.getRate());
