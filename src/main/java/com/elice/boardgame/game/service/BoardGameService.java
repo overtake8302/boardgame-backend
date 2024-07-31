@@ -16,7 +16,13 @@ import com.elice.boardgame.game.mapper.BoardGameMapper;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
 import com.elice.boardgame.game.repository.GameRateRepository;
+import com.elice.boardgame.game.repository.GameVisitorRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -42,6 +48,7 @@ public class BoardGameService {
     private final UserRepository userRepository;
     private final GameRateRepository gameRateRepository;
     private final BoardGameMapper boardGameMapper;
+    private final GameVisitorRepository gameVisitorRepository;
 
     @Transactional
     public GameResponseDto create(GamePostDto gamePostDto) {
@@ -309,5 +316,29 @@ public class BoardGameService {
         gameRateRepository.save(newGameRate);
 
         return new GameRateResponseDto(GameRateResponseMessages.REGISTERED.getMessage());
+    }
+
+    public Page<GameResponseDto> findAll(Pageable pageable, String sortBy) {
+
+        Sort sort = Sort.by(Sort.Direction.DESC, sortBy);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        return boardGameRepository.findAllByDeletedDateIsNull(sortedPageable)
+                .map(boardGameMapper::boardGameToGameResponseDto);
+    }
+
+    public void incrementViewCount(String visitorId, Long gameId) {
+
+        BoardGame boardGame = findGameByGameId(gameId);
+        GameVisitor gameVisitor = gameVisitorRepository.findByVisitorIdAndBoardGameGameId(visitorId, gameId);
+
+        if (gameVisitor == null) {
+            GameVisitor newGameVisitor = new GameVisitor(visitorId, boardGame);
+            gameVisitorRepository.save(newGameVisitor);
+            int views = boardGame.getViews();
+            views++;
+            boardGame.setViews(views);
+            boardGameRepository.save(boardGame);
+        }
     }
 }
