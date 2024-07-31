@@ -1,10 +1,10 @@
 package com.elice.boardgame.game.controller;
 
+import com.elice.boardgame.ExceptionHandler.GameErrorMessages;
+import com.elice.boardgame.ExceptionHandler.GameRootException;
 import com.elice.boardgame.auth.repository.UserRepository;
 import com.elice.boardgame.game.dto.*;
 import com.elice.boardgame.game.entity.BoardGame;
-import com.elice.boardgame.ExceptionHandler.GameErrorMessages;
-import com.elice.boardgame.ExceptionHandler.GameRootException;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
 import com.elice.boardgame.game.repository.GameLikeRepository;
 import com.elice.boardgame.game.service.BoardGameService;
@@ -44,17 +44,12 @@ public class BoardGameController {
             throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
         }
 
-        BoardGame newBoardGame = mapper.gamePostDtoToBoardGame(gamePostDto);
-
-        BoardGame savedBoardGame = new BoardGame();
-
+        GameResponseDto gameResponseDto = new GameResponseDto();
         if (files != null && !files.isEmpty()) {
-            savedBoardGame = boardGameService.create(newBoardGame, files, gamePostDto.getGameGenreIds());
+            gameResponseDto = boardGameService.create(gamePostDto, files);
         } else {
-            savedBoardGame = boardGameService.create(newBoardGame, gamePostDto.getGameGenreIds());
+            gameResponseDto = boardGameService.create(gamePostDto);
         }
-
-        GameResponseDto gameResponseDto = mapper.boardGameToGameResponseDto(savedBoardGame);
 
         return new ResponseEntity<>(gameResponseDto, HttpStatus.CREATED);
     }
@@ -88,18 +83,13 @@ public class BoardGameController {
             throw new GameRootException(GameErrorMessages.MISSING_REQUIRED_INPUT);
         }
 
-
-        BoardGame target = mapper.gamePutDtoToBoardGame(gamePutDto);
-
-        BoardGame updatedTarget;
+        GameResponseDto gameResponseDto;
 
         if (files == null || files.isEmpty()) {
-            updatedTarget = boardGameService.editWithoutPics(target, gamePutDto.getGameGenreIds());
+            gameResponseDto = boardGameService.editWithoutPics(gamePutDto);
         } else {
-            updatedTarget = boardGameService.editWithPics(target, files, gamePutDto.getGameGenreIds());
+            gameResponseDto = boardGameService.editWithPics(gamePutDto, files);
         }
-
-        GameResponseDto gameResponseDto = mapper.boardGameToGameResponseDto(updatedTarget);
 
         return new ResponseEntity<>(gameResponseDto, HttpStatus.OK);
     }
@@ -122,17 +112,7 @@ public class BoardGameController {
     @PostMapping("/like")
     public ResponseEntity<ClickLikeResponseDto> clickLike(@RequestParam Long gameId) {
 
-        boolean like = boardGameService.clickLike(gameId);
-        ClickLikeResponseDto clickLikeResponseDto = new ClickLikeResponseDto();
-
-        if (like) {
-            clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_REMOVED.getMessage());
-        } else {
-            clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_ADDED.getMessage());
-        }
-
-        int likeCount = gameLikeRepository.countLikesByBoardGameGameId(gameId);
-        clickLikeResponseDto.setLikeCount(likeCount);
+        ClickLikeResponseDto clickLikeResponseDto = boardGameService.clickLike(gameId);
 
         return new ResponseEntity<>(clickLikeResponseDto, HttpStatus.OK);
     }
