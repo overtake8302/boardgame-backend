@@ -16,7 +16,7 @@ public interface BoardGameRepository extends JpaRepository<BoardGame, Long>,
 
     BoardGame findByGameIdAndDeletedDateIsNull(Long gameId);
 
-    List<BoardGame> findByNameContaining(String keyword);
+    List<BoardGame> findByNameContainingAndDeletedDateIsNull(String keyword);
 
     Page<BoardGame> findAllByDeletedDateIsNull(Pageable sortedPageable);
 }

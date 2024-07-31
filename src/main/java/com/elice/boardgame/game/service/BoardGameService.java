@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -71,7 +72,7 @@ public class BoardGameService {
                 gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
             } else {
-                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
+                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
@@ -112,7 +113,7 @@ public class BoardGameService {
                 gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
             } else {
-                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
+                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
@@ -127,7 +128,7 @@ public class BoardGameService {
         BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
 
         if (foundGame == null) {
-            throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND);
+            throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
 
         return foundGame;
@@ -157,7 +158,7 @@ public class BoardGameService {
             boardGameRepository.save(targetGame);
 
         } catch (Exception e) {
-            throw new GameRootException(GameErrorMessages.GAME_DELETE_FAIL);
+            throw new GameRootException(GameErrorMessages.GAME_DELETE_FAIL, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -191,7 +192,7 @@ public class BoardGameService {
                 gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
             } else {
-                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
+                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
@@ -241,7 +242,7 @@ public class BoardGameService {
                 gameGenre = gameGenreRepository.save(gameGenre);
                 genres.add(gameGenre);
             } else {
-                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
+                throw new GameRootException(GameErrorMessages.GAME_POST_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
@@ -255,10 +256,10 @@ public class BoardGameService {
 
     public List<BoardGame> findGameByName(String keyword) {
 
-        List<BoardGame> foundGames = boardGameRepository.findByNameContaining(keyword);
+        List<BoardGame> foundGames = boardGameRepository.findByNameContainingAndDeletedDateIsNull(keyword);
 
         if (foundGames == null || foundGames.isEmpty()) {
-            throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND);
+            throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
 
         return foundGames;
