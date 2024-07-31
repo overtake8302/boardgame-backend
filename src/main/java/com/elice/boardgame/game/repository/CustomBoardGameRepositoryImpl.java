@@ -6,7 +6,11 @@ import com.elice.boardgame.game.entity.QBoardGame;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,7 +22,8 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<BoardGame> findBoardGamesWithFilters(List<String> playTimes, List<String> playNums, List<String> ageLimits, List<String> prices, List<String> genres) {
+    public List<BoardGame> findBoardGamesWithFilters(List<String> playTimes, List<String> playNums,
+        List<String> ageLimits, List<String> prices, List<String> genres) {
         QBoardGame qBoardGame = QBoardGame.boardGame;
         QGameGenre qGameGenre = QGameGenre.gameGenre;
         BooleanBuilder builder = new BooleanBuilder();
@@ -66,6 +71,64 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         return queryFactory.selectFrom(qBoardGame)
             .where(builder)
             .fetch();
+    }
+
+    @Override
+    public List<BoardGame> findByGenres(List<Long> genreIds) {
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameGenre gameGenre = QGameGenre.gameGenre;
+
+        List<BoardGame> result = new ArrayList<>();
+        Set<Set<Long>> subsets = new HashSet<>();
+        generateSubsets(genreIds, new HashSet<>(), subsets, 0);
+
+        // 공집합 제거
+        subsets.removeIf(Set::isEmpty);
+
+        // 장르가 많이 겹치는 게임부터 add
+        List<Set<Long>> sortedSubsets = subsets.stream()
+            .sorted((a, b) -> Integer.compare(b.size(), a.size()))
+            .toList();
+
+        for (Set<Long> subset : sortedSubsets) {
+            // 각 genreId를 확인하는 조건을 추가
+            BooleanExpression predicate = null;
+            for (Long genreId : subset) {
+                BooleanExpression condition = gameGenre.genre.genreId.eq(genreId);
+                if (predicate == null) {
+                    predicate = condition;
+                } else {
+                    predicate = predicate.and(condition);
+                }
+            }
+
+            List<BoardGame> games = queryFactory.selectDistinct(boardGame)
+                .from(boardGame)
+                .join(boardGame.gameGenres, gameGenre)
+                .where(predicate)
+                .fetch();
+
+            // 결과를 바로 추가하지 않고, 중복 검사 후 추가
+            for (BoardGame game : games) {
+                if (!result.contains(game)) {
+                    result.add(game);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    // 모든 경우의 수
+    private void generateSubsets(List<Long> list, Set<Long> current, Set<Set<Long>> subsets, int index) {
+        if (index == list.size()) {
+            subsets.add(new HashSet<>(current));
+            return;
+        }
+        current.add(list.get(index));
+        generateSubsets(list, current, subsets, index + 1);
+        current.remove(list.get(index));
+        generateSubsets(list, current, subsets, index + 1);
     }
 
 }

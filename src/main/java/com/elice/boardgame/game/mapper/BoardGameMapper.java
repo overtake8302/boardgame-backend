@@ -65,7 +65,7 @@ public class BoardGameMapper {
         gameResponseDto.setGameProfilePics(gameProfilePicResponseDto);
         gameResponseDto.setLikeCount(gameLikeRepository.countLikesByBoardGameGameId(boardGame.getGameId()));
         gameResponseDto.setYoutubeLink(boardGame.getYoutubeLink());
-        gameResponseDto.setAverageRate(gameRateRepository.findAverageRateByGameId(boardGame.getGameId()));
+        gameResponseDto.setAverageRate(gameRateRepository.findAverageRateByBoardGame(boardGame));
         gameResponseDto.setDifficulty(boardGame.getDifficulty().getLabel());
         //댓글 후기 공략 질문 모임 중고 판매 기타등등
 

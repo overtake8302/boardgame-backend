@@ -3,7 +3,6 @@ package com.elice.boardgame.category.controller;
 import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.service.GenreService;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -52,4 +51,6 @@ public class GenreController {
     public void deleteGenre(@PathVariable Long id) {
         genreService.deleteById(id);
     }
+
+
 }
