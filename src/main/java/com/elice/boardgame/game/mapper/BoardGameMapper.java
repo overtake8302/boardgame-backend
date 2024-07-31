@@ -8,7 +8,6 @@ import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
 import com.elice.boardgame.game.repository.GameRateQueryDSLRepository;
-import com.elice.boardgame.game.service.BoardGameService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -23,7 +22,6 @@ public class BoardGameMapper {
     private final BoardGameRepository boardGameRepository;
     private final GameRateQueryDSLRepository gameRateRepository;
     private final GameProfilePicMapper gameProfilePicMapper;
-    private final BoardGameService boardGameService;
     private final GameLikeRepository gameLikeRepository;
 
     public BoardGame gamePostDtoToBoardGame(GamePostDto dto) {
@@ -72,24 +70,20 @@ public class BoardGameMapper {
         return gameResponseDto;
     }
 
-    public BoardGame gamePutDtoToBoardGame(GamePutDto gamePutDto) {
+    public BoardGame boardGameUpdateMapper(BoardGame target, GamePutDto gamePutDto) {
 
-        BoardGame foundGame = boardGameService.findGameByGameId(gamePutDto.getGameId());
+        target.setYoutubeLink(gamePutDto.getYoutubeLink());
+        target.setDifficulty(gamePutDto.getDifficulty());
+        target.setPrice(gamePutDto.getPrice());
+        target.setArtwork(gamePutDto.getArtwork());
+        target.setPublisher(gamePutDto.getPublisher());
+        target.setDesigner(gamePutDto.getDesigner());
+        target.setAgeLimit(gamePutDto.getAgeLimit());
+        target.setPlayNum(gamePutDto.getPlayNum());
+        target.setPlayTime(gamePutDto.getPlayTime());
+        target.setReleaseDate(gamePutDto.getReleaseDate());
+        target.setName(gamePutDto.getName());
 
-        foundGame.setYoutubeLink(gamePutDto.getYoutubeLink());
-        foundGame.setDifficulty(gamePutDto.getDifficulty());
-        foundGame.setPrice(gamePutDto.getPrice());
-        foundGame.setArtwork(gamePutDto.getArtwork());
-        foundGame.setPublisher(gamePutDto.getPublisher());
-        foundGame.setDesigner(gamePutDto.getDesigner());
-        foundGame.setAgeLimit(gamePutDto.getAgeLimit());
-        foundGame.setPlayNum(gamePutDto.getPlayNum());
-        foundGame.setPlayTime(gamePutDto.getPlayTime());
-        foundGame.setReleaseDate(gamePutDto.getReleaseDate());
-        foundGame.setName(gamePutDto.getName());
-
-
-        return foundGame;
-
+        return target;
     }
 }

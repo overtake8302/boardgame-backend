@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class AmazonS3Config {
 
-    @Value("${cloud.aws.region.static:ap-northeast-2}")
+    @Value("${cloud.aws.region.static}")
     private String region;
 
     @Value("${bucket1.access-key}")
