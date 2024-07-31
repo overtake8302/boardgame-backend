@@ -25,7 +25,7 @@ public class SocialController {
 
     private final SocialService socialService;
 
-    @GetMapping("/friends")
+    @GetMapping
     public ResponseEntity<List<Long>> getFriends(@RequestParam Long userId) {
         try {
             List<Long> friends = socialService.getFriendIds(userId);
@@ -36,7 +36,7 @@ public class SocialController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<String> addFriend(@RequestBody SocialRequest socialRequest) {
         try {
             socialService.addFriend(socialRequest);
@@ -51,7 +51,7 @@ public class SocialController {
         }
     }
 
-    @DeleteMapping("/remove")
+    @DeleteMapping
     public ResponseEntity<String> removeFriend(@RequestParam Long userId, @RequestParam Long friendId) {
         try {
             socialService.removeFriend(userId, friendId);

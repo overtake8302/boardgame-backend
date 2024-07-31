@@ -8,7 +8,6 @@ import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
 import com.elice.boardgame.game.repository.GameRateQueryDSLRepository;
-import com.elice.boardgame.game.service.BoardGameService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -23,7 +22,6 @@ public class BoardGameMapper {
     private final BoardGameRepository boardGameRepository;
     private final GameRateQueryDSLRepository gameRateRepository;
     private final GameProfilePicMapper gameProfilePicMapper;
-    private final BoardGameService boardGameService;
     private final GameLikeRepository gameLikeRepository;
 
     public BoardGame gamePostDtoToBoardGame(GamePostDto dto) {
@@ -53,10 +51,10 @@ public class BoardGameMapper {
         gameResponseDto.setName(boardGame.getName());
         //장르 추가하기
         gameResponseDto.setGameGenres(boardGame.getGameGenres());
-        gameResponseDto.setPlayTime(boardGame.getPlayTime());
+        gameResponseDto.setPlayTime(boardGame.getPlayTime().getLabel());
         gameResponseDto.setReleaseDate(boardGame.getReleaseDate());
-        gameResponseDto.setPlayNum(boardGame.getPlayNum());
-        gameResponseDto.setAgeLimit(boardGame.getAgeLimit());
+        gameResponseDto.setPlayNum(boardGame.getPlayNum().getLabel());
+        gameResponseDto.setAgeLimit(boardGame.getAgeLimit().getLabel());
         gameResponseDto.setDesigner(boardGame.getDesigner());
         gameResponseDto.setArtwork(boardGame.getArtwork());
         gameResponseDto.setPublisher(boardGame.getPublisher());
@@ -66,30 +64,29 @@ public class BoardGameMapper {
         gameResponseDto.setLikeCount(gameLikeRepository.countLikesByBoardGameGameId(boardGame.getGameId()));
         gameResponseDto.setYoutubeLink(boardGame.getYoutubeLink());
         gameResponseDto.setAverageRate(gameRateRepository.findAverageRateByGameId(boardGame.getGameId()));
-        gameResponseDto.setDifficulty(boardGame.getDifficulty());
+        gameResponseDto.setDifficulty(boardGame.getDifficulty().getLabel());
+        //조회수
+        gameResponseDto.setViews(boardGame.getViews());
+        gameResponseDto.setDifficulty(boardGame.getDifficulty().getLabel());
         //댓글 후기 공략 질문 모임 중고 판매 기타등등
 
         return gameResponseDto;
     }
 
-    public BoardGame gamePutDtoToBoardGame(GamePutDto gamePutDto) {
+    public BoardGame boardGameUpdateMapper(BoardGame target, GamePutDto gamePutDto) {
 
-        BoardGame foundGame = boardGameService.findGameByGameId(gamePutDto.getGameId());
+        target.setYoutubeLink(gamePutDto.getYoutubeLink());
+        target.setDifficulty(gamePutDto.getDifficulty());
+        target.setPrice(gamePutDto.getPrice());
+        target.setArtwork(gamePutDto.getArtwork());
+        target.setPublisher(gamePutDto.getPublisher());
+        target.setDesigner(gamePutDto.getDesigner());
+        target.setAgeLimit(gamePutDto.getAgeLimit());
+        target.setPlayNum(gamePutDto.getPlayNum());
+        target.setPlayTime(gamePutDto.getPlayTime());
+        target.setReleaseDate(gamePutDto.getReleaseDate());
+        target.setName(gamePutDto.getName());
 
-        foundGame.setYoutubeLink(gamePutDto.getYoutubeLink());
-        foundGame.setDifficulty(gamePutDto.getDifficulty());
-        foundGame.setPrice(gamePutDto.getPrice());
-        foundGame.setArtwork(gamePutDto.getArtwork());
-        foundGame.setPublisher(gamePutDto.getPublisher());
-        foundGame.setDesigner(gamePutDto.getDesigner());
-        foundGame.setAgeLimit(gamePutDto.getAgeLimit());
-        foundGame.setPlayNum(gamePutDto.getPlayNum());
-        foundGame.setPlayTime(gamePutDto.getPlayTime());
-        foundGame.setReleaseDate(gamePutDto.getReleaseDate());
-        foundGame.setName(gamePutDto.getName());
-
-
-        return foundGame;
-
+        return target;
     }
 }

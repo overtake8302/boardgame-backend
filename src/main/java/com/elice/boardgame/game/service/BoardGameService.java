@@ -1,5 +1,7 @@
 package com.elice.boardgame.game.service;
 
+import com.elice.boardgame.ExceptionHandler.GameErrorMessages;
+import com.elice.boardgame.ExceptionHandler.GameRootException;
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
 import com.elice.boardgame.category.entity.GameGenre;
@@ -7,15 +9,20 @@ import com.elice.boardgame.category.entity.GameGenreId;
 import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.service.GenreService;
-import com.elice.boardgame.game.entity.BoardGame;
-import com.elice.boardgame.game.entity.GameLike;
-import com.elice.boardgame.game.entity.GameLikePK;
-import com.elice.boardgame.game.entity.GameProfilePic;
-import com.elice.boardgame.ExceptionHandler.GameErrorMessages;
-import com.elice.boardgame.ExceptionHandler.GameRootException;
+import com.elice.boardgame.enums.GameRateResponseMessages;
+import com.elice.boardgame.game.dto.*;
+import com.elice.boardgame.game.entity.*;
+import com.elice.boardgame.game.mapper.BoardGameMapper;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
+import com.elice.boardgame.game.repository.GameRateRepository;
+import com.elice.boardgame.game.repository.GameVisitorRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -39,15 +46,19 @@ public class BoardGameService {
     private final GameGenreRepository gameGenreRepository;
     private final GameLikeRepository gameLikeRepository;
     private final UserRepository userRepository;
+    private final GameRateRepository gameRateRepository;
+    private final BoardGameMapper boardGameMapper;
+    private final GameVisitorRepository gameVisitorRepository;
 
     @Transactional
-    public BoardGame create(BoardGame newBoardGame, List<Long> genreIds) {
+    public GameResponseDto create(GamePostDto gamePostDto) {
 
+        BoardGame newBoardGame = boardGameMapper.gamePostDtoToBoardGame(gamePostDto);
         BoardGame savedBoardGame = boardGameRepository.save(newBoardGame);
 
         List<GameGenre> genres = new ArrayList<>();
 
-        for (Long id : genreIds) {
+        for (Long id : gamePostDto.getGameGenreIds()) {
             Genre genre = genreService.findById(id);
             if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
@@ -67,12 +78,14 @@ public class BoardGameService {
         savedBoardGame.setGameGenres(genres);
         savedBoardGame = boardGameRepository.save(savedBoardGame);
 
-        return savedBoardGame;
+        return boardGameMapper.boardGameToGameResponseDto(savedBoardGame);
+
     }
 
     @Transactional
-    public BoardGame create(BoardGame newBoardGame, List<MultipartFile> files, List<Long> genreIds) throws IOException {
+    public GameResponseDto create(GamePostDto gamePostDto, List<MultipartFile> files) throws IOException {
 
+        BoardGame newBoardGame = boardGameMapper.gamePostDtoToBoardGame(gamePostDto);
         List<GameProfilePic> pics = new ArrayList<>();
 
         for (MultipartFile file : files) {
@@ -86,7 +99,7 @@ public class BoardGameService {
 
         List<GameGenre> genres = new ArrayList<>();
 
-        for (Long id : genreIds) {
+        for (Long id : gamePostDto.getGameGenreIds()) {
             Genre genre = genreService.findById(id);
             if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
@@ -106,7 +119,7 @@ public class BoardGameService {
         savedBoardGame.setGameGenres(genres);
         savedBoardGame = boardGameRepository.save(savedBoardGame);
 
-        return savedBoardGame;
+        return boardGameMapper.boardGameToGameResponseDto(savedBoardGame);
     }
 
     public BoardGame findGameByGameId(Long gameId) {
@@ -149,7 +162,10 @@ public class BoardGameService {
     }
 
     @Transactional
-    public BoardGame editWithoutPics(BoardGame target, List<Long> genreIds) {
+    public GameResponseDto editWithoutPics(GamePutDto gamePutDto) {
+
+        BoardGame foundGame = findGameByGameId(gamePutDto.getGameId());
+        BoardGame target = boardGameMapper.boardGameUpdateMapper(foundGame, gamePutDto);
 
         gameProfilePicService.deleteFiles(target.getGameProfilePics());
         target.setGameProfilePics(Collections.emptyList());
@@ -162,7 +178,7 @@ public class BoardGameService {
 
         List<GameGenre> genres = new ArrayList<>();
 
-        for (Long id : genreIds) {
+        for (Long id : gamePutDto.getGameGenreIds()) {
             Genre genre = genreService.findById(id);
             if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
@@ -183,11 +199,14 @@ public class BoardGameService {
 
         BoardGame updatedGame = boardGameRepository.save(target);
 
-        return updatedGame;
+        return boardGameMapper.boardGameToGameResponseDto(updatedGame);
     }
 
     @Transactional
-    public BoardGame editWithPics(BoardGame target, List<MultipartFile> files, List<Long> genreIds) throws IOException {
+    public GameResponseDto editWithPics(GamePutDto gamePutDto, List<MultipartFile> files) throws IOException {
+
+        BoardGame foundGame = findGameByGameId(gamePutDto.getGameId());
+        BoardGame target = boardGameMapper.boardGameUpdateMapper(foundGame, gamePutDto);
 
         gameProfilePicService.deleteFiles(target.getGameProfilePics());
         target.setGameProfilePics(Collections.emptyList());
@@ -209,7 +228,7 @@ public class BoardGameService {
 
         List<GameGenre> genres = new ArrayList<>();
 
-        for (Long id : genreIds) {
+        for (Long id : gamePutDto.getGameGenreIds()) {
             Genre genre = genreService.findById(id);
             if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
@@ -228,9 +247,9 @@ public class BoardGameService {
 
         target.setGameGenres(genres);
 
-        boardGameRepository.save(target);
+        target = boardGameRepository.save(target);
 
-        return target;
+        return boardGameMapper.boardGameToGameResponseDto(target);
     }
 
 
@@ -245,24 +264,29 @@ public class BoardGameService {
         return foundGames;
     }
 
-    public boolean clickLike(Long gameId) {
+    public ClickLikeResponseDto clickLike(Long gameId) {
 
         BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
         User currentUser = getCurrentUser();
         GameLikePK gameLikePK = new GameLikePK(currentUser.getId(), gameId);
 
-//        boolean like = gameLikeRepository.existsByGameLikePK(gameLikePK);
         Optional<GameLike> target = gameLikeRepository.findById(gameLikePK);
+
+        ClickLikeResponseDto clickLikeResponseDto = new ClickLikeResponseDto();
 
         if (target.isPresent()) {
             gameLikeRepository.delete(target.get());
-            return true;
+            clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_REMOVED.getMessage());
+        } else {
+            GameLike gameLike = new GameLike(gameLikePK, targetGame, currentUser);
+            gameLikeRepository.save(gameLike);
+            clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_ADDED.getMessage());
         }
 
-        GameLike gameLike = new GameLike(gameLikePK, targetGame, currentUser);
-        gameLikeRepository.save(gameLike);
+        int likeCount = gameLikeRepository.countLikesByBoardGameGameId(gameId);
+        clickLikeResponseDto.setLikeCount(likeCount);
 
-        return false;
+        return clickLikeResponseDto;
     }
 
     private User getCurrentUser() {
@@ -270,5 +294,51 @@ public class BoardGameService {
         String currentUserName = authentication.getName();
         User currentUser = userRepository.findByUsername(currentUserName);
         return currentUser;
+    }
+
+    public GameRateResponseDto clickGameRate(Long gameId, GameRatePostDto gameRatePostDto) {
+
+        BoardGame foundGame = findGameByGameId(gameId);
+        User currentUser = getCurrentUser();
+        GameRate foundGameRate = gameRateRepository.findByUserIdAndBoardGameGameId(currentUser.getId(), gameId);
+
+        if (foundGameRate != null) {
+            foundGameRate.setRate(gameRatePostDto.getRate());
+            gameRateRepository.save(foundGameRate);
+
+            return new GameRateResponseDto(GameRateResponseMessages.EDITED.getMessage());
+        }
+
+        GameRate newGameRate = new GameRate();
+        newGameRate.setBoardGame(foundGame);
+        newGameRate.setUser(currentUser);
+        newGameRate.setRate(gameRatePostDto.getRate());
+        gameRateRepository.save(newGameRate);
+
+        return new GameRateResponseDto(GameRateResponseMessages.REGISTERED.getMessage());
+    }
+
+    public Page<GameResponseDto> findAll(Pageable pageable, String sortBy) {
+
+        Sort sort = Sort.by(Sort.Direction.DESC, sortBy);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        return boardGameRepository.findAllByDeletedDateIsNull(sortedPageable)
+                .map(boardGameMapper::boardGameToGameResponseDto);
+    }
+
+    public void incrementViewCount(String visitorId, Long gameId) {
+
+        BoardGame boardGame = findGameByGameId(gameId);
+        GameVisitor gameVisitor = gameVisitorRepository.findByVisitorIdAndBoardGameGameId(visitorId, gameId);
+
+        if (gameVisitor == null) {
+            GameVisitor newGameVisitor = new GameVisitor(visitorId, boardGame);
+            gameVisitorRepository.save(newGameVisitor);
+            int views = boardGame.getViews();
+            views++;
+            boardGame.setViews(views);
+            boardGameRepository.save(boardGame);
+        }
     }
 }

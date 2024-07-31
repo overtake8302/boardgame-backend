@@ -67,4 +67,8 @@ public class BoardGame extends BaseEntity{
     @JsonManagedReference
     private List<GameGenre> gameGenres;
 
+    @OneToMany(mappedBy = "boardGame")
+    private List<GameVisitor> gameVisitors;
+
+    private int views;
 }
