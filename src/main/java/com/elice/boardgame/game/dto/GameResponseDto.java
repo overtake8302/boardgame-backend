@@ -48,5 +48,7 @@ public class GameResponseDto {
 
     private GameProfilePicResponseDto gameProfilePics;
 
-    List<GameGenre> gameGenres = new ArrayList<>();
+    private List<GameGenre> gameGenres = new ArrayList<>();
+
+    private int views;
 }
