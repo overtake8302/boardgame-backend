@@ -43,6 +43,6 @@ public class GlobalExceptionHandler {
 
         GameErrorResponse errorResponse = new GameErrorResponse(gameRootException.getErrorMessage().getErrorCode(), gameRootException.getErrorMessage().getErrorMessage());
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, gameRootException.getHttpStatus());
     }
 }

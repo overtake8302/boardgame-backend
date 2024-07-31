@@ -38,7 +38,7 @@ public class BoardGameController {
     ) throws IOException {
 
         if (bindingResult.hasErrors()) {
-            throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
+            throw new GameRootException(GameErrorMessages.GAME_POST_ERROR, HttpStatus.BAD_REQUEST);
         }
 
         GameResponseDto gameResponseDto = new GameResponseDto();
@@ -77,7 +77,7 @@ public class BoardGameController {
     ) throws  IOException {
 
         if (bindingResult.hasErrors()) {
-            throw new GameRootException(GameErrorMessages.MISSING_REQUIRED_INPUT);
+            throw new GameRootException(GameErrorMessages.MISSING_REQUIRED_INPUT, HttpStatus.BAD_REQUEST);
         }
 
         GameResponseDto gameResponseDto;
