@@ -2,9 +2,9 @@ package com.elice.boardgame.enums;
 
 public class Enums {
     public enum Category {
-        FREE("자유 게시판"),
-        USED("중고 거래 게시판"),
-        MEETING("모임 게시판");
+        FREE("자유"),
+        USED("중고"),
+        MEETING("모임");
 
         private final String label;
 

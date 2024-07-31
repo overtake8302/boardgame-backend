@@ -5,6 +5,7 @@ import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.enums.Enums;
 import com.elice.boardgame.post.repository.PostRepository;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,5 +64,9 @@ public class PostService {
         }
 
         postRepository.delete(post);
+    }
+
+    public List<Post> getAllPosts() {
+        return postRepository.findAll();
     }
 }

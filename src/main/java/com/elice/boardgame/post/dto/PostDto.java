@@ -15,4 +15,5 @@ public class PostDto {
     private Long userId;
     private String userName;
     private List<CommentDto> comments;
+    private String gameName;
 }
