@@ -322,7 +322,7 @@ public class BoardGameService {
     public Page<GameResponseDto> findAll(Pageable pageable) {
 
         return boardGameRepository.findAllByDeletedDateIsNull(pageable)
-                .map(boardGameMapper::boardGameToGameResponseDto);
+            .map(boardGameMapper::boardGameToGameResponseDto);
     }
 
     public void incrementViewCount(String visitorId, Long gameId) {

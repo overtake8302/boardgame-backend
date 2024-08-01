@@ -18,7 +18,8 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<BoardGame> findBoardGamesWithFilters(List<String> playTimes, List<String> playNums, List<String> ageLimits, List<String> prices, List<String> genres) {
+    public List<BoardGame> findBoardGamesWithFilters(List<String> playTimes, List<String> playNums,
+        List<String> ageLimits, List<String> prices, List<String> genres) {
         QBoardGame qBoardGame = QBoardGame.boardGame;
         QGameGenre qGameGenre = QGameGenre.gameGenre;
         BooleanBuilder builder = new BooleanBuilder();
@@ -65,6 +66,30 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
 
         return queryFactory.selectFrom(qBoardGame)
             .where(builder)
+            .fetch();
+    }
+
+    @Override
+    public List<BoardGame> findByGenres(List<Long> genreIds) {
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameGenre gameGenre = QGameGenre.gameGenre;
+
+        // 각 genreId를 확인하는 조건을 추가
+        BooleanExpression predicate = gameGenre.genre.genreId.in(genreIds);
+
+        // game_id를 그룹화하고 count(genre_id)로 정렬
+        List<Long> boardGameIds = queryFactory
+            .select(gameGenre.boardGame.gameId)
+            .from(gameGenre)
+            .where(predicate)
+            .groupBy(gameGenre.boardGame.gameId)
+            .orderBy(gameGenre.genre.genreId.count().desc())
+            .fetch();
+
+        // 보드게임 ID로 보드게임을 조회
+        return queryFactory
+            .selectFrom(boardGame)
+            .where(boardGame.gameId.in(boardGameIds))
             .fetch();
     }
 

@@ -36,7 +36,7 @@ public class LiveViewService {
         LocalDate now = LocalDate.now();
 
         liveView.setGame(game);
-        liveView.setCreatedDate(now);
+        liveView.setCreatedDate(now.atStartOfDay());
         liveView.setViewScore(8L);
         liveView.setIpAddress(ipAddress);
 
@@ -50,7 +50,7 @@ public class LiveViewService {
         List<LiveView> dataList = liveViewRepository.findAll();
 
         for (LiveView data : dataList) {
-            LocalDate date = data.getCreatedDate();
+            LocalDate date = LocalDate.from(data.getCreatedDate());
             Period period = Period.between(date, currentDate);
 
             int days = period.getDays();
