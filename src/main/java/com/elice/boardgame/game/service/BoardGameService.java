@@ -319,12 +319,9 @@ public class BoardGameService {
         return new GameRateResponseDto(GameRateResponseMessages.REGISTERED.getMessage());
     }
 
-    public Page<GameResponseDto> findAll(Pageable pageable, String sortBy) {
+    public Page<GameResponseDto> findAll(Pageable pageable) {
 
-        Sort sort = Sort.by(Sort.Direction.DESC, sortBy);
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-
-        return boardGameRepository.findAllByDeletedDateIsNull(sortedPageable)
+        return boardGameRepository.findAllByDeletedDateIsNull(pageable)
                 .map(boardGameMapper::boardGameToGameResponseDto);
     }
 
