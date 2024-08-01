@@ -123,9 +123,9 @@ public class BoardGameController {
     }
 
     @GetMapping("/games")
-    public ResponseEntity<Page<GameResponseDto>> getGames(@PageableDefault(size = 10, page = 0, sort = "gameId") Pageable pageable) {
-
-        return new ResponseEntity<>(boardGameService.findAll(pageable), HttpStatus.OK);
+    public ResponseEntity<Page<GameResponseDto>> getGames(@PageableDefault(size = 10, page = 0) Pageable pageable,
+                                                          @RequestParam(defaultValue = "gameId") String sortBy) {
+        return new ResponseEntity<>(boardGameService.findAll(pageable, sortBy), HttpStatus.OK);
     }
 
     @PostMapping("/game/view")

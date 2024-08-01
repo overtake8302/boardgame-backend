@@ -319,10 +319,16 @@ public class BoardGameService {
         return new GameRateResponseDto(GameRateResponseMessages.REGISTERED.getMessage());
     }
 
-    public Page<GameResponseDto> findAll(Pageable pageable) {
-
-        return boardGameRepository.findAllByDeletedDateIsNull(pageable)
-            .map(boardGameMapper::boardGameToGameResponseDto);
+    public Page<GameResponseDto> findAll(Pageable pageable, String sortBy) {
+        if ("averageRate".equals(sortBy)) {
+            return boardGameRepository.findAllOrderByAverageRateDesc(pageable)
+                    .map(boardGameMapper::boardGameToGameResponseDto);
+        } else {
+            Sort sort = Sort.by(Sort.Direction.DESC, sortBy);
+            Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+            return boardGameRepository.findAllByDeletedDateIsNull(sortedPageable)
+                    .map(boardGameMapper::boardGameToGameResponseDto);
+        }
     }
 
     public void incrementViewCount(String visitorId, Long gameId) {
