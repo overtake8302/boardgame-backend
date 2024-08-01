@@ -1,21 +1,21 @@
 package com.elice.boardgame.enums;
 
 public class Enums {
-    public enum Category {
-        FREE("자유"),
-        USED("중고"),
-        MEETING("모임");
-
-        private final String label;
-
-        Category(String label) {
-            this.label = label;
-        }
-
-        public String getLabel() {
-            return label;
-        }
-    }
+//    public enum Category {
+//        FREE("자유"),
+//        USED("중고"),
+//        MEETING("모임");
+//
+//        private final String label;
+//
+//        Category(String label) {
+//            this.label = label;
+//        }
+//
+//        public String getLabel() {
+//            return label;
+//        }
+//    }
 
     public enum PlayTime {
         SHORT("30분 이하"),

@@ -6,5 +6,5 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
-    Optional<Post> findByCategoryAndId(Enums.Category category, Long id);
+    Optional<Post> findByCategoryAndId(String category, Long id);
 }

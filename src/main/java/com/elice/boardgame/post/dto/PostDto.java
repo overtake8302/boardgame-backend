@@ -9,11 +9,12 @@ import lombok.Setter;
 public class PostDto {
     private String title;
     private String content;
-    private Enums.Category category;
+    private String category;
     private String imageUrl;
     private String imageName;
     private Long userId;
     private String userName;
     private List<CommentDto> comments;
     private String gameName;
+    private Long gameId;
 }

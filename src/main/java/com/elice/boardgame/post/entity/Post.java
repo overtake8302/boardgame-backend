@@ -28,16 +28,14 @@ public class Post extends BaseEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "game_id", nullable = false)
+    @JoinColumn(name = "gameId", nullable = false)
     private BoardGame boardGame;
 
-    @Enumerated(EnumType.STRING)
-    private Enums.Category category;
-
+    private String category;
     private String title;
     private String content;
     private String imageUrl;
@@ -51,10 +49,6 @@ public class Post extends BaseEntity {
     private List<Comment> comments = new ArrayList<>();
 
     public Long getUserId() {
-        return user.getId();
-    }
-
-    public Long getGameId() {
-        return boardGame.getGameId();
+        return user != null ? user.getId() : null;
     }
 }

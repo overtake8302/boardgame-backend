@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/")  //  경로는 일단 나중에 생각해보자
+@RequestMapping("/posts/{postId}")  //  경로는 일단 나중에 생각해보자
 public class CommentController {
     private final CommentService commentService;
 
