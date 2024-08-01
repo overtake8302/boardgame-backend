@@ -19,10 +19,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LikeGenreService {
 
     private final LikeGenreRepository likeGenreRepository;
@@ -163,7 +165,10 @@ public class LikeGenreService {
             .map(likeGenre -> likeGenre.getGenre().getGenreId())
             .collect(Collectors.toList());
 
-
+        List<BoardGame> test = boardGameRepository.findByGenres(topLikeGenreIds);
+        for (BoardGame game : test) {
+            log.info("Game ID: {}", game.getGameId());
+        }
         return boardGameRepository.findByGenres(topLikeGenreIds);
     }
 }

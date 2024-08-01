@@ -7,7 +7,7 @@ import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
-import com.elice.boardgame.game.repository.GameRateQueryDSLRepository;
+import com.elice.boardgame.game.repository.CustomGameRateRepositoryImpl;
 import com.elice.boardgame.game.service.BoardGameService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 public class BoardGameMapper {
 
     private final BoardGameRepository boardGameRepository;
-    private final GameRateQueryDSLRepository gameRateRepository;
+    private final CustomGameRateRepositoryImpl gameRateRepository;
     private final GameProfilePicMapper gameProfilePicMapper;
     private final BoardGameService boardGameService;
     private final GameLikeRepository gameLikeRepository;

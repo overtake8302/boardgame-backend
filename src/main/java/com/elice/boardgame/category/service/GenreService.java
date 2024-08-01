@@ -35,13 +35,13 @@ public class GenreService {
             .orElseThrow(() -> new GenreNotFoundException("찾는 장르가 없습니다."));
     }
 
-    public Genre save(String name) {
+    public void save(String name) {
         if (genreRepository.findByGenre(name).isPresent()) {
             throw new GenreAlreadyExistsException("이미 존재하는 장르명입니다.");
         }
         Genre genre = new Genre();
         genre.setGenre(name);
-        return genreRepository.save(genre);
+        genreRepository.save(genre);
     }
 
 
@@ -52,7 +52,6 @@ public class GenreService {
     }
 
     public void deleteById(Long id) {
-        findById(id);
         genreRepository.deleteById(id);
     }
 }

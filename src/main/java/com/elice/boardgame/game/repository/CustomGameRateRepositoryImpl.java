@@ -3,27 +3,20 @@ package com.elice.boardgame.game.repository;
 import com.elice.boardgame.category.DTO.BoardGameRateDTO;
 import com.elice.boardgame.category.DTO.RatingCountDTO;
 import com.elice.boardgame.game.entity.BoardGame;
-import com.elice.boardgame.game.entity.QGameRate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.Tuple;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Repository;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 
 import static com.elice.boardgame.game.entity.QBoardGame.boardGame;
 import static com.elice.boardgame.game.entity.QGameRate.gameRate;
 
 @Repository
-public class GameRateQueryDSLRepository implements CustomGameRateRepository{
+public class CustomGameRateRepositoryImpl implements CustomGameRateRepository{
 
     private final JPAQueryFactory queryFactory;
 
-    public GameRateQueryDSLRepository(JPAQueryFactory queryFactory) {
+    public CustomGameRateRepositoryImpl(JPAQueryFactory queryFactory) {
         this.queryFactory = queryFactory;
     }
 
@@ -39,9 +32,9 @@ public class GameRateQueryDSLRepository implements CustomGameRateRepository{
     @Override
     public List<RatingCountDTO> countRatingsByUserId(Long userId) {
         return queryFactory.select(
-                Projections.constructor(RatingCountDTO.class,
-                    gameRate.rate,
-                    gameRate.rate.count()))
+                Projections.fields(RatingCountDTO.class,
+                    gameRate.rate.as("rate"),
+                    gameRate.rate.count().as("count")))
             .from(gameRate)
             .where(gameRate.user.id.eq(userId))
             .groupBy(gameRate.rate)
