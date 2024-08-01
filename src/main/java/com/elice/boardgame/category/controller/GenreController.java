@@ -1,5 +1,6 @@
 package com.elice.boardgame.category.controller;
 
+import com.elice.boardgame.category.DTO.GenreDto;
 import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.service.GenreService;
 import java.util.List;
@@ -23,36 +24,35 @@ public class GenreController {
     private final GenreService genreService;
 
     @GetMapping
-    public ResponseEntity<List<Genre>> getAllGenres() {
+    public ResponseEntity<List<GenreDto>> getAllGenres() {
         return ResponseEntity.ok(genreService.findAll());
     }
 
     @GetMapping("/{GenreId}")
-    public ResponseEntity<Genre> getGenreById(@PathVariable("GenreId") Long id) {
+    public ResponseEntity<GenreDto> getGenreById(@PathVariable("GenreId") Long id) {
         return ResponseEntity.ok(genreService.findById(id));
     }
 
     @GetMapping("/name/{name}")
-    public ResponseEntity<Genre> getGenreByName(@PathVariable String name) {
+    public ResponseEntity<GenreDto> getGenreByName(@PathVariable String name) {
         return ResponseEntity.ok(genreService.findByGenreName(name));
     }
 
     @PostMapping
-    public void createGenre(@RequestBody String genreName) {
-        System.out.println(genreName);
-        genreService.save(genreName);
+    public ResponseEntity<GenreDto> createGenre(@RequestBody GenreDto genreDto) {
+        return ResponseEntity.ok(genreService.save(genreDto));
     }
 
     @PutMapping("/{GenreId}")
-    public ResponseEntity<Genre> updateGenre(@PathVariable("GenreId") Long id,
-        @RequestBody Map<String, String> request) {
-        String newGenreName = request.get("name");
-        return ResponseEntity.ok(genreService.update(id, newGenreName));
+    public ResponseEntity<GenreDto> updateGenre(@PathVariable("GenreId") Long id,
+        @RequestBody GenreDto genreDto) {
+        return ResponseEntity.ok(genreService.update(id, genreDto.getGenre()));
     }
 
     @DeleteMapping("/{GenreId}")
-    public void deleteGenre(@PathVariable("GenreId") Long id) {
+    public ResponseEntity<Void> deleteGenre(@PathVariable("GenreId") Long id) {
         genreService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
 

@@ -1,7 +1,7 @@
 package com.elice.boardgame.game.repository;
 
-import com.elice.boardgame.category.DTO.BoardGameRateDTO;
-import com.elice.boardgame.category.DTO.RatingCountDTO;
+import com.elice.boardgame.category.DTO.BoardGameRateDto;
+import com.elice.boardgame.category.DTO.RatingCountDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -30,9 +30,9 @@ public class CustomGameRateRepositoryImpl implements CustomGameRateRepository{
     }
 
     @Override
-    public List<RatingCountDTO> countRatingsByUserId(Long userId) {
+    public List<RatingCountDto> countRatingsByUserId(Long userId) {
         return queryFactory.select(
-                Projections.fields(RatingCountDTO.class,
+                Projections.fields(RatingCountDto.class,
                     gameRate.rate.as("rate"),
                     gameRate.rate.count().as("count")))
             .from(gameRate)
@@ -42,9 +42,9 @@ public class CustomGameRateRepositoryImpl implements CustomGameRateRepository{
     }
 
     @Override
-    public List<BoardGameRateDTO> findByUserIdAndRate(Long userId, Double rate) {
+    public List<BoardGameRateDto> findByUserIdAndRate(Long userId, Double rate) {
         return queryFactory
-            .select(Projections.fields(BoardGameRateDTO.class,
+            .select(Projections.fields(BoardGameRateDto.class,
                 boardGame,
                 gameRate.rate))
             .from(gameRate)

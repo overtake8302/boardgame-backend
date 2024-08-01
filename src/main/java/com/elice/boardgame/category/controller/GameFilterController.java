@@ -1,6 +1,6 @@
 package com.elice.boardgame.category.controller;
 
-import com.elice.boardgame.category.DTO.BoardGameFilterDTO;
+import com.elice.boardgame.category.DTO.BoardGameFilterDto;
 import com.elice.boardgame.category.service.GameFilterService;
 import com.elice.boardgame.game.entity.BoardGame;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ public class GameFilterController {
     private GameFilterService gameFilterService;
 
     @GetMapping("/filter")
-    public List<BoardGame> getFilteredBoardGames(BoardGameFilterDTO filterDTO) {
+    public List<BoardGame> getFilteredBoardGames(BoardGameFilterDto filterDTO) {
         return gameFilterService.getFilteredBoardGames(
             filterDTO.getPlayTimes(),
             filterDTO.getPlayNums(),

@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class BoardGameFilterDTO {
+public class BoardGameFilterDto {
     private List<String> playTimes;
     private List<String> playNums;
     private List<String> ageLimits;
