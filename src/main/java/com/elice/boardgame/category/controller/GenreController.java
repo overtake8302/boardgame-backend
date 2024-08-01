@@ -3,7 +3,7 @@ package com.elice.boardgame.category.controller;
 import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.service.GenreService;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,8 +27,8 @@ public class GenreController {
         return ResponseEntity.ok(genreService.findAll());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Genre> getGenreById(@PathVariable Long id) {
+    @GetMapping("/{GenreId}")
+    public ResponseEntity<Genre> getGenreById(@PathVariable("GenreId") Long id) {
         return ResponseEntity.ok(genreService.findById(id));
     }
 
@@ -38,18 +38,21 @@ public class GenreController {
     }
 
     @PostMapping
-    public ResponseEntity<Genre> createGenre(@RequestBody String genreName) {
-        return ResponseEntity.ok(genreService.save(genreName));
+    public void createGenre(@RequestBody String genreName) {
+        System.out.println(genreName);
+        genreService.save(genreName);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Genre> updateGenre(@PathVariable Long id,
-        @RequestBody String newGenreName) {
+    @PutMapping("/{GenreId}")
+    public ResponseEntity<Genre> updateGenre(@PathVariable("GenreId") Long id,
+        @RequestBody Map<String, String> request) {
+        String newGenreName = request.get("name");
         return ResponseEntity.ok(genreService.update(id, newGenreName));
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteGenre(@PathVariable Long id) {
+    @DeleteMapping("/{GenreId}")
+    public void deleteGenre(@PathVariable("GenreId") Long id) {
         genreService.deleteById(id);
     }
 }
+

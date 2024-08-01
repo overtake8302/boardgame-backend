@@ -7,7 +7,7 @@ import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
-import com.elice.boardgame.game.repository.GameRateQueryDSLRepository;
+import com.elice.boardgame.game.repository.GameRateRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -20,12 +20,12 @@ import org.springframework.stereotype.Component;
 public class BoardGameMapper {
 
     private final BoardGameRepository boardGameRepository;
-    private final GameRateQueryDSLRepository gameRateRepository;
+    private final GameRateRepository gameRateRepository;
     private final GameProfilePicMapper gameProfilePicMapper;
     private final GameLikeRepository gameLikeRepository;
 
     public BoardGame gamePostDtoToBoardGame(GamePostDto dto) {
-        
+
         BoardGame newBoardGame = new BoardGame();
         newBoardGame.setName(dto.getName());
 //        newBoardGame.setGameProfilePics(dto.getGameProfilePic());
@@ -40,7 +40,7 @@ public class BoardGameMapper {
         newBoardGame.setPrice(dto.getPrice());
         newBoardGame.setDifficulty(dto.getDifficulty());
         newBoardGame.setYoutubeLink(dto.getYoutubeLink());
-        
+
         return newBoardGame;
     }
 
@@ -63,7 +63,7 @@ public class BoardGameMapper {
         gameResponseDto.setGameProfilePics(gameProfilePicResponseDto);
         gameResponseDto.setLikeCount(gameLikeRepository.countLikesByBoardGameGameId(boardGame.getGameId()));
         gameResponseDto.setYoutubeLink(boardGame.getYoutubeLink());
-        gameResponseDto.setAverageRate(gameRateRepository.findAverageRateByGameId(boardGame.getGameId()));
+        gameResponseDto.setAverageRate(gameRateRepository.findAverageRateByBoardGame(boardGame));
         gameResponseDto.setDifficulty(boardGame.getDifficulty().getLabel());
         //조회수
         gameResponseDto.setViews(boardGame.getViews());

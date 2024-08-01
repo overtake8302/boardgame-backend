@@ -12,16 +12,19 @@ import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.repository.GenreRepository;
 import com.elice.boardgame.category.repository.LikeGenreRepository;
 import com.elice.boardgame.game.entity.BoardGame;
+import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LikeGenreService {
 
     private final LikeGenreRepository likeGenreRepository;
@@ -33,6 +36,8 @@ public class LikeGenreService {
     private final GameGenreRepository gameGenreRepository;
 
     private final GameLikeRepository gameLikeRepository;
+
+    private final BoardGameRepository boardGameRepository;
 
     public void addLikeGenreScore(LikeGenreId id) {
         Optional<LikeGenre> optionalEntity = likeGenreRepository.findById(id);
@@ -119,11 +124,10 @@ public class LikeGenreService {
         }
     }
 
-    public List<String> getTop3GenreIds(Long userId) {
+    public List<String> getGenres(Long userId) {
         List<LikeGenre> likeGenres = likeGenreRepository.findByUserIdOrderByScoreDesc(userId);
 
         return likeGenres.stream()
-            .limit(3)
             .map(likeGenre -> likeGenre.getGenre().getGenre())
             .collect(Collectors.toList());
     }
@@ -150,5 +154,21 @@ public class LikeGenreService {
 
     public List<BoardGame> getGames(Long userId) {
         return gameLikeRepository.findLikedGamesByUserId(userId);
+    }
+
+    public List<BoardGame> getGamesFromLikeGenre(Long userId) {
+        List<LikeGenre> likeGenres = likeGenreRepository.findByUserIdOrderByScoreDesc(userId);
+
+        // 상위 3개의 좋아하는 장르를 추출
+        List<Long> topLikeGenreIds = likeGenres.stream()
+            .limit(3)
+            .map(likeGenre -> likeGenre.getGenre().getGenreId())
+            .collect(Collectors.toList());
+
+        List<BoardGame> test = boardGameRepository.findByGenres(topLikeGenreIds);
+        for (BoardGame game : test) {
+            log.info("Game ID: {}", game.getGameId());
+        }
+        return boardGameRepository.findByGenres(topLikeGenreIds);
     }
 }
