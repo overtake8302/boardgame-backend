@@ -26,9 +26,10 @@ public class SocialController {
     private final SocialService socialService;
 
     @GetMapping
-    public ResponseEntity<List<Long>> getFriends(@RequestParam Long userId) {
+    public ResponseEntity<List<Long>> getFriends(@RequestParam int page, @RequestParam int size) {
+        Long userId = 1l; // 로그인된 계정 아이디 받아오는 메서드로 변경
         try {
-            List<Long> friends = socialService.getFriendIds(userId);
+            List<Long> friends = socialService.getFriendIds(userId, page, size);
             log.info("Retrieved friend IDs for user {}: {}", userId, friends);
             return ResponseEntity.ok(friends);
         } catch (Exception e) {
@@ -40,7 +41,6 @@ public class SocialController {
     public ResponseEntity<String> addFriend(@RequestBody SocialRequest socialRequest) {
         try {
             socialService.addFriend(socialRequest);
-            log.info("Friend relationship added between user {} and friend {}", socialRequest.getUserId(), socialRequest.getFriendId());
             return ResponseEntity.status(HttpStatus.CREATED).body("Friend added successfully.");
         } catch (SocialAlreadyExistsException e) {
             log.error("Failed to add friend: {}", e.getMessage());
@@ -55,7 +55,6 @@ public class SocialController {
     public ResponseEntity<String> removeFriend(@RequestParam Long userId, @RequestParam Long friendId) {
         try {
             socialService.removeFriend(userId, friendId);
-            log.info("Friend relationship removed between user {} and friend {}", userId, friendId);
             return ResponseEntity.ok("Friend removed successfully.");
         } catch (SocialNotFoundException e) {
             log.error("Failed to remove friend: {}", e.getMessage());
