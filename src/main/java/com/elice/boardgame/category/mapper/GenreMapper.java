@@ -17,6 +17,7 @@ public class GenreMapper {
     public Genre toEntity(GenreDto genreDto) {
         Genre genre = new Genre();
         genre.setGenre(genreDto.getGenre());
+        genre.setGenreId(genreDto.getGenreId());
         return genre;
     }
 }
