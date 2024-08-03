@@ -54,11 +54,9 @@ public class BoardGameController {
     @GetMapping("/game/{gameId}")
     public ResponseEntity<GameResponseDto> getGame(@PathVariable Long gameId) {
 
-        BoardGame foundGame = boardGameService.findGameByGameId(gameId);
+        GameResponseDto foundGame = boardGameService.findGameByGameId(gameId);
 
-        GameResponseDto gameResponseDto = mapper.boardGameToGameResponseDto(foundGame);
-
-        return new ResponseEntity<>(gameResponseDto, HttpStatus.OK);
+        return new ResponseEntity<>(foundGame, HttpStatus.OK);
     }
 
     @DeleteMapping("/game/{gameId}")
@@ -94,16 +92,11 @@ public class BoardGameController {
     @GetMapping("/game/search")
     public ResponseEntity<List<GameResponseDto>> searchByName(@RequestParam(required = true) String keyword) {
 
-        List<BoardGame> foundGames = boardGameService.findGameByName(keyword);
+        List<GameResponseDto> foundGames = boardGameService.findGameByName(keyword);
 
-        List<GameResponseDto> gameResponseDtos = new ArrayList<>();
 
-        for (BoardGame boardGame : foundGames) {
-            GameResponseDto dto = mapper.boardGameToGameResponseDto(boardGame);
-            gameResponseDtos.add(dto);
-        }
 
-        return new ResponseEntity<>(gameResponseDtos, HttpStatus.OK);
+        return new ResponseEntity<>(foundGames, HttpStatus.OK);
     }
 
     @PostMapping("/game/like")

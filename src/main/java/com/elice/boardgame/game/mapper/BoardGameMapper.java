@@ -66,7 +66,7 @@ public class BoardGameMapper {
         gameResponseDto.setAverageRate(gameRateRepository.findAverageRateByBoardGame(boardGame));
         gameResponseDto.setDifficulty(boardGame.getDifficulty().getLabel());
         //조회수
-        gameResponseDto.setViews(boardGame.getViews());
+//        gameResponseDto.setViews(boardGame.getViews());
         //댓글 후기 공략 질문 모임 중고 판매 기타등등
 
         return gameResponseDto;

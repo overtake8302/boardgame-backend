@@ -11,4 +11,5 @@ import org.springframework.data.jpa.repository.Query;
 public interface BoardGameRepository extends JpaRepository<BoardGame, Long>, CustomBoardGameRepository {
 
 
+    BoardGame findByGameIdAndDeletedDateIsNull(Long gameId);
 }

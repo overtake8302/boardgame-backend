@@ -4,6 +4,6 @@ import com.elice.boardgame.game.entity.GameVisitor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface GameVisitorRepository extends JpaRepository<GameVisitor, Long>, CustomGameVisitorRepository {
-    GameVisitor findByVisitorIdAndBoardGameGameId(String visitorId, Long gameId);
-    int countByBoardGameGameId(Long gameId);
+    GameVisitor findByIdVisitorIdAndIdGameId(String visitorId, Long gameId);
+    int countByIdGameId(Long gameId);
 }

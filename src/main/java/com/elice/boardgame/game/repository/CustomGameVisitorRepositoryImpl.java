@@ -18,7 +18,7 @@ public class CustomGameVisitorRepositoryImpl implements CustomGameVisitorReposit
 
     @Override
     public void insertIgnore(String visitorId, Long gameId) {
-        String sql = "INSERT IGNORE INTO game_visitor (visitor_id, game_id) VALUES (:visitorId, :gameId)";
+        String sql = "INSERT IGNORE INTO gamevisitor (visitorId, gameId) VALUES (:visitorId, :gameId)";
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("visitorId", visitorId);
         query.setParameter("gameId", gameId);

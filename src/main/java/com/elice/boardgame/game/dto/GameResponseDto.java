@@ -50,5 +50,5 @@ public class GameResponseDto {
 
     private List<GameGenre> gameGenres = new ArrayList<>();
 
-    private int views;
+    private Long views;
 }

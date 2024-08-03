@@ -17,9 +17,9 @@ public class GameProfilePic extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long picId;
 
-    /*@ManyToOne
-    @JoinColumn(name = "game_id")
-    private BoardGame boardGame;*/
+    @ManyToOne
+    @JoinColumn(name = "gameId")
+    private BoardGame boardGame;
 
     private String picAddress;
 

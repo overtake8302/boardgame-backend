@@ -1,5 +1,6 @@
 package com.elice.boardgame.game.service;
 
+import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameProfilePic;
 import com.elice.boardgame.game.repository.GameProfilePIcRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +18,12 @@ public class GameProfilePicService {
     private final GameProfilePIcRepository gameProfilePIcRepository;
     private final BoardGameS3Service boardGameS3Service;
 
-    public GameProfilePic save(MultipartFile file) throws IOException {
+    public GameProfilePic save(MultipartFile file, BoardGame savedBoardGame) throws IOException {
 
         List<String> info = boardGameS3Service.uploadFileToBucket1(file);
 
         GameProfilePic gameProfilePic = new GameProfilePic();
-
+        gameProfilePic.setBoardGame(savedBoardGame);
         gameProfilePic.setFileName(info.get(0));
         gameProfilePic.setPicAddress(info.get(1));
         GameProfilePic savedGameProfilePic = gameProfilePIcRepository.save(gameProfilePic);
