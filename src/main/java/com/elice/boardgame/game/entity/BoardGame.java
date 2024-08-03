@@ -1,6 +1,7 @@
 package com.elice.boardgame.game.entity;
 
 
+import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.enums.Enums;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -71,4 +72,8 @@ public class BoardGame extends BaseEntity{
     private List<GameVisitor> gameVisitors;
 
     private int views;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User firstCreator;
 }

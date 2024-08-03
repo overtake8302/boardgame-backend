@@ -123,7 +123,7 @@ public class BoardGameController {
     }
 
     @GetMapping("/games")
-    public ResponseEntity<Page<GameResponseDto>> getGames(@PageableDefault(size = 10, page = 0) Pageable pageable,
+    public ResponseEntity<Page<GameResponseDto>> getGames(@PageableDefault(size = 12, page = 0) Pageable pageable,
                                                           @RequestParam(defaultValue = "gameId") String sortBy) {
         return new ResponseEntity<>(boardGameService.findAll(pageable, sortBy), HttpStatus.OK);
     }
@@ -132,5 +132,13 @@ public class BoardGameController {
     public ResponseEntity<Void> incrementViewCount(@RequestHeader("visitorId") String visitorId, @RequestHeader("gameId") Long gameId) {
         boardGameService.incrementViewCount(visitorId, gameId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/game/home")
+    public ResponseEntity<List<GameResponseDto>> getHomeGames(@RequestParam String genre, @RequestParam String sort) {
+
+        List<GameResponseDto> gameResponseDtos = boardGameService.findGamesByGenreAndSort(genre, sort);
+
+        return new ResponseEntity<>(gameResponseDtos, HttpStatus.OK);
     }
 }

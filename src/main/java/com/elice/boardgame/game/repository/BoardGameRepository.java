@@ -2,7 +2,6 @@ package com.elice.boardgame.game.repository;
 
 import com.elice.boardgame.game.entity.BoardGame;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,4 +22,6 @@ public interface BoardGameRepository extends JpaRepository<BoardGame, Long>,
 
     @Query("SELECT bg FROM BoardGame bg LEFT JOIN bg.gameRates gr WHERE bg.deletedDate IS NULL GROUP BY bg ORDER BY AVG(gr.rate) DESC")
     Page<BoardGame> findAllOrderByAverageRateDesc(Pageable pageable);
+
+    List<BoardGame> findByGameGenresGenreGenre(String genre, Pageable pageable);
 }

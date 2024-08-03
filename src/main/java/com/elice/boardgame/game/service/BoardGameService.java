@@ -23,7 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,9 +53,12 @@ public class BoardGameService {
     private final GameVisitorRepository gameVisitorRepository;
 
     @Transactional
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public GameResponseDto create(GamePostDto gamePostDto) {
 
+        User currentUser = getCurrentUser();
         BoardGame newBoardGame = boardGameMapper.gamePostDtoToBoardGame(gamePostDto);
+        newBoardGame.setFirstCreator(currentUser);
         BoardGame savedBoardGame = boardGameRepository.save(newBoardGame);
 
         List<GameGenre> genres = new ArrayList<>();
@@ -84,9 +88,12 @@ public class BoardGameService {
     }
 
     @Transactional
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public GameResponseDto create(GamePostDto gamePostDto, List<MultipartFile> files) throws IOException {
 
+        User currentUser = getCurrentUser();
         BoardGame newBoardGame = boardGameMapper.gamePostDtoToBoardGame(gamePostDto);
+        newBoardGame.setFirstCreator(currentUser);
         List<GameProfilePic> pics = new ArrayList<>();
 
         for (MultipartFile file : files) {
@@ -135,9 +142,18 @@ public class BoardGameService {
     }
 
     @Transactional
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public void deleteGameByGameId(Long gameId) {
 
+        User currentUser = getCurrentUser();
         BoardGame targetGame = findGameByGameId(gameId);
+
+        if (currentUser != null && targetGame.getFirstCreator() != null) {
+            if (!currentUser.getRole().equals("ROLE_ADMIN") && !(targetGame.getFirstCreator().getId().equals(currentUser.getId()))) {
+                throw new GameRootException(GameErrorMessages.ACCESS_DENIED, HttpStatus.FORBIDDEN);
+            }
+        }
+
         List<GameProfilePic> targetPics = targetGame.getGameProfilePics();
 
         try {
@@ -163,6 +179,7 @@ public class BoardGameService {
     }
 
     @Transactional
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public GameResponseDto editWithoutPics(GamePutDto gamePutDto) {
 
         BoardGame foundGame = findGameByGameId(gamePutDto.getGameId());
@@ -204,6 +221,7 @@ public class BoardGameService {
     }
 
     @Transactional
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public GameResponseDto editWithPics(GamePutDto gamePutDto, List<MultipartFile> files) throws IOException {
 
         BoardGame foundGame = findGameByGameId(gamePutDto.getGameId());
@@ -265,6 +283,7 @@ public class BoardGameService {
         return foundGames;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public ClickLikeResponseDto clickLike(Long gameId) {
 
         BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
@@ -297,6 +316,7 @@ public class BoardGameService {
         return currentUser;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public GameRateResponseDto clickGameRate(Long gameId, GameRatePostDto gameRatePostDto) {
 
         BoardGame foundGame = findGameByGameId(gameId);
@@ -344,5 +364,14 @@ public class BoardGameService {
             boardGame.setViews(views);
             boardGameRepository.save(boardGame);
         }
+    }
+
+    public List<GameResponseDto> findGamesByGenreAndSort(String genre, String sort) {
+
+        Pageable pageable = PageRequest.of(0, 5, Sort.by(sort));
+        List<BoardGame> foundGames = boardGameRepository.findByGameGenresGenreGenre(genre,pageable);
+        return foundGames.stream()
+                .map(boardGameMapper::boardGameToGameResponseDto)
+                .collect(Collectors.toList());
     }
 }
