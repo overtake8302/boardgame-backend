@@ -3,6 +3,7 @@ package com.elice.boardgame.game.repository;
 import com.elice.boardgame.category.entity.QGameGenre;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.QBoardGame;
+import com.elice.boardgame.game.entity.QGameLike;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -70,12 +71,19 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
     }
 
     @Override
-    public List<BoardGame> findByGenres(List<Long> genreIds) {
+    public List<BoardGame> findByGenres(List<Long> genreIds, Long userId) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameGenre gameGenre = QGameGenre.gameGenre;
+        QGameLike gameLike = QGameLike.gameLike;
 
-        // 각 genreId를 확인하는 조건을 추가
+        // 각 genreId를 확인하는 조건 추가
         BooleanExpression predicate = gameGenre.genre.genreId.in(genreIds);
+
+        // 좋아요를 누른 게임 ID 가져오기
+        List<Long> likedGameIds = queryFactory.select(gameLike.boardGame.gameId)
+            .from(gameLike)
+            .where(gameLike.user.id.eq(userId))
+            .fetch();
 
         // game_id를 그룹화하고 count(genre_id)로 정렬
         List<Long> boardGameIds = queryFactory
@@ -86,10 +94,11 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
             .orderBy(gameGenre.genre.genreId.count().desc())
             .fetch();
 
-        // 보드게임 ID로 보드게임을 조회
+        // 보드게임 ID로 보드게임을 조회하며 좋아요를 누른 게임은 제외
         return queryFactory
             .selectFrom(boardGame)
-            .where(boardGame.gameId.in(boardGameIds))
+            .where(boardGame.gameId.in(boardGameIds) //서브쿼리 사용해서 좋아요 누른 게임 제외
+                .and(boardGame.gameId.notIn(likedGameIds)))
             .fetch();
     }
 
