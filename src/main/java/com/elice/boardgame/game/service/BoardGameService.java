@@ -353,7 +353,7 @@ public class BoardGameService {
 
     public void incrementViewCount(String visitorId, Long gameId) {
 
-        BoardGame boardGame = findGameByGameId(gameId);
+        /*BoardGame boardGame = findGameByGameId(gameId);
         GameVisitor gameVisitor = gameVisitorRepository.findByVisitorIdAndBoardGameGameId(visitorId, gameId);
 
         if (gameVisitor == null) {
@@ -363,7 +363,9 @@ public class BoardGameService {
             views++;
             boardGame.setViews(views);
             boardGameRepository.save(boardGame);
-        }
+        }*/
+
+        gameVisitorRepository.insertIgnore(visitorId, gameId);
     }
 
     public List<GameResponseDto> findGamesByGenreAndSort(String genre, String sort) {

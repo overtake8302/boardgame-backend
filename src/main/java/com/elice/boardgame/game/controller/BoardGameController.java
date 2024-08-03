@@ -92,7 +92,7 @@ public class BoardGameController {
     }
 
     @GetMapping("/game/search")
-    public ResponseEntity<List<GameResponseDto>> searchByName(@RequestParam String keyword) {
+    public ResponseEntity<List<GameResponseDto>> searchByName(@RequestParam(required = true) String keyword) {
 
         List<BoardGame> foundGames = boardGameService.findGameByName(keyword);
 

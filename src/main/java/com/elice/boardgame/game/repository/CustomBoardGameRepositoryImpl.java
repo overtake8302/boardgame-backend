@@ -3,13 +3,25 @@ package com.elice.boardgame.game.repository;
 import com.elice.boardgame.category.entity.QGameGenre;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.QBoardGame;
+import com.elice.boardgame.game.entity.QGameRate;
+import com.elice.boardgame.game.entity.QGameVisitor;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -92,5 +104,85 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
             .where(boardGame.gameId.in(boardGameIds))
             .fetch();
     }
+
+    @Override
+    public Page<BoardGame> findAllOrderByAverageRateDesc(Pageable pageable) {
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameRate gameRate = QGameRate.gameRate;
+        QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
+
+        List<BoardGame> boardGames = queryFactory
+                .select(boardGame)
+                .from(boardGame)
+                .leftJoin(boardGame.gameRates, gameRate)
+                .leftJoin(boardGame.gameVisitors, gameVisitor)
+                .where(boardGame.deletedDate.isNull())
+                .groupBy(boardGame)
+                .orderBy(gameRate.rate.avg().desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        return new PageImpl<>(boardGames, pageable, boardGames.size());
+    }
+
+    @Override
+    public BoardGame findByGameIdAndDeletedDateIsNull(Long gameId) {
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
+
+        return queryFactory
+                .selectFrom(boardGame)
+                .leftJoin(boardGame.gameVisitors, gameVisitor)
+                .where(boardGame.gameId.eq(gameId).and(boardGame.deletedDate.isNull()))
+                .fetchOne();
+    }
+
+    @Override
+    public List<BoardGame> findByNameContainingAndDeletedDateIsNull(String keyword) {
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
+
+        return queryFactory
+                .selectFrom(boardGame)
+                .leftJoin(boardGame.gameVisitors, gameVisitor)
+                .where(boardGame.name.contains(keyword).and(boardGame.deletedDate.isNull()))
+                .fetch();
+    }
+
+    public Page<BoardGame> findAllByDeletedDateIsNull(Pageable pageable) {
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
+
+        List<BoardGame> results = queryFactory
+                .selectFrom(boardGame)
+                .leftJoin(boardGame.gameVisitors, gameVisitor)
+                .where(boardGame.deletedDate.isNull())
+//                .orderBy()
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        return new PageImpl<>(results, pageable, results.size());
+    }
+
+
+
+    @Override
+    public List<BoardGame> findByGameGenresGenreGenre(String genre, Pageable pageable) {
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameGenre gameGenre = QGameGenre.gameGenre;
+        QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
+
+        return queryFactory
+                .selectFrom(boardGame)
+                .leftJoin(boardGame.gameGenres, gameGenre)
+                .leftJoin(boardGame.gameVisitors, gameVisitor)
+                .where(gameGenre.genre.genre.eq(genre).and(boardGame.deletedDate.isNull()))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+    }
+
 
 }
