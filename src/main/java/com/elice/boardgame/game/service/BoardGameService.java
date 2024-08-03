@@ -4,9 +4,11 @@ import com.elice.boardgame.ExceptionHandler.GameErrorMessages;
 import com.elice.boardgame.ExceptionHandler.GameRootException;
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
+import com.elice.boardgame.category.DTO.GenreDto;
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.GameGenreId;
 import com.elice.boardgame.category.entity.Genre;
+import com.elice.boardgame.category.mapper.GenreMapper;
 import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.service.GenreService;
 import com.elice.boardgame.enums.GameRateResponseMessages;
@@ -47,6 +49,7 @@ public class BoardGameService {
     private final GameRateRepository gameRateRepository;
     private final BoardGameMapper boardGameMapper;
     private final GameVisitorRepository gameVisitorRepository;
+    private final GenreMapper genreMapper;
 
     @Transactional
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
@@ -60,7 +63,8 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : gamePostDto.getGameGenreIds()) {
-            Genre genre = genreService.findById(id);
+            GenreDto genreDto = genreService.findById(id);
+            Genre genre = genreMapper.toEntity(genreDto);
             if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(savedBoardGame);
@@ -106,7 +110,8 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : gamePostDto.getGameGenreIds()) {
-            Genre genre = genreService.findById(id);
+            GenreDto genreDto = genreService.findById(id);
+            Genre genre = genreMapper.toEntity(genreDto);
             if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(savedBoardGame);
@@ -196,7 +201,8 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : gamePutDto.getGameGenreIds()) {
-            Genre genre = genreService.findById(id);
+            GenreDto genreDto = genreService.findById(id);
+            Genre genre = genreMapper.toEntity(genreDto);
             if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(target);
@@ -247,7 +253,8 @@ public class BoardGameService {
         List<GameGenre> genres = new ArrayList<>();
 
         for (Long id : gamePutDto.getGameGenreIds()) {
-            Genre genre = genreService.findById(id);
+            GenreDto genreDto = genreService.findById(id);
+            Genre genre = genreMapper.toEntity(genreDto);
             if (genre != null) {
                 GameGenre gameGenre = new GameGenre();
                 gameGenre.setBoardGame(target);

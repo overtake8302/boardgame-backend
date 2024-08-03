@@ -8,17 +8,20 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class SocialRepositoryImpl implements SocialRepository {
+public class SocialRepositoryImpl implements SocialRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     private final EntityManager entityManager;
 
     @Override
-    public List<Long> findFriendIdsByUserId(Long userId) {
-        return queryFactory
+    public Page<Long> findFriendIdsByUserId(Long userId, Pageable pageable) {
+        List<Long> friendIds = queryFactory
             .select(
                 new CaseBuilder()
                     .when(social.id.userId.eq(userId)).then(social.id.friendId)
@@ -26,7 +29,16 @@ public class SocialRepositoryImpl implements SocialRepository {
             )
             .from(social)
             .where(social.id.userId.eq(userId).or(social.id.friendId.eq(userId)))
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
             .fetch();
+
+        long total = queryFactory
+            .selectFrom(social)
+            .where(social.id.userId.eq(userId).or(social.id.friendId.eq(userId)))
+            .fetchCount();
+
+        return new PageImpl<>(friendIds, pageable, total);
     }
 
     @Override
