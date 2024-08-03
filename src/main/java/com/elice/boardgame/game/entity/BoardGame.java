@@ -1,6 +1,7 @@
 package com.elice.boardgame.game.entity;
 
 
+import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.enums.Enums;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -57,8 +58,7 @@ public class BoardGame extends BaseEntity{
     @OneToMany(mappedBy = "boardGame", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GameRate> gameRates = new ArrayList<>();
 
-    @OneToMany
-    @JoinColumn(name = "game_id")
+    @OneToMany(mappedBy = "boardGame")
     private List<GameProfilePic> gameProfilePics = new ArrayList<>();
 
     //장르 추가하기
@@ -67,8 +67,13 @@ public class BoardGame extends BaseEntity{
     @JsonManagedReference
     private List<GameGenre> gameGenres;
 
-    @OneToMany(mappedBy = "boardGame")
+    @OneToMany
+    @JoinColumn(name = "gameId")
     private List<GameVisitor> gameVisitors;
 
-    private int views;
+    private Long views;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User firstCreator;
 }

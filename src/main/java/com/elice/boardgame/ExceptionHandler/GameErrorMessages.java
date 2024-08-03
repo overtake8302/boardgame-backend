@@ -11,7 +11,8 @@ public enum GameErrorMessages {
     INVALID_INPUT_FORMAT("E002", "Invalid input format"),
     GAME_NOT_FOUND("E003", "Game not found"),
     GAME_DELETE_FAIL("E004", "Game Delete fail"),
-    GAME_POST_ERROR("E005", "Game Post fail");
+    GAME_POST_ERROR("E005", "Game Post fail"),
+    ACCESS_DENIED("E006", "access denied");
 
     private final String errorCode;
     private final String errorMessage;

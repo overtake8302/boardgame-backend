@@ -13,18 +13,16 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GameVisitor {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    private GameVisitorId id;
 
-    private String visitorId;
-
+    /*@MapsId("gameId")
     @ManyToOne
-    @JoinColumn(name = "game_id")
-    private BoardGame boardGame;
+    @JoinColumn(name = "gameId")
+    private BoardGame boardGame;*/
 
-    public GameVisitor(String visitorId, BoardGame boardGame) {
-        this.visitorId = visitorId;
-        this.boardGame = boardGame;
+    public GameVisitor(String visitorId, Long gameId) {
+        this.id = new GameVisitorId(visitorId, gameId);
     }
+
 }
