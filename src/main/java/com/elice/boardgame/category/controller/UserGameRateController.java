@@ -21,15 +21,13 @@ public class UserGameRateController {
 
     // 내가 평점을 준 게임들 평점별로 찾기
     @GetMapping("/ratings/counts/{userId}")
-    public ResponseEntity<List<RatingCountDto>> getRatingCounts(@PathVariable Long userId) {
-        List<RatingCountDto> ratingCounts = userGameRateService.getRatingCounts(userId);
-        return ResponseEntity.ok(ratingCounts);
+    public List<RatingCountDto> getRatingCounts(@PathVariable Long userId) {
+        return userGameRateService.getRatingCounts(userId);
     }
 
     // 평점 n점을 준 게임 찾기
     @GetMapping("/ratings/games/{userId}")
-    public ResponseEntity<List<GameResponseDto>> getGamesByRating(@RequestParam Double rate, @PathVariable Long userId) {
-        List<GameResponseDto> games = userGameRateService.getGamesByRating(userId, rate);
-        return ResponseEntity.ok(games);
+    public List<GameResponseDto> getGamesByRating(@RequestParam Double rate, @PathVariable Long userId) {
+        return userGameRateService.getGamesByRating(userId, rate);
     }
 }

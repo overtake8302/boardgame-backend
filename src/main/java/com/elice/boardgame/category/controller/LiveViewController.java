@@ -1,6 +1,7 @@
 package com.elice.boardgame.category.controller;
 
 import com.elice.boardgame.category.service.LiveViewService;
+import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -40,7 +41,7 @@ public class LiveViewController {
 
     //뷰 랭킹순 가져오기 // 전부 가져가서 프런트에서 깎아줄지 탑 10으로 정해지면 탑 10만 정해서 보내줄지, 아마 후자가 좋을것같음
     @GetMapping("/list")
-    public List<BoardGame> getLiveViewRanking() {
+    public List<GameResponseDto> getLiveViewRanking() {
         return liveViewService.getLiveViewRanking();
     }
 }
