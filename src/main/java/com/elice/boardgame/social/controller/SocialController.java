@@ -1,5 +1,6 @@
 package com.elice.boardgame.social.controller;
 
+import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.social.dto.SocialRequest;
 import com.elice.boardgame.social.service.SocialService;
 import java.util.List;
@@ -24,22 +25,37 @@ public class SocialController {
     private final SocialService socialService;
 
     @GetMapping
-    public ResponseEntity<List<Long>> getFriends(@RequestParam int page, @RequestParam int size) {
+    public ResponseEntity<CommonResponse<List<Long>>> getFriends(@RequestParam int page, @RequestParam int size) {
         Long userId = 1L; // 로그인된 계정 아이디 받아오는 메서드로 변경
         List<Long> friends = socialService.getFriendIds(userId, page, size);
-        return ResponseEntity.ok(friends);
+        CommonResponse<List<Long>> response = CommonResponse.<List<Long>>builder()
+            .payload(friends)
+            .message("Friends retrieved successfully")
+            .status(200)
+            .build();
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<String> addFriend(@RequestBody SocialRequest socialRequest) {
+    public ResponseEntity<CommonResponse<Void>> addFriend(@RequestBody SocialRequest socialRequest) {
         socialService.addFriend(socialRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Friend added successfully.");
+        CommonResponse<Void> response = CommonResponse.<Void>builder()
+            .payload(null)
+            .message("Friend added successfully.")
+            .status(200)
+            .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping
-    public ResponseEntity<String> removeFriend(@RequestParam Long userId, @RequestParam Long friendId) {
+    public ResponseEntity<CommonResponse<Void>> removeFriend(@RequestParam Long userId, @RequestParam Long friendId) {
         socialService.removeFriend(userId, friendId);
-        return ResponseEntity.ok("Friend removed successfully.");
+        CommonResponse<Void> response = CommonResponse.<Void>builder()
+            .payload(null)
+            .message("Friend removed successfully.")
+            .status(200)
+            .build();
+        return ResponseEntity.ok(response);
     }
 }
 
