@@ -1,4 +1,4 @@
-package com.elice.boardgame.enums;
+package com.elice.boardgame.common.enums;
 
 public class Enums {
     public enum Category {

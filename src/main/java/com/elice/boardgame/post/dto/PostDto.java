@@ -1,6 +1,6 @@
 package com.elice.boardgame.post.dto;
 
-import com.elice.boardgame.enums.Enums;
+import com.elice.boardgame.common.enums.Enums;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;

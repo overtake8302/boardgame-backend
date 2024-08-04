@@ -1,15 +1,12 @@
 package com.elice.boardgame.game.dto;
 
 
-import com.elice.boardgame.enums.Enums;
-import com.elice.boardgame.game.entity.BoardGame;
-import com.elice.boardgame.game.entity.GameProfilePic;
+import com.elice.boardgame.common.enums.Enums;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,4 +1,4 @@
-package com.elice.boardgame.ExceptionHandler;
+package com.elice.boardgame.common.exceptions;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

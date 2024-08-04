@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/social")
+@RequestMapping("/social")
 @Slf4j
 public class SocialController {
 

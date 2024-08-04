@@ -2,7 +2,7 @@ package com.elice.boardgame.post.service;
 
 import com.elice.boardgame.post.dto.PostDto;
 import com.elice.boardgame.post.entity.Post;
-import com.elice.boardgame.enums.Enums;
+import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.post.repository.PostRepository;
 
 import java.util.NoSuchElementException;

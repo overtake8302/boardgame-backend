@@ -1,20 +1,15 @@
 package com.elice.boardgame.category.service;
 
-import static com.elice.boardgame.auth.entity.QUser.user;
-import static com.elice.boardgame.game.entity.QBoardGame.boardGame;
-
-import com.elice.boardgame.ExceptionHandler.BoardGameNotFoundException;
-import com.elice.boardgame.ExceptionHandler.GenreNotFoundException;
-import com.elice.boardgame.ExceptionHandler.MemberNotFoundException;
+import com.elice.boardgame.common.exceptions.BoardGameNotFoundException;
+import com.elice.boardgame.common.exceptions.GenreNotFoundException;
+import com.elice.boardgame.common.exceptions.MemberNotFoundException;
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
 import com.elice.boardgame.category.DTO.GenreDto;
-import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.entity.LikeGenre;
 import com.elice.boardgame.category.entity.LikeGenreId;
 import com.elice.boardgame.category.repository.GameGenreRepository;
-import com.elice.boardgame.category.repository.GenreRepository;
 import com.elice.boardgame.category.repository.LikeGenreRepository;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
@@ -28,11 +23,9 @@ import com.elice.boardgame.game.repository.GameRateRepository;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

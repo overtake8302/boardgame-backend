@@ -1,4 +1,4 @@
-package com.elice.boardgame.config;
+package com.elice.boardgame.common.config;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
