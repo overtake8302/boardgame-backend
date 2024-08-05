@@ -355,21 +355,9 @@ public class BoardGameService {
         }
     }
 
+    @Transactional
     public void incrementViewCount(String visitorId, Long gameId) {
-        //나중에 제거하기
-        BoardGame boardGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);;
-        GameVisitor gameVisitor = gameVisitorRepository.findByIdVisitorIdAndIdGameId(visitorId, gameId);
 
-        if (gameVisitor == null) {
-            GameVisitor newGameVisitor = new GameVisitor(visitorId, gameId);
-//            newGameVisitor.setBoardGame(boardGame);
-            gameVisitorRepository.save(newGameVisitor);
-            Long views = boardGame.getViews();
-            views++;
-            boardGame.setViews(views);
-            boardGameRepository.save(boardGame);
-        }
-        //나중에 이거만 사용
         gameVisitorRepository.insertIgnore(visitorId, gameId);
     }
 
