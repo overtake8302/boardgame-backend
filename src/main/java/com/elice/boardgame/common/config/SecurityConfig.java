@@ -1,4 +1,4 @@
-package com.elice.boardgame.config;
+package com.elice.boardgame.common.config;
 
 import com.elice.boardgame.auth.jwt.JWTFilter;
 import com.elice.boardgame.auth.jwt.JWTUtil;

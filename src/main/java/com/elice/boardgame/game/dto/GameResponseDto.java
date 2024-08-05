@@ -1,11 +1,6 @@
 package com.elice.boardgame.game.dto;
 
 import com.elice.boardgame.category.entity.GameGenre;
-import com.elice.boardgame.enums.Enums;
-import com.elice.boardgame.game.entity.BoardGame;
-import com.elice.boardgame.game.entity.GameLike;
-import com.elice.boardgame.game.entity.GameProfilePic;
-import com.elice.boardgame.game.entity.GameRate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -50,5 +45,5 @@ public class GameResponseDto {
 
     private List<GameGenre> gameGenres = new ArrayList<>();
 
-    private int views;
+    private Long views;
 }

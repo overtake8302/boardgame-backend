@@ -1,7 +1,7 @@
 package com.elice.boardgame.post.entity;
 
 import com.elice.boardgame.auth.entity.User;
-import com.elice.boardgame.enums.Enums;
+import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.game.entity.BoardGame;
 
 import java.util.ArrayList;

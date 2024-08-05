@@ -10,4 +10,5 @@ public interface GameLikeRepository extends JpaRepository<GameLike, GameLikePK>,
 
     boolean existsByGameLikePK(GameLikePK gameLikePK);
     int countLikesByBoardGameGameId(Long gameId);
+    void deleteByGameLikePK(GameLikePK gameLikePK);
 }

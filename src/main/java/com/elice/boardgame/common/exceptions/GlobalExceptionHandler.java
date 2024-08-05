@@ -1,4 +1,4 @@
-package com.elice.boardgame.ExceptionHandler;
+package com.elice.boardgame.common.exceptions;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +43,6 @@ public class GlobalExceptionHandler {
 
         GameErrorResponse errorResponse = new GameErrorResponse(gameRootException.getErrorMessage().getErrorCode(), gameRootException.getErrorMessage().getErrorMessage());
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, gameRootException.getHttpStatus());
     }
 }

@@ -1,9 +1,8 @@
 package com.elice.boardgame.game.controller;
 
-import com.elice.boardgame.ExceptionHandler.GameErrorMessages;
-import com.elice.boardgame.ExceptionHandler.GameRootException;
+import com.elice.boardgame.common.exceptions.GameErrorMessages;
+import com.elice.boardgame.common.exceptions.GameRootException;
 import com.elice.boardgame.game.dto.*;
-import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
 import com.elice.boardgame.game.service.BoardGameService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -38,7 +36,7 @@ public class BoardGameController {
     ) throws IOException {
 
         if (bindingResult.hasErrors()) {
-            throw new GameRootException(GameErrorMessages.GAME_POST_ERROR);
+            throw new GameRootException(GameErrorMessages.GAME_POST_ERROR, HttpStatus.BAD_REQUEST);
         }
 
         GameResponseDto gameResponseDto = new GameResponseDto();
@@ -54,11 +52,9 @@ public class BoardGameController {
     @GetMapping("/game/{gameId}")
     public ResponseEntity<GameResponseDto> getGame(@PathVariable Long gameId) {
 
-        BoardGame foundGame = boardGameService.findGameByGameId(gameId);
+        GameResponseDto foundGame = boardGameService.findGameByGameId(gameId);
 
-        GameResponseDto gameResponseDto = mapper.boardGameToGameResponseDto(foundGame);
-
-        return new ResponseEntity<>(gameResponseDto, HttpStatus.OK);
+        return new ResponseEntity<>(foundGame, HttpStatus.OK);
     }
 
     @DeleteMapping("/game/{gameId}")
@@ -77,7 +73,7 @@ public class BoardGameController {
     ) throws  IOException {
 
         if (bindingResult.hasErrors()) {
-            throw new GameRootException(GameErrorMessages.MISSING_REQUIRED_INPUT);
+            throw new GameRootException(GameErrorMessages.MISSING_REQUIRED_INPUT, HttpStatus.BAD_REQUEST);
         }
 
         GameResponseDto gameResponseDto;
@@ -92,18 +88,13 @@ public class BoardGameController {
     }
 
     @GetMapping("/game/search")
-    public ResponseEntity<List<GameResponseDto>> searchByName(@RequestParam String keyword) {
+    public ResponseEntity<List<GameResponseDto>> searchByName(@RequestParam(required = true) String keyword) {
 
-        List<BoardGame> foundGames = boardGameService.findGameByName(keyword);
+        List<GameResponseDto> foundGames = boardGameService.findGameByName(keyword);
 
-        List<GameResponseDto> gameResponseDtos = new ArrayList<>();
 
-        for (BoardGame boardGame : foundGames) {
-            GameResponseDto dto = mapper.boardGameToGameResponseDto(boardGame);
-            gameResponseDtos.add(dto);
-        }
 
-        return new ResponseEntity<>(gameResponseDtos, HttpStatus.OK);
+        return new ResponseEntity<>(foundGames, HttpStatus.OK);
     }
 
     @PostMapping("/game/like")
@@ -123,8 +114,8 @@ public class BoardGameController {
     }
 
     @GetMapping("/games")
-    public ResponseEntity<Page<GameResponseDto>> getGames(@PageableDefault(size = 10, page = 0) Pageable pageable, @RequestParam(defaultValue = "createdDate") String sortBy) {
-
+    public ResponseEntity<Page<GameResponseDto>> getGames(@PageableDefault(size = 12, page = 0) Pageable pageable,
+                                                          @RequestParam(defaultValue = "gameId") String sortBy) {
         return new ResponseEntity<>(boardGameService.findAll(pageable, sortBy), HttpStatus.OK);
     }
 
@@ -132,5 +123,13 @@ public class BoardGameController {
     public ResponseEntity<Void> incrementViewCount(@RequestHeader("visitorId") String visitorId, @RequestHeader("gameId") Long gameId) {
         boardGameService.incrementViewCount(visitorId, gameId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/game/home")
+    public ResponseEntity<List<GameResponseDto>> getHomeGames(@RequestParam String genre, @RequestParam String sort) {
+
+        List<GameResponseDto> gameResponseDtos = boardGameService.findGamesByGenreAndSort(genre, sort);
+
+        return new ResponseEntity<>(gameResponseDtos, HttpStatus.OK);
     }
 }

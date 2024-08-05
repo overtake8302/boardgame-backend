@@ -1,4 +1,4 @@
-package com.elice.boardgame.ExceptionHandler;
+package com.elice.boardgame.common.exceptions;
 
 public class MemberNotFoundException extends RuntimeException {
     public MemberNotFoundException(String message) {

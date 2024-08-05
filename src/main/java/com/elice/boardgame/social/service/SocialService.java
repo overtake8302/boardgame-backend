@@ -5,11 +5,13 @@ import com.elice.boardgame.social.entity.Social;
 import com.elice.boardgame.social.entity.SocialId;
 import com.elice.boardgame.social.exception.SocialAlreadyExistsException;
 import com.elice.boardgame.social.exception.SocialNotFoundException;
-import com.elice.boardgame.social.repository.SocialRepository;
+import com.elice.boardgame.social.repository.SocialRepositoryCustom;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -17,10 +19,11 @@ import org.springframework.stereotype.Service;
 @Transactional
 @Service
 public class SocialService {
-    private final SocialRepository socialRepository;
+    private final SocialRepositoryCustom socialRepository;
 
-    public List<Long> getFriendIds(Long userId) {
-        return socialRepository.findFriendIdsByUserId(userId);
+    public List<Long> getFriendIds(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return socialRepository.findFriendIdsByUserId(userId, pageable).getContent();
     }
 
     public void addFriend(SocialRequest socialRequest) {

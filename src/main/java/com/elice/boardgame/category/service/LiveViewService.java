@@ -1,12 +1,13 @@
 package com.elice.boardgame.category.service;
 
-import com.elice.boardgame.ExceptionHandler.BoardGameNotFoundException;
+import com.elice.boardgame.common.exceptions.BoardGameNotFoundException;
 import com.elice.boardgame.category.entity.LiveView;
 import com.elice.boardgame.category.entity.LiveViewRanking;
 import com.elice.boardgame.category.repository.LiveViewRankingRepository;
 import com.elice.boardgame.category.repository.LiveViewRepository;
+import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
-import com.elice.boardgame.game.repository.BoardGameRepository;
+import com.elice.boardgame.game.mapper.BoardGameMapper;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -25,6 +26,8 @@ public class LiveViewService {
 
     private final LiveViewRankingRepository liveViewRankingRepository;
 
+    private final BoardGameMapper boardGameMapper;
+
     public void addViewScore(BoardGame game, String ipAddress) {
         Optional<LiveView> optionalEntity = liveViewRepository.findByGame(game);
 
@@ -36,7 +39,7 @@ public class LiveViewService {
         LocalDate now = LocalDate.now();
 
         liveView.setGame(game);
-        liveView.setCreatedDate(now);
+        liveView.setCreatedDate(now.atStartOfDay());
         liveView.setViewScore(8L);
         liveView.setIpAddress(ipAddress);
 
@@ -50,7 +53,7 @@ public class LiveViewService {
         List<LiveView> dataList = liveViewRepository.findAll();
 
         for (LiveView data : dataList) {
-            LocalDate date = data.getCreatedDate();
+            LocalDate date = LocalDate.from(data.getCreatedDate());
             Period period = Period.between(date, currentDate);
 
             int days = period.getDays();
@@ -94,7 +97,7 @@ public class LiveViewService {
 
     }
 
-    public List<BoardGame> getLiveViewRanking() {
+    public List<GameResponseDto> getLiveViewRanking() {
         List<LiveViewRanking> liveViews = liveViewRankingRepository.findAllByOrderBySumScoreDesc();
         List<BoardGame> boardGames = new ArrayList<>();
 
@@ -106,6 +109,11 @@ public class LiveViewService {
             boardGames.add(boardGame);
         }
 
-        return boardGames;
+        List<GameResponseDto> dtos = new ArrayList<>();
+        for (BoardGame game : boardGames) {
+            dtos.add(boardGameMapper.boardGameToGameResponseDto(game));
+        }
+
+        return dtos;
     }
 }
