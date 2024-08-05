@@ -2,6 +2,9 @@ package com.elice.boardgame.post.entity;
 
 import com.elice.boardgame.auth.entity.User;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -15,7 +18,7 @@ import org.hibernate.annotations.Where;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@SQLDelete(sql = "UPDATE orders SET deletedAt = true WHERE deletedAt = ?")
+@SQLDelete(sql = "UPDATE comment SET deletedAt = true WHERE id = ?")
 @Where(clause = "deletedAt = false")
 public class Comment extends BaseEntity {
     @Id
@@ -28,14 +31,15 @@ public class Comment extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "post_id")
+    @JsonBackReference
     private Post post;
 
     private String content;
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
-    private Comment parent; // 부모 댓글
+    private Comment parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Comment> comInComs; // 자식 댓글 리스트
+    private List<Comment> comInComs;
 }

@@ -7,6 +7,8 @@ import com.elice.boardgame.game.entity.BoardGame;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +21,7 @@ import org.hibernate.annotations.Where;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@SQLDelete(sql = "UPDATE orders SET deletedAt = true WHERE deletedAt = ?")
+@SQLDelete(sql = "UPDATE post SET deletedAt = true WHERE post_id = ?")
 @Where(clause = "deletedAt = false")
 public class Post extends BaseEntity {
     @Id
@@ -35,20 +37,32 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "gameId", nullable = false)
     private BoardGame boardGame;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String content;
+
     private String category;
     private String title;
-    private String content;
-    private String imageUrl;
-    private String imageName;
+    private List<String> imageUrls = new ArrayList<>();
+    private List<String> imageNames = new ArrayList<>();
     private String gameName;
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private View view;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonManagedReference
     private List<Comment> comments = new ArrayList<>();
 
     public Long getUserId() {
         return user != null ? user.getId() : null;
+    }
+
+    public void addImageUrl(String imageUrl) {
+        this.imageUrls.add(imageUrl);
+    }
+
+    public void addImageName(String imageName) {
+        this.imageNames.add(imageName);
     }
 }
