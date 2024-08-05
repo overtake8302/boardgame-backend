@@ -1,6 +1,7 @@
 package com.elice.boardgame.game.controller;
 
 import com.elice.boardgame.common.dto.CommonResponse;
+import com.elice.boardgame.common.dto.PaginationRequest;
 import com.elice.boardgame.common.exceptions.GameErrorMessages;
 import com.elice.boardgame.common.exceptions.GameRootException;
 import com.elice.boardgame.game.dto.*;
@@ -10,7 +11,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -127,10 +130,19 @@ public class BoardGameController {
     }
 
     @GetMapping("/games")
-    public ResponseEntity<Page<GameResponseDto>> getGames(@PageableDefault(size = 12, page = 0) Pageable pageable,
-                                                          @RequestParam(defaultValue = "gameId") String sortBy) {
-        return new ResponseEntity<>(boardGameService.findAll(pageable, sortBy), HttpStatus.OK);
+    public ResponseEntity<CommonResponse<Page<GameResponseDto>>> getGames(PaginationRequest paginationRequest,
+                                                          @RequestParam(defaultValue = "gameId") @NotBlank String sortBy) {
+        int page = paginationRequest.getPage() == 0 ? 0 : paginationRequest.getPage();
+        int size = paginationRequest.getSize() == 0 ? 12 : paginationRequest.getSize();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        Page<GameResponseDto> gameResponseDtoPage = boardGameService.findAll(pageable, sortBy);
+        CommonResponse<Page<GameResponseDto>> response = CommonResponse.<Page<GameResponseDto>>builder()
+                .payload(gameResponseDtoPage)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 
     @PostMapping("/game/view")
     public ResponseEntity<Void> incrementViewCount(@RequestHeader("visitorId") @NotBlank String visitorId, @RequestHeader("gameId") @Min(1) Long gameId) {
