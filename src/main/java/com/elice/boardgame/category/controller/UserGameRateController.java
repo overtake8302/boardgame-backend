@@ -27,7 +27,7 @@ public class UserGameRateController {
 
     // 평점 n점을 준 게임 찾기
     @GetMapping("/ratings/games/{userId}")
-    public List<GameResponseDto> getGamesByRating(@RequestParam Double rate, @PathVariable Long userId) {
+    public RatingCountDto getGamesByRating(@RequestParam Double rate, @PathVariable Long userId) {
         return userGameRateService.getGamesByRating(userId, rate);
     }
 }
