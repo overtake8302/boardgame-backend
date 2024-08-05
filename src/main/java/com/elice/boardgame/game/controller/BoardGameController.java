@@ -119,7 +119,9 @@ public class BoardGameController {
     }
 
     @PostMapping("/game/rate")
-    public ResponseEntity<CommonResponse<GameRateResponseDto>> postGameRate(@RequestParam @Min(1) Long gameId, @RequestBody @Validated GameRatePostDto gameRatePostDto) {
+    public ResponseEntity<CommonResponse<GameRateResponseDto>> postGameRate(
+            @RequestParam @Min(1) Long gameId,
+            @RequestBody @Validated GameRatePostDto gameRatePostDto) {
 
         GameRateResponseDto responseDto = boardGameService.clickGameRate(gameId, gameRatePostDto);
         CommonResponse<GameRateResponseDto> response = CommonResponse.<GameRateResponseDto>builder()
@@ -130,12 +132,17 @@ public class BoardGameController {
     }
 
     @GetMapping("/games")
-    public ResponseEntity<CommonResponse<Page<GameResponseDto>>> getGames(PaginationRequest paginationRequest,
-                                                          @RequestParam(defaultValue = "gameId") @NotBlank String sortBy) {
+    public ResponseEntity<CommonResponse<Page<GameResponseDto>>> getGames(
+            @ModelAttribute PaginationRequest paginationRequest,
+            @RequestParam(defaultValue = "gameId") @NotBlank String sortBy) {
+
         int page = paginationRequest.getPage() == 0 ? 0 : paginationRequest.getPage();
         int size = paginationRequest.getSize() == 0 ? 12 : paginationRequest.getSize();
+
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-        Page<GameResponseDto> gameResponseDtoPage = boardGameService.findAll(pageable, sortBy);
+
+        Page<GameResponseDto> gameResponseDtoPage = boardGameService.findAll(pageable);
+
         CommonResponse<Page<GameResponseDto>> response = CommonResponse.<Page<GameResponseDto>>builder()
                 .payload(gameResponseDtoPage)
                 .build();

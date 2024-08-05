@@ -332,11 +332,11 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .from(boardGame)
                 .leftJoin(boardGame.gameRates, gameRate)
                 .leftJoin(boardGame.gameVisitors, gameVisitor)
-                .leftJoin(boardGame.gameProfilePics, gameProfilePic) // 프로필 사진 조인
-                .leftJoin(boardGame.gameGenres, gameGenre) // 장르 조인
+                .leftJoin(boardGame.gameProfilePics, gameProfilePic)
+                .leftJoin(boardGame.gameGenres, gameGenre)
                 .where(boardGame.deletedDate.isNull())
                 .groupBy(boardGame)
-                .orderBy(gameRate.rate.avg().desc())
+//                .orderBy()
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
