@@ -25,12 +25,10 @@ public class RatingService {
         return gameRateRepository.countRatingsByUserId(userId);
     }
 
-    public List<GameResponseDto> getGamesByRating(Long userId, Double rate) {
-        List<BoardGameRateDto> dtoList = gameRateRepository.findByUserIdAndRate(userId, rate);
-        return dtoList.stream()
-            .map(this::convertToGameResponseDto)
-            .collect(Collectors.toList());
+    public RatingCountDto getGamesByRating(Long userId, Double rate) {
+        return gameRateRepository.findRatingCountByUserIdAndRate(userId, rate);
     }
+
 
     //dto 변환 로직
     private GameResponseDto convertToGameResponseDto(BoardGameRateDto boardGameRateDTO) {

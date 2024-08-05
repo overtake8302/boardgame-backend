@@ -47,17 +47,27 @@ public class CustomGameRateRepositoryImpl implements CustomGameRateRepository{
     }
 
     @Override
-    public List<BoardGameRateDto> findByUserIdAndRate(Long userId, Double rate) {
-        return queryFactory
-            .select(Projections.fields(BoardGameRateDto.class,
-                boardGame,
-                gameRate.rate))
+    public RatingCountDto findRatingCountByUserIdAndRate(Long userId, Double rate) {
+        List<String> gameNames = queryFactory
+            .select(boardGame.name)
             .from(gameRate)
             .join(gameRate.boardGame, boardGame)
             .where(gameRate.user.id.eq(userId)
                 .and(gameRate.rate.eq(rate)))
             .fetch();
+
+        Long totalCount = queryFactory
+            .select(gameRate.count())
+            .from(gameRate)
+            .where(gameRate.user.id.eq(userId)
+                .and(gameRate.rate.eq(rate)))
+            .fetchOne();
+
+        return new RatingCountDto(totalCount, gameNames);
     }
+
+
+
 
     @Override
     public List<BoardGame> findByUserId(Long userId) {
