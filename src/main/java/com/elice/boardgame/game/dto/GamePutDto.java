@@ -1,7 +1,6 @@
 package com.elice.boardgame.game.dto;
 
-import com.elice.boardgame.enums.Enums;
-import com.elice.boardgame.game.entity.BoardGame;
+import com.elice.boardgame.common.enums.Enums;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

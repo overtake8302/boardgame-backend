@@ -1,7 +1,7 @@
 package com.elice.boardgame.game.service;
 
-import com.elice.boardgame.ExceptionHandler.GameErrorMessages;
-import com.elice.boardgame.ExceptionHandler.GameRootException;
+import com.elice.boardgame.common.exceptions.GameErrorMessages;
+import com.elice.boardgame.common.exceptions.GameRootException;
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
 import com.elice.boardgame.category.DTO.GenreDto;
@@ -11,7 +11,7 @@ import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.mapper.GenreMapper;
 import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.service.GenreService;
-import com.elice.boardgame.enums.GameRateResponseMessages;
+import com.elice.boardgame.common.enums.GameRateResponseMessages;
 import com.elice.boardgame.game.dto.*;
 import com.elice.boardgame.game.entity.*;
 import com.elice.boardgame.game.mapper.BoardGameMapper;

@@ -1,6 +1,6 @@
 package com.elice.boardgame.category.service;
 
-import com.elice.boardgame.ExceptionHandler.BoardGameNotFoundException;
+import com.elice.boardgame.common.exceptions.BoardGameNotFoundException;
 import com.elice.boardgame.category.entity.LiveView;
 import com.elice.boardgame.category.entity.LiveViewRanking;
 import com.elice.boardgame.category.repository.LiveViewRankingRepository;
@@ -8,7 +8,6 @@ import com.elice.boardgame.category.repository.LiveViewRepository;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
-import com.elice.boardgame.game.repository.BoardGameRepository;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;

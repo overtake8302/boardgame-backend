@@ -1,4 +1,4 @@
-package com.elice.boardgame.enums;
+package com.elice.boardgame.common.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
