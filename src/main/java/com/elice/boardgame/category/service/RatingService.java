@@ -57,8 +57,8 @@ public class RatingService {
         List<String> picAddresses = gameProfilePics.stream()
             .map(GameProfilePic::getPicAddress)
             .collect(Collectors.toList());
-        GameProfilePicResponseDto gameProfilePicResponseDto = new GameProfilePicResponseDto(picAddresses);
-        gameResponseDto.setGameProfilePics(gameProfilePicResponseDto);
+//        GameProfilePicResponseDto gameProfilePicResponseDto = new GameProfilePicResponseDto(picAddresses);
+        gameResponseDto.setGameProfilePics(picAddresses);
 
         return gameResponseDto;
     }

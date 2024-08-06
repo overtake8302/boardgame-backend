@@ -13,5 +13,5 @@ import java.util.List;
 @Setter
 public class GameProfilePicResponseDto {
 
-    private List<String> picAddress;
+    private String picAddress;
 }

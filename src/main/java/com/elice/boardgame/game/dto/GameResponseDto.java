@@ -41,9 +41,10 @@ public class GameResponseDto {
 
     private Double averageRate;
 
-    private GameProfilePicResponseDto gameProfilePics;
+    private List<String> gameProfilePics;
 
     private List<GameGenre> gameGenres = new ArrayList<>();
 
     private Long views;
+
 }

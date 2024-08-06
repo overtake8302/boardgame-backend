@@ -1,5 +1,8 @@
 package com.elice.boardgame.common.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 public class Enums {
     public enum Category {
         FREE("자유 게시판"),
@@ -81,6 +84,26 @@ public class Enums {
 
         public String getLabel() {
             return label;
+        }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public enum GameListSortOption {
+        GAME_ID("gameId"),
+        DIFFICULTY("difficulty"),
+        AVERAGE_RATE("averageRate"),
+        VIEWS("views");
+
+        private final String sortBy;
+
+        public static GameListSortOption fromString(String sortBy) {
+            for (GameListSortOption option : GameListSortOption.values()) {
+                if (option.sortBy.equalsIgnoreCase(sortBy)) {
+                    return option;
+                }
+            }
+            throw new IllegalArgumentException("Unknown sort option: " + sortBy);
         }
     }
 }

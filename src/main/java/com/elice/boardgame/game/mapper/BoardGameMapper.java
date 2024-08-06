@@ -5,6 +5,7 @@ import com.elice.boardgame.game.dto.GameProfilePicResponseDto;
 import com.elice.boardgame.game.dto.GamePutDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
+import com.elice.boardgame.game.entity.GameProfilePic;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
 import com.elice.boardgame.game.repository.GameRateRepository;
@@ -12,6 +13,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -28,8 +32,6 @@ public class BoardGameMapper {
 
         BoardGame newBoardGame = new BoardGame();
         newBoardGame.setName(dto.getName());
-//        newBoardGame.setGameProfilePics(dto.getGameProfilePic());
-        //장르도 추가하기
         newBoardGame.setPlayTime(dto.getPlayTime());
         newBoardGame.setReleaseDate(dto.getReleaseDate());
         newBoardGame.setPlayNum(dto.getPlayNum());
@@ -46,30 +48,8 @@ public class BoardGameMapper {
 
     public GameResponseDto boardGameToGameResponseDto(BoardGame boardGame) {
 
-        GameResponseDto gameResponseDto = new GameResponseDto();
-        gameResponseDto.setGameId(boardGame.getGameId());
-        gameResponseDto.setName(boardGame.getName());
-        //장르 추가하기
-        gameResponseDto.setGameGenres(boardGame.getGameGenres());
-        gameResponseDto.setPlayTime(boardGame.getPlayTime().getLabel());
-        gameResponseDto.setReleaseDate(boardGame.getReleaseDate());
-        gameResponseDto.setPlayNum(boardGame.getPlayNum().getLabel());
-        gameResponseDto.setAgeLimit(boardGame.getAgeLimit().getLabel());
-        gameResponseDto.setDesigner(boardGame.getDesigner());
-        gameResponseDto.setArtwork(boardGame.getArtwork());
-        gameResponseDto.setPublisher(boardGame.getPublisher());
-        gameResponseDto.setPrice(boardGame.getPrice());
-        GameProfilePicResponseDto gameProfilePicResponseDto = gameProfilePicMapper.gameProfilePicToDto(boardGame.getGameProfilePics());
-        gameResponseDto.setGameProfilePics(gameProfilePicResponseDto);
-        gameResponseDto.setLikeCount(gameLikeRepository.countLikesByBoardGameGameId(boardGame.getGameId()));
-        gameResponseDto.setYoutubeLink(boardGame.getYoutubeLink());
-        gameResponseDto.setAverageRate(gameRateRepository.findAverageRateByBoardGame(boardGame));
-        gameResponseDto.setDifficulty(boardGame.getDifficulty().getLabel());
-        //조회수
-//        gameResponseDto.setViews(boardGame.getViews());
-        //댓글 후기 공략 질문 모임 중고 판매 기타등등
+        return boardGameRepository.getGameResponseDtoByGameIdAndDeletedDateIsNull(boardGame.getGameId());
 
-        return gameResponseDto;
     }
 
     public BoardGame boardGameUpdateMapper(BoardGame target, GamePutDto gamePutDto) {
