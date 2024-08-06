@@ -137,14 +137,33 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .select(Projections.bean(GameResponseDto.class,
                         boardGame.gameId.as("gameId"),
                         boardGame.name.as("name"),
-                        boardGame.playTime.stringValue().as("playTime"),
-                        boardGame.playNum.stringValue().as("playNum"),
-                        boardGame.ageLimit.stringValue().as("ageLimit"),
+                        new CaseBuilder()
+                                .when(boardGame.playTime.eq(Enums.PlayTime.SHORT)).then("30분 이하")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.MEDIUM)).then("30분 ~ 1시간")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.LONG)).then("1시간 이상")
+                                .otherwise(boardGame.playTime.stringValue()).as("playTime"),
+                        new CaseBuilder()
+                                .when(boardGame.playNum.eq(Enums.PlayNum.ONE_PLAYER)).then("1인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.TWO_PLAYERS)).then("2인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.THREE_PLAYERS)).then("3인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FOUR_PLAYERS)).then("4인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FIVE_PLUS_PLAYERS)).then("5인 이상")
+                                .otherwise(boardGame.playNum.stringValue()).as("playNum"),
+                        new CaseBuilder()
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_ALL)).then("전체 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_12_PLUS)).then("12세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_15_PLUS)).then("15세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_18_PLUS)).then("청소년 이용 불가")
+                                .otherwise(boardGame.ageLimit.stringValue()).as("ageLimit"),
+                        new CaseBuilder()
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then("쉬움")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then("보통")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then("어려움")
+                                .otherwise(boardGame.difficulty.stringValue()).as("difficulty"),
                         boardGame.price.as("price"),
                         boardGame.designer.as("designer"),
                         boardGame.artwork.as("artwork"),
                         boardGame.releaseDate.as("releaseDate"),
-                        boardGame.difficulty.stringValue().as("difficulty"),
                         boardGame.publisher.as("publisher"),
                         boardGame.youtubeLink.as("youtubeLink"),
                         boardGame.gameLikes.size().as("likeCount"),
@@ -182,10 +201,29 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .select(Projections.bean(GameResponseDto.class,
                         boardGame.gameId.as("gameId"),
                         boardGame.name.as("name"),
-                        boardGame.playTime.stringValue().as("playTime"),
-                        boardGame.playNum.stringValue().as("playNum"),
-                        boardGame.ageLimit.stringValue().as("ageLimit"),
-                        boardGame.difficulty.stringValue().as("difficulty"),
+                        new CaseBuilder()
+                                .when(boardGame.playTime.eq(Enums.PlayTime.SHORT)).then("30분 이하")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.MEDIUM)).then("30분 ~ 1시간")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.LONG)).then("1시간 이상")
+                                .otherwise(boardGame.playTime.stringValue()).as("playTime"),
+                        new CaseBuilder()
+                                .when(boardGame.playNum.eq(Enums.PlayNum.ONE_PLAYER)).then("1인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.TWO_PLAYERS)).then("2인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.THREE_PLAYERS)).then("3인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FOUR_PLAYERS)).then("4인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FIVE_PLUS_PLAYERS)).then("5인 이상")
+                                .otherwise(boardGame.playNum.stringValue()).as("playNum"),
+                        new CaseBuilder()
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_ALL)).then("전체 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_12_PLUS)).then("12세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_15_PLUS)).then("15세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_18_PLUS)).then("청소년 이용 불가")
+                                .otherwise(boardGame.ageLimit.stringValue()).as("ageLimit"),
+                        new CaseBuilder()
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then("쉬움")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then("보통")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then("어려움")
+                                .otherwise(boardGame.difficulty.stringValue()).as("difficulty"),
                         boardGame.price.as("price"),
                         boardGame.designer.as("designer"),
                         boardGame.artwork.as("artwork"),
@@ -250,10 +288,29 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .select(Projections.bean(GameResponseDto.class,
                         boardGame.gameId.as("gameId"),
                         boardGame.name.as("name"),
-                        boardGame.playTime.stringValue().as("playTime"),
-                        boardGame.playNum.stringValue().as("playNum"),
-                        boardGame.ageLimit.stringValue().as("ageLimit"),
-                        boardGame.difficulty.stringValue().as("difficulty"),
+                        new CaseBuilder()
+                                .when(boardGame.playTime.eq(Enums.PlayTime.SHORT)).then("30분 이하")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.MEDIUM)).then("30분 ~ 1시간")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.LONG)).then("1시간 이상")
+                                .otherwise(boardGame.playTime.stringValue()).as("playTime"),
+                        new CaseBuilder()
+                                .when(boardGame.playNum.eq(Enums.PlayNum.ONE_PLAYER)).then("1인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.TWO_PLAYERS)).then("2인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.THREE_PLAYERS)).then("3인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FOUR_PLAYERS)).then("4인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FIVE_PLUS_PLAYERS)).then("5인 이상")
+                                .otherwise(boardGame.playNum.stringValue()).as("playNum"),
+                        new CaseBuilder()
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_ALL)).then("전체 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_12_PLUS)).then("12세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_15_PLUS)).then("15세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_18_PLUS)).then("청소년 이용 불가")
+                                .otherwise(boardGame.ageLimit.stringValue()).as("ageLimit"),
+                        new CaseBuilder()
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then("쉬움")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then("보통")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then("어려움")
+                                .otherwise(boardGame.difficulty.stringValue()).as("difficulty"),
                         boardGame.price.as("price"),
                         boardGame.designer.as("designer"),
                         boardGame.artwork.as("artwork"),
@@ -346,10 +403,29 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .select(Projections.bean(GameResponseDto.class,
                         boardGame.gameId.as("gameId"),
                         boardGame.name.as("name"),
-                        boardGame.playTime.stringValue().as("playTime"),
-                        boardGame.playNum.stringValue().as("playNum"),
-                        boardGame.ageLimit.stringValue().as("ageLimit"),
-                        boardGame.difficulty.stringValue().as("difficulty"),
+                        new CaseBuilder()
+                                .when(boardGame.playTime.eq(Enums.PlayTime.SHORT)).then("30분 이하")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.MEDIUM)).then("30분 ~ 1시간")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.LONG)).then("1시간 이상")
+                                .otherwise(boardGame.playTime.stringValue()).as("playTime"),
+                        new CaseBuilder()
+                                .when(boardGame.playNum.eq(Enums.PlayNum.ONE_PLAYER)).then("1인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.TWO_PLAYERS)).then("2인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.THREE_PLAYERS)).then("3인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FOUR_PLAYERS)).then("4인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FIVE_PLUS_PLAYERS)).then("5인 이상")
+                                .otherwise(boardGame.playNum.stringValue()).as("playNum"),
+                        new CaseBuilder()
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_ALL)).then("전체 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_12_PLUS)).then("12세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_15_PLUS)).then("15세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_18_PLUS)).then("청소년 이용 불가")
+                                .otherwise(boardGame.ageLimit.stringValue()).as("ageLimit"),
+                        new CaseBuilder()
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then("쉬움")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then("보통")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then("어려움")
+                                .otherwise(boardGame.difficulty.stringValue()).as("difficulty"),
                         boardGame.price.as("price"),
                         boardGame.designer.as("designer"),
                         boardGame.artwork.as("artwork"),
