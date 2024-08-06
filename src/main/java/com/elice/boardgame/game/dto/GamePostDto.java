@@ -41,7 +41,7 @@ public class GamePostDto {
 
     private String artwork;
 
-    @Enumerated(EnumType.STRING)
+    @NotNull
     private Enums.Difficulty difficulty;
 
     private String publisher;

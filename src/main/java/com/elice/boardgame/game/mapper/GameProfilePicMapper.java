@@ -10,7 +10,7 @@ import java.util.List;
 @Component
 public class GameProfilePicMapper {
 
-    public GameProfilePicResponseDto gameProfilePicToDto(List<GameProfilePic> pics) {
+    /*public GameProfilePicResponseDto gameProfilePicToDto(List<GameProfilePic> pics) {
 
         GameProfilePicResponseDto dto = new GameProfilePicResponseDto();
         List<String> urls = new ArrayList<>();
@@ -23,5 +23,5 @@ public class GameProfilePicMapper {
         dto.setPicAddress(urls);
 
         return dto;
-    }
+    }*/
 }

@@ -2,6 +2,7 @@ package com.elice.boardgame.game.service;
 
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
+import com.elice.boardgame.auth.service.AuthService;
 import com.elice.boardgame.category.DTO.GenreDto;
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.GameGenreId;
@@ -9,6 +10,7 @@ import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.mapper.GenreMapper;
 import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.service.GenreService;
+import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.common.enums.GameRateResponseMessages;
 import com.elice.boardgame.common.exceptions.GameErrorMessages;
 import com.elice.boardgame.common.exceptions.GameRootException;
@@ -53,12 +55,13 @@ public class BoardGameService {
     private final BoardGameMapper boardGameMapper;
     private final GameVisitorRepository gameVisitorRepository;
     private final GenreMapper genreMapper;
+    private final AuthService authService;
 
     @Transactional
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public GameResponseDto create(GamePostDto gamePostDto, List<MultipartFile> files) throws IOException {
 
-        User currentUser = getCurrentUser();
+        User currentUser = authService.getCurrentUser();
         BoardGame newBoardGame = boardGameMapper.gamePostDtoToBoardGame(gamePostDto);
         newBoardGame.setFirstCreator(currentUser);
         BoardGame savedBoardGame = boardGameRepository.save(newBoardGame);
@@ -98,7 +101,7 @@ public class BoardGameService {
         savedBoardGame.setGameGenres(genres);
         savedBoardGame = boardGameRepository.save(savedBoardGame);
 
-        return boardGameMapper.boardGameToGameResponseDto(savedBoardGame);
+        return findGameByGameId(savedBoardGame.getGameId());
     }
 
     public GameResponseDto findGameByGameId(Long gameId) {
@@ -116,7 +119,7 @@ public class BoardGameService {
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public void deleteGameByGameId(Long gameId) {
 
-        User currentUser = getCurrentUser();
+        User currentUser = authService.getCurrentUser();
         BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
 
         if (targetGame == null) {
@@ -222,7 +225,7 @@ public class BoardGameService {
     public ClickLikeResponseDto clickLike(Long gameId) {
 
         BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
-        User currentUser = getCurrentUser();
+        User currentUser = authService.getCurrentUser();
         GameLikePK gameLikePK = new GameLikePK(currentUser.getId(), gameId);
 
         Optional<GameLike> target = gameLikeRepository.findById(gameLikePK);
@@ -244,18 +247,11 @@ public class BoardGameService {
         return clickLikeResponseDto;
     }
 
-    private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserName = authentication.getName();
-        User currentUser = userRepository.findByUsername(currentUserName);
-        return currentUser;
-    }
-
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public GameRateResponseDto clickGameRate(Long gameId, GameRatePostDto gameRatePostDto) {
 
         BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
-        User currentUser = getCurrentUser();
+        User currentUser = authService.getCurrentUser();
         GameRate foundGameRate = gameRateRepository.findByUserIdAndBoardGameGameId(currentUser.getId(), gameId);
 
         if (foundGameRate != null) {
@@ -274,16 +270,9 @@ public class BoardGameService {
         return new GameRateResponseDto(GameRateResponseMessages.REGISTERED.getMessage());
     }
 
-    public Page<GameResponseDto> findAll(Pageable pageable) {
-        /*if ("averageRate".equals(sortBy)) {
-            return boardGameRepository.findAllOrderByAverageRateDesc(pageable);
-        } else {
-            Sort sort = Sort.by(Sort.Direction.DESC, sortBy);
-            Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-            return boardGameRepository.findAllByDeletedDateIsNull(sortedPageable);
-        }*/
+    public Page<GameResponseDto> findAll(Pageable pageable, Enums.GameListSortOption sortBy) {
 
-        return boardGameRepository.findAllByDeletedDateIsNull(pageable);
+        return boardGameRepository.findAllByDeletedDateIsNull(pageable, sortBy);
     }
 
     @Transactional

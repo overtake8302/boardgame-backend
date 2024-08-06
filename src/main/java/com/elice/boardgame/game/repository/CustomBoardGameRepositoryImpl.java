@@ -2,36 +2,32 @@ package com.elice.boardgame.game.repository;
 
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.QGameGenre;
-import com.elice.boardgame.game.dto.GameProfilePicResponseDto;
+import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.*;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.QueryResults;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.ExpressionUtils;
-import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.PathBuilder;
-import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
 public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository {
 
     private final JPAQueryFactory queryFactory;
+    private final EntityManager entityManager;
 
     @Override
     public List<BoardGame> findBoardGamesWithFilters(List<String> playTimes, List<String> playNums,
@@ -116,78 +112,6 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .and(boardGame.gameId.notIn(likedGameIds)))
             .fetch();
     }
-    
-     public Page<GameResponseDto> findAllOrderByAverageRateDesc(Pageable pageable) {
-        QBoardGame boardGame = QBoardGame.boardGame;
-        QGameRate gameRate = QGameRate.gameRate;
-        QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
-        QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
-        QGameGenre gameGenre = QGameGenre.gameGenre;
-
-        List<Tuple> results = queryFactory
-                .select(boardGame, gameRate.rate.avg(), gameVisitor.id.count())
-                .from(boardGame)
-                .leftJoin(boardGame.gameRates, gameRate)
-                .leftJoin(boardGame.gameVisitors, gameVisitor)
-                .leftJoin(boardGame.gameGenres, gameGenre) // 장르 조인
-                .where(boardGame.deletedDate.isNull())
-                .groupBy(boardGame)
-                .orderBy(gameRate.rate.avg().desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        List<GameResponseDto> gameResponseDtos = new ArrayList<>();
-        for (Tuple tuple : results) {
-            BoardGame boardGameEntity = tuple.get(boardGame);
-            Double averageRate = tuple.get(gameRate.rate.avg());
-            Long views = tuple.get(gameVisitor.id.count());
-
-            // 프로필 사진 수집
-            List<String> picAddresses = boardGameEntity.getGameProfilePics().stream()
-                    .map(GameProfilePic::getPicAddress)
-                    .collect(Collectors.toList());
-
-            // 장르 수집
-            List<GameGenre> genres = queryFactory
-                    .select(gameGenre)
-                    .from(gameGenre)
-                    .where(gameGenre.boardGame.eq(boardGameEntity))
-                    .fetch();
-
-            GameResponseDto dto = new GameResponseDto();
-            dto.setGameId(boardGameEntity.getGameId());
-            dto.setName(boardGameEntity.getName());
-            dto.setPlayTime(boardGameEntity.getPlayTime().getLabel());
-            dto.setPlayNum(boardGameEntity.getPlayNum().getLabel());
-            dto.setAgeLimit(boardGameEntity.getAgeLimit().getLabel());
-            dto.setPrice(boardGameEntity.getPrice());
-            dto.setDesigner(boardGameEntity.getDesigner());
-            dto.setArtwork(boardGameEntity.getArtwork());
-            dto.setReleaseDate(boardGameEntity.getReleaseDate());
-            dto.setDifficulty(boardGameEntity.getDifficulty().getLabel());
-            dto.setPublisher(boardGameEntity.getPublisher());
-            dto.setYoutubeLink(boardGameEntity.getYoutubeLink());
-            dto.setLikeCount(boardGameEntity.getGameLikes().size());
-            dto.setGameGenres(genres);
-            dto.setAverageRate(averageRate);
-            dto.setViews(views);
-
-            GameProfilePicResponseDto gameProfilePicResponseDto = new GameProfilePicResponseDto(picAddresses);
-            dto.setGameProfilePics(gameProfilePicResponseDto);
-
-            gameResponseDtos.add(dto);
-        }
-
-        return new PageImpl<>(gameResponseDtos, pageable, gameResponseDtos.size());
-    }
-
-
-
-
-
-
-
 
     @Override
     public GameResponseDto getGameResponseDtoByGameIdAndDeletedDateIsNull(Long gameId) {
@@ -197,8 +121,36 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
         QGameGenre gameGenre = QGameGenre.gameGenre;
 
-        Tuple result = queryFactory
-                .select(boardGame, gameRate.rate.avg(), gameVisitor.id.count())
+        List<String> profilePics = queryFactory
+                .select(gameProfilePic.picAddress)
+                .from(gameProfilePic)
+                .where(gameProfilePic.boardGame.gameId.eq(gameId))
+                .fetch();
+
+        List<GameGenre> genres = queryFactory
+                .select(gameGenre)
+                .from(gameGenre)
+                .where(gameGenre.boardGame.gameId.eq(gameId))
+                .fetch();
+
+        GameResponseDto result = queryFactory
+                .select(Projections.bean(GameResponseDto.class,
+                        boardGame.gameId.as("gameId"),
+                        boardGame.name.as("name"),
+                        boardGame.playTime.stringValue().as("playTime"),
+                        boardGame.playNum.stringValue().as("playNum"),
+                        boardGame.ageLimit.stringValue().as("ageLimit"),
+                        boardGame.price.as("price"),
+                        boardGame.designer.as("designer"),
+                        boardGame.artwork.as("artwork"),
+                        boardGame.releaseDate.as("releaseDate"),
+                        boardGame.difficulty.stringValue().as("difficulty"),
+                        boardGame.publisher.as("publisher"),
+                        boardGame.youtubeLink.as("youtubeLink"),
+                        boardGame.gameLikes.size().as("likeCount"),
+                        gameRate.rate.avg().as("averageRate"),
+                        gameVisitor.id.count().as("views")
+                ))
                 .from(boardGame)
                 .leftJoin(boardGame.gameRates, gameRate)
                 .leftJoin(boardGame.gameVisitors, gameVisitor)
@@ -206,54 +158,17 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .leftJoin(boardGame.gameGenres, gameGenre) // 장르 조인
                 .where(boardGame.deletedDate.isNull()
                         .and(boardGame.gameId.eq(gameId)))
-                .groupBy(boardGame)
+                .groupBy(boardGame.gameId)
                 .orderBy(gameRate.rate.avg().desc())
                 .fetchOne();
 
-        if (result == null) {
-            return null;
+        if (result != null) {
+            result.setGameProfilePics(profilePics);
+            result.setGameGenres(genres);
         }
 
-        BoardGame boardGameEntity = result.get(boardGame);
-        Double averageRate = result.get(gameRate.rate.avg());
-        Long views = result.get(gameVisitor.id.count());
-
-        // 프로필 사진 수집
-        List<String> picAddresses = boardGameEntity.getGameProfilePics().stream()
-                .map(GameProfilePic::getPicAddress)
-                .collect(Collectors.toList());
-
-        // 장르 수집
-        List<GameGenre> genres = queryFactory
-                .select(gameGenre)
-                .from(gameGenre)
-                .where(gameGenre.boardGame.eq(boardGameEntity))
-                .fetch();
-
-        GameResponseDto dto = new GameResponseDto();
-        dto.setGameId(boardGameEntity.getGameId());
-        dto.setName(boardGameEntity.getName());
-        dto.setPlayTime(boardGameEntity.getPlayTime().getLabel());
-        dto.setPlayNum(boardGameEntity.getPlayNum().getLabel());
-        dto.setAgeLimit(boardGameEntity.getAgeLimit().getLabel());
-        dto.setPrice(boardGameEntity.getPrice());
-        dto.setDesigner(boardGameEntity.getDesigner());
-        dto.setArtwork(boardGameEntity.getArtwork());
-        dto.setReleaseDate(boardGameEntity.getReleaseDate());
-        dto.setDifficulty(boardGameEntity.getDifficulty().getLabel());
-        dto.setPublisher(boardGameEntity.getPublisher());
-        dto.setYoutubeLink(boardGameEntity.getYoutubeLink());
-        dto.setLikeCount(boardGameEntity.getGameLikes().size());
-        dto.setGameGenres(genres);
-        dto.setAverageRate(averageRate);
-        dto.setViews(views);
-
-        GameProfilePicResponseDto gameProfilePicResponseDto = new GameProfilePicResponseDto(picAddresses);
-        dto.setGameProfilePics(gameProfilePicResponseDto);
-
-        return dto;
+        return result;
     }
-
 
     @Override
     public List<GameResponseDto> findByNameContainingAndDeletedDateIsNull(String keyword) {
@@ -263,135 +178,161 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
         QGameGenre gameGenre = QGameGenre.gameGenre;
 
-        List<Tuple> results = queryFactory
-                .select(boardGame, gameRate.rate.avg(), gameVisitor.id.count())
+        List<GameResponseDto> results = queryFactory
+                .select(Projections.bean(GameResponseDto.class,
+                        boardGame.gameId.as("gameId"),
+                        boardGame.name.as("name"),
+                        boardGame.playTime.stringValue().as("playTime"),
+                        boardGame.playNum.stringValue().as("playNum"),
+                        boardGame.ageLimit.stringValue().as("ageLimit"),
+                        boardGame.difficulty.stringValue().as("difficulty"),
+                        boardGame.price.as("price"),
+                        boardGame.designer.as("designer"),
+                        boardGame.artwork.as("artwork"),
+                        boardGame.releaseDate.as("releaseDate"),
+                        boardGame.publisher.as("publisher"),
+                        boardGame.youtubeLink.as("youtubeLink"),
+                        boardGame.gameLikes.size().as("likeCount"),
+                        gameRate.rate.avg().as("averageRate"),
+                        gameVisitor.id.count().as("views")
+                ))
                 .from(boardGame)
                 .leftJoin(boardGame.gameRates, gameRate)
                 .leftJoin(boardGame.gameVisitors, gameVisitor)
+                .leftJoin(boardGame.gameProfilePics, gameProfilePic) // 프로필 사진 조인
                 .leftJoin(boardGame.gameGenres, gameGenre) // 장르 조인
                 .where(boardGame.name.contains(keyword).and(boardGame.deletedDate.isNull()))
-                .groupBy(boardGame)
+                .groupBy(
+                        boardGame.gameId,
+                        boardGame.name,
+                        boardGame.playTime,
+                        boardGame.playNum,
+                        boardGame.ageLimit,
+                        boardGame.difficulty,
+                        boardGame.price,
+                        boardGame.designer,
+                        boardGame.artwork,
+                        boardGame.releaseDate,
+                        boardGame.publisher,
+                        boardGame.youtubeLink,
+                        gameRate.rate,
+                        gameVisitor.id
+                )
                 .fetch();
 
-        List<GameResponseDto> gameResponseDtos = new ArrayList<>();
-        for (Tuple tuple : results) {
-            BoardGame boardGameEntity = tuple.get(boardGame);
-            Double averageRate = tuple.get(gameRate.rate.avg());
-            Long views = tuple.get(gameVisitor.id.count());
+        for (GameResponseDto result : results) {
+            List<String> profilePics = queryFactory
+                    .select(gameProfilePic.picAddress)
+                    .from(gameProfilePic)
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .fetch();
+            result.setGameProfilePics(profilePics);
 
-            // 프로필 사진 수집
-            List<String> picAddresses = boardGameEntity.getGameProfilePics().stream()
-                    .map(GameProfilePic::getPicAddress)
-                    .collect(Collectors.toList());
-
-            // 장르 수집
             List<GameGenre> genres = queryFactory
                     .select(gameGenre)
                     .from(gameGenre)
-                    .where(gameGenre.boardGame.eq(boardGameEntity))
+                    .where(gameGenre.boardGame.gameId.eq(result.getGameId()))
                     .fetch();
-
-            GameResponseDto dto = new GameResponseDto();
-            dto.setGameId(boardGameEntity.getGameId());
-            dto.setName(boardGameEntity.getName());
-            dto.setPlayTime(boardGameEntity.getPlayTime().getLabel());
-            dto.setPlayNum(boardGameEntity.getPlayNum().getLabel());
-            dto.setAgeLimit(boardGameEntity.getAgeLimit().getLabel());
-            dto.setPrice(boardGameEntity.getPrice());
-            dto.setDesigner(boardGameEntity.getDesigner());
-            dto.setArtwork(boardGameEntity.getArtwork());
-            dto.setReleaseDate(boardGameEntity.getReleaseDate());
-            dto.setDifficulty(boardGameEntity.getDifficulty().getLabel());
-            dto.setPublisher(boardGameEntity.getPublisher());
-            dto.setYoutubeLink(boardGameEntity.getYoutubeLink());
-            dto.setLikeCount(boardGameEntity.getGameLikes().size());
-            dto.setGameGenres(genres);
-            dto.setAverageRate(averageRate);
-            dto.setViews(views);
-
-            GameProfilePicResponseDto gameProfilePicResponseDto = new GameProfilePicResponseDto(picAddresses);
-            dto.setGameProfilePics(gameProfilePicResponseDto);
-
-            gameResponseDtos.add(dto);
+            result.setGameGenres(genres);
         }
 
-        return gameResponseDtos;
+        return results;
     }
 
-
-
-    public Page<GameResponseDto> findAllByDeletedDateIsNull(Pageable pageable) {
+    public Page<GameResponseDto> findAllByDeletedDateIsNull(Pageable pageable, Enums.GameListSortOption sortBy) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
         QGameRate gameRate = QGameRate.gameRate;
         QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
         QGameGenre gameGenre = QGameGenre.gameGenre;
 
-        List<Tuple> results = queryFactory
-                .select(boardGame, gameRate.rate.avg(), gameVisitor.id.count())
+        JPAQuery<GameResponseDto> query = queryFactory
+                .select(Projections.bean(GameResponseDto.class,
+                        boardGame.gameId.as("gameId"),
+                        boardGame.name.as("name"),
+                        boardGame.playTime.stringValue().as("playTime"),
+                        boardGame.playNum.stringValue().as("playNum"),
+                        boardGame.ageLimit.stringValue().as("ageLimit"),
+                        boardGame.difficulty.stringValue().as("difficulty"),
+                        boardGame.price.as("price"),
+                        boardGame.designer.as("designer"),
+                        boardGame.artwork.as("artwork"),
+                        boardGame.releaseDate.as("releaseDate"),
+                        boardGame.publisher.as("publisher"),
+                        boardGame.youtubeLink.as("youtubeLink"),
+                        boardGame.gameLikes.size().as("likeCount"),
+                        gameRate.rate.avg().as("averageRate"),
+                        gameVisitor.id.count().as("views")
+                ))
                 .from(boardGame)
                 .leftJoin(boardGame.gameRates, gameRate)
                 .leftJoin(boardGame.gameVisitors, gameVisitor)
                 .leftJoin(boardGame.gameProfilePics, gameProfilePic)
                 .leftJoin(boardGame.gameGenres, gameGenre)
                 .where(boardGame.deletedDate.isNull())
-                .groupBy(boardGame)
-//                .orderBy()
+                .groupBy(
+                        boardGame.gameId,
+                        boardGame.name,
+                        boardGame.playTime,
+                        boardGame.playNum,
+                        boardGame.ageLimit,
+                        boardGame.difficulty,
+                        boardGame.price,
+                        boardGame.designer,
+                        boardGame.artwork,
+                        boardGame.releaseDate,
+                        boardGame.publisher,
+                        boardGame.youtubeLink,
+                        gameRate.rate,
+                        gameVisitor.id
+                );
+
+        if (sortBy.equals(Enums.GameListSortOption.GAME_ID)) {
+            query.orderBy(boardGame.gameId.desc());
+        } else if (sortBy.equals(Enums.GameListSortOption.AVERAGE_RATE)) {
+            NumberExpression<Double> averageRate = gameRate.rate.avg();
+            OrderSpecifier<Double> orderSpecifier = new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, averageRate);
+            query.orderBy(orderSpecifier);
+        } else if (sortBy.equals(Enums.GameListSortOption.DIFFICULTY)) {
+            NumberExpression<Integer> difficultyOrder = new CaseBuilder()
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then(0)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then(1)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then(2)
+                    .otherwise(3);
+            query.orderBy(new OrderSpecifier<>(com.querydsl.core.types.Order.ASC, difficultyOrder));
+        } else if (sortBy.equals(Enums.GameListSortOption.VIEWS)) {
+            query.orderBy(gameVisitor.id.count().desc());
+        }
+
+        List<GameResponseDto> results = query
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        List<GameResponseDto> gameResponseDtos = new ArrayList<>();
-        for (Tuple tuple : results) {
-            BoardGame boardGameEntity = tuple.get(boardGame);
-            Double averageRate = tuple.get(gameRate.rate.avg());
-            Long views = tuple.get(gameVisitor.id.count());
+        for (GameResponseDto result : results) {
+            List<String> profilePics = queryFactory
+                    .select(gameProfilePic.picAddress)
+                    .from(gameProfilePic)
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .fetch();
+            result.setGameProfilePics(profilePics);
 
-            // 프로필 사진 수집
-            List<String> picAddresses = boardGameEntity.getGameProfilePics().stream()
-                    .map(GameProfilePic::getPicAddress)
-                    .collect(Collectors.toList());
-
-            // 장르 수집
             List<GameGenre> genres = queryFactory
                     .select(gameGenre)
                     .from(gameGenre)
-                    .where(gameGenre.boardGame.eq(boardGameEntity))
+                    .where(gameGenre.boardGame.gameId.eq(result.getGameId()))
                     .fetch();
-
-            GameResponseDto dto = new GameResponseDto();
-            dto.setGameId(boardGameEntity.getGameId());
-            dto.setName(boardGameEntity.getName());
-            dto.setPlayTime(boardGameEntity.getPlayTime().getLabel());
-            dto.setPlayNum(boardGameEntity.getPlayNum().getLabel());
-            dto.setAgeLimit(boardGameEntity.getAgeLimit().getLabel());
-            dto.setPrice(boardGameEntity.getPrice());
-            dto.setDesigner(boardGameEntity.getDesigner());
-            dto.setArtwork(boardGameEntity.getArtwork());
-            dto.setReleaseDate(boardGameEntity.getReleaseDate());
-            dto.setDifficulty(boardGameEntity.getDifficulty().getLabel());
-            dto.setPublisher(boardGameEntity.getPublisher());
-            dto.setYoutubeLink(boardGameEntity.getYoutubeLink());
-            dto.setLikeCount(boardGameEntity.getGameLikes().size());
-            dto.setGameGenres(genres);
-            dto.setAverageRate(averageRate);
-            dto.setViews(views);
-
-            GameProfilePicResponseDto gameProfilePicResponseDto = new GameProfilePicResponseDto(picAddresses);
-            dto.setGameProfilePics(gameProfilePicResponseDto);
-
-            gameResponseDtos.add(dto);
+            result.setGameGenres(genres);
         }
 
-        return new PageImpl<>(gameResponseDtos, pageable, gameResponseDtos.size());
+        long total = queryFactory
+                .select(boardGame.count())
+                .from(boardGame)
+                .where(boardGame.deletedDate.isNull())
+                .fetchOne();
+
+        return new PageImpl<>(results, pageable, total);
     }
-
-
-
-
-
-
-
 
     @Override
     public List<GameResponseDto> findByGameGenresGenreGenre(String genre, Pageable pageable) {
@@ -401,62 +342,68 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         QGameRate gameRate = QGameRate.gameRate;
         QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
 
-        List<Tuple> results = queryFactory
-                .select(boardGame, gameRate.rate.avg(), gameVisitor.id.count())
+        List<GameResponseDto> results = queryFactory
+                .select(Projections.bean(GameResponseDto.class,
+                        boardGame.gameId.as("gameId"),
+                        boardGame.name.as("name"),
+                        boardGame.playTime.stringValue().as("playTime"),
+                        boardGame.playNum.stringValue().as("playNum"),
+                        boardGame.ageLimit.stringValue().as("ageLimit"),
+                        boardGame.difficulty.stringValue().as("difficulty"),
+                        boardGame.price.as("price"),
+                        boardGame.designer.as("designer"),
+                        boardGame.artwork.as("artwork"),
+                        boardGame.releaseDate.as("releaseDate"),
+                        boardGame.publisher.as("publisher"),
+                        boardGame.youtubeLink.as("youtubeLink"),
+                        boardGame.gameLikes.size().as("likeCount"),
+                        gameRate.rate.avg().as("averageRate"),
+                        gameVisitor.id.count().as("views")
+                ))
                 .from(boardGame)
                 .leftJoin(boardGame.gameRates, gameRate)
                 .leftJoin(boardGame.gameVisitors, gameVisitor)
                 .leftJoin(boardGame.gameProfilePics, gameProfilePic) // 프로필 사진 조인
                 .leftJoin(boardGame.gameGenres, gameGenre) // 장르 조인
                 .where(gameGenre.genre.genre.eq(genre).and(boardGame.deletedDate.isNull()))
-                .groupBy(boardGame)
+                .groupBy(
+                        boardGame.gameId,
+                        boardGame.name,
+                        boardGame.playTime,
+                        boardGame.playNum,
+                        boardGame.ageLimit,
+                        boardGame.difficulty,
+                        boardGame.price,
+                        boardGame.designer,
+                        boardGame.artwork,
+                        boardGame.releaseDate,
+                        boardGame.publisher,
+                        boardGame.youtubeLink,
+                        gameRate.rate,
+                        gameVisitor.id
+                )
                 .orderBy(gameRate.rate.avg().desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        List<GameResponseDto> gameResponseDtos = new ArrayList<>();
-        for (Tuple tuple : results) {
-            BoardGame boardGameEntity = tuple.get(boardGame);
-            Double averageRate = tuple.get(gameRate.rate.avg());
-            Long views = tuple.get(gameVisitor.id.count());
+        for (GameResponseDto result : results) {
+            List<String> profilePics = queryFactory
+                    .select(gameProfilePic.picAddress)
+                    .from(gameProfilePic)
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .fetch();
+            result.setGameProfilePics(profilePics);
 
-            // 프로필 사진 수집
-            List<String> picAddresses = boardGameEntity.getGameProfilePics().stream()
-                    .map(GameProfilePic::getPicAddress)
-                    .collect(Collectors.toList());
-
-            // 장르 수집
             List<GameGenre> genres = queryFactory
                     .select(gameGenre)
                     .from(gameGenre)
-                    .where(gameGenre.boardGame.eq(boardGameEntity))
+                    .where(gameGenre.boardGame.gameId.eq(result.getGameId()))
                     .fetch();
-
-            GameResponseDto dto = new GameResponseDto();
-            dto.setGameId(boardGameEntity.getGameId());
-            dto.setName(boardGameEntity.getName());
-            dto.setPlayTime(boardGameEntity.getPlayTime().getLabel());
-            dto.setPlayNum(boardGameEntity.getPlayNum().getLabel());
-            dto.setAgeLimit(boardGameEntity.getAgeLimit().getLabel());
-            dto.setPrice(boardGameEntity.getPrice());
-            dto.setDesigner(boardGameEntity.getDesigner());
-            dto.setArtwork(boardGameEntity.getArtwork());
-            dto.setReleaseDate(boardGameEntity.getReleaseDate());
-            dto.setDifficulty(boardGameEntity.getDifficulty().getLabel());
-            dto.setPublisher(boardGameEntity.getPublisher());
-            dto.setYoutubeLink(boardGameEntity.getYoutubeLink());
-            dto.setLikeCount(boardGameEntity.getGameLikes().size());
-            dto.setGameGenres(genres);
-            dto.setAverageRate(averageRate);
-            dto.setViews(views);
-
-            GameProfilePicResponseDto gameProfilePicResponseDto = new GameProfilePicResponseDto(picAddresses);
-            dto.setGameProfilePics(gameProfilePicResponseDto);
-
-            gameResponseDtos.add(dto);
+            result.setGameGenres(genres);
         }
 
-        return gameResponseDtos;
+        return results;
     }
+
 }
