@@ -132,12 +132,13 @@ public class BoardGameController {
 
     @GetMapping("/games")
     public ResponseEntity<CommonResponse<Page<GameResponseDto>>> getGames(
-            @ModelAttribute PaginationRequest paginationRequest,
-            @RequestParam(defaultValue = "gameId")  String sort) {
+            @ModelAttribute GamesPaginationRequest paginationRequest
+            ) {
 
-        Enums.GameListSortOption sortBy = Enums.GameListSortOption.fromString(sort);
+//        Enums.GameListSortOption sortBy = Enums.GameListSortOption.fromString(sort);
         int page = paginationRequest.getPage() == 0 ? 0 : paginationRequest.getPage();
         int size = paginationRequest.getSize() == 0 ? 12 : paginationRequest.getSize();
+        Enums.GameListSortOption sortBy = paginationRequest.getSortBy() == null ? Enums.GameListSortOption.GAME_ID : paginationRequest.getSortBy();
 
         Pageable pageable = PageRequest.of(page, size);
 
