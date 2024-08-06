@@ -41,7 +41,5 @@ public class GamePutDto {
 
     private Double averageRate;
 
-    private GameProfilePicResponseDto gameProfilePics;
-
     private List<Long> gameGenreIds = new ArrayList<>();
 }

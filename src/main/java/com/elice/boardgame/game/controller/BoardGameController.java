@@ -76,7 +76,7 @@ public class BoardGameController {
                 ,HttpStatus.OK);
     }
 
-    @PutMapping("/{gameId}")
+    @PutMapping
     public ResponseEntity<CommonResponse<GameResponseDto>> putGame(
             @RequestPart("gamePutDto") @Validated GamePutDto gamePutDto,
             @RequestPart(value = "file", required = false) List<MultipartFile> files,
@@ -135,7 +135,6 @@ public class BoardGameController {
             @ModelAttribute GamesPaginationRequest paginationRequest
             ) {
 
-//        Enums.GameListSortOption sortBy = Enums.GameListSortOption.fromString(sort);
         int page = paginationRequest.getPage() == 0 ? 0 : paginationRequest.getPage();
         int size = paginationRequest.getSize() == 0 ? 12 : paginationRequest.getSize();
         Enums.GameListSortOption sortBy = paginationRequest.getSortBy() == null ? Enums.GameListSortOption.GAME_ID : paginationRequest.getSortBy();

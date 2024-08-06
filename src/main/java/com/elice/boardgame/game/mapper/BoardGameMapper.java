@@ -1,11 +1,9 @@
 package com.elice.boardgame.game.mapper;
 
 import com.elice.boardgame.game.dto.GamePostDto;
-import com.elice.boardgame.game.dto.GameProfilePicResponseDto;
 import com.elice.boardgame.game.dto.GamePutDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
-import com.elice.boardgame.game.entity.GameProfilePic;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
 import com.elice.boardgame.game.repository.GameRateRepository;
@@ -13,9 +11,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter

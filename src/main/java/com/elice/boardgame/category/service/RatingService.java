@@ -2,7 +2,6 @@ package com.elice.boardgame.category.service;
 
 import com.elice.boardgame.category.DTO.BoardGameRateDto;
 import com.elice.boardgame.category.DTO.RatingCountDto;
-import com.elice.boardgame.game.dto.GameProfilePicResponseDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameProfilePic;
