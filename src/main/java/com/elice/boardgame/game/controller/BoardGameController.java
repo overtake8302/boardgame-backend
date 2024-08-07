@@ -8,12 +8,17 @@ import com.elice.boardgame.common.exceptions.GameRootException;
 import com.elice.boardgame.game.dto.*;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
 import com.elice.boardgame.game.service.BoardGameService;
+import com.elice.boardgame.post.dto.PostDto;
+import com.elice.boardgame.post.entity.Comment;
+import com.elice.boardgame.post.entity.Post;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -52,10 +57,36 @@ public class    BoardGameController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{gameId}")
+    /*@GetMapping("/{gameId}")
     public ResponseEntity<CommonResponse<GameResponseDto>> getGame(@PathVariable @Min(1) Long gameId) {
 
         GameResponseDto foundGame = boardGameService.findGameByGameId(gameId);
+        CommonResponse<GameResponseDto> response = CommonResponse.<GameResponseDto>builder()
+                .payload(foundGame)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }*/
+
+    @GetMapping("/{gameId}")
+    public ResponseEntity<CommonResponse<GameResponseDto>> getGame(
+            @PathVariable @Min(1) Long gameId,
+            @RequestParam(required = false) boolean wantComments,
+            @RequestParam(required = false) boolean wantPosts,
+            @RequestParam(required = false) Enums.Category category
+    ) {
+
+        GameResponseDto foundGame = boardGameService.findGameByGameId(gameId);
+
+        /*if (wantComments) {
+            List<Comment> comments = boardGameService.findComentsByGameId(gameId);
+        }*/
+
+        if (wantPosts) {
+            List<PostDto> posts = boardGameService.getTop10Posts(gameId,category);
+            foundGame.setPosts(posts);
+        }
+
         CommonResponse<GameResponseDto> response = CommonResponse.<GameResponseDto>builder()
                 .payload(foundGame)
                 .build();
@@ -76,7 +107,7 @@ public class    BoardGameController {
                 ,HttpStatus.OK);
     }
 
-    @PutMapping("/{gameId}")
+    @PutMapping
     public ResponseEntity<CommonResponse<GameResponseDto>> putGame(
             @RequestPart("gamePutDto") @Validated GamePutDto gamePutDto,
             @RequestPart(value = "file", required = false) List<MultipartFile> files,
@@ -96,10 +127,13 @@ public class    BoardGameController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<CommonResponse<List<GameResponseDto>>> searchByName(@RequestParam(required = true) @NotBlank String keyword) {
+    public ResponseEntity<CommonResponse<Page<GameResponseDto>>> searchByName(
+            @RequestParam(required = true) @NotBlank String keyword,
+            @PageableDefault(page = 0, size = 20) Pageable pageable
+            ) {
 
-        List<GameResponseDto> foundGames = boardGameService.findGameByName(keyword);
-        CommonResponse<List<GameResponseDto>> response = CommonResponse.<List<GameResponseDto>>builder()
+        Page<GameResponseDto> foundGames = boardGameService.findGameByName(keyword, pageable);
+        CommonResponse<Page<GameResponseDto>> response = CommonResponse.<Page<GameResponseDto>>builder()
                 .payload(foundGames)
                 .build();
 
@@ -130,12 +164,11 @@ public class    BoardGameController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/games")
+    @GetMapping
     public ResponseEntity<CommonResponse<Page<GameResponseDto>>> getGames(
             @ModelAttribute GamesPaginationRequest paginationRequest
             ) {
 
-//        Enums.GameListSortOption sortBy = Enums.GameListSortOption.fromString(sort);
         int page = paginationRequest.getPage() == 0 ? 0 : paginationRequest.getPage();
         int size = paginationRequest.getSize() == 0 ? 12 : paginationRequest.getSize();
         Enums.GameListSortOption sortBy = paginationRequest.getSortBy() == null ? Enums.GameListSortOption.GAME_ID : paginationRequest.getSortBy();
@@ -159,7 +192,7 @@ public class    BoardGameController {
     }
 
     @GetMapping("/home")
-    public ResponseEntity<CommonResponse<List<GameResponseDto>>> getHomeGames(@RequestParam @NotBlank String genre, @RequestParam @NotBlank String sort) {
+    public ResponseEntity<CommonResponse<List<GameResponseDto>>> getHomeGames(@RequestParam @NotBlank String genre, @RequestParam @NotNull Enums.GameListSortOption sort) {
 
         List<GameResponseDto> gameResponseDtos = boardGameService.findGamesByGenreAndSort(genre, sort);
         CommonResponse<List<GameResponseDto>> response = CommonResponse.<List<GameResponseDto>>builder()

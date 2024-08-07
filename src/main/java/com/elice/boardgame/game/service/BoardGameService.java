@@ -21,6 +21,11 @@ import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
 import com.elice.boardgame.game.repository.GameRateRepository;
 import com.elice.boardgame.game.repository.GameVisitorRepository;
+import com.elice.boardgame.post.dto.PostDto;
+import com.elice.boardgame.post.entity.Comment;
+import com.elice.boardgame.post.entity.Post;
+import com.elice.boardgame.post.repository.CommentRepository;
+import com.elice.boardgame.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +33,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,6 +60,8 @@ public class BoardGameService {
     private final GameVisitorRepository gameVisitorRepository;
     private final GenreMapper genreMapper;
     private final AuthService authService;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
@@ -208,9 +216,9 @@ public class BoardGameService {
     }
 
 
-    public List<GameResponseDto> findGameByName(String keyword) {
+    public Page<GameResponseDto> findGameByName(String keyword, Pageable pageable) {
 
-        List<GameResponseDto> foundGames = boardGameRepository.findByNameContainingAndDeletedDateIsNull(keyword);
+        Page<GameResponseDto> foundGames = boardGameRepository.findByNameContainingAndDeletedDateIsNull(keyword, pageable);
 
         if (foundGames == null || foundGames.isEmpty()) {
             throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -279,10 +287,23 @@ public class BoardGameService {
         gameVisitorRepository.insertIgnore(visitorId, gameId);
     }
 
-    public List<GameResponseDto> findGamesByGenreAndSort(String genre, String sort) {
+    public List<GameResponseDto> findGamesByGenreAndSort(String genre, Enums.GameListSortOption sort) {
 
-        Pageable pageable = PageRequest.of(0, 5, Sort.by(sort));
-        return boardGameRepository.findByGameGenresGenreGenre(genre,pageable);
+        return boardGameRepository.findByGameGenresGenreGenre(genre, sort);
 
     }
+
+    public List<PostDto> getTop10Posts(Long gameId, Enums.Category category) {
+        List<Post> posts = postRepository.findTop10ByBoardGameGameIdAndCategoryOrderByIdDesc(gameId, category);
+        List<PostDto> postDtos = new ArrayList<>();
+        for (Post post : posts) {
+            PostDto postDto = new PostDto();
+            postDto.setCategory(post.getCategory());
+            postDto.setTitle(post.getTitle());
+            postDto.setContent(post.getContent());
+            postDtos.add(postDto);
+        }
+        return postDtos;
+    }
+
 }

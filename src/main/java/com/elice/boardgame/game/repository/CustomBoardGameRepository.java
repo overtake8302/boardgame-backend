@@ -12,7 +12,7 @@ public interface CustomBoardGameRepository {
     List<BoardGame> findBoardGamesWithFilters(List<String> playTimes, List<String> playNums, List<String> ageLimits, List<String> prices, List<String> genres);
     List<BoardGame> findByGenres(List<Long> genreIds, Long userId);
     GameResponseDto getGameResponseDtoByGameIdAndDeletedDateIsNull(Long gameId);
-    List<GameResponseDto> findByNameContainingAndDeletedDateIsNull(String keyword);
+    Page<GameResponseDto> findByNameContainingAndDeletedDateIsNull(String keyword, Pageable pageable);
     Page<GameResponseDto> findAllByDeletedDateIsNull(Pageable pageable, Enums.GameListSortOption sortBy);
-    List<GameResponseDto> findByGameGenresGenreGenre(String genre, Pageable pageable);
+    List<GameResponseDto> findByGameGenresGenreGenre(String genre, Enums.GameListSortOption sort);
 }
