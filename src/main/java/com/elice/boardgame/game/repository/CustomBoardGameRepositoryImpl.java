@@ -2,6 +2,7 @@ package com.elice.boardgame.game.repository;
 
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.QGameGenre;
+import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.*;
@@ -506,4 +507,28 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         return results;
     }
 
+    @Override
+    public Page<SearchResponse> searchByKeyword(String keyword, Pageable pageable) {
+        QBoardGame boardGame = QBoardGame.boardGame;
+
+        List<SearchResponse> results = queryFactory
+            .select(Projections.constructor(SearchResponse.class,
+                boardGame.gameId,
+                boardGame.name))
+            .from(boardGame)
+            .where(boardGame.name.containsIgnoreCase(keyword)
+                .and(boardGame.deletedDate.isNull()))
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        long total = queryFactory
+            .select(boardGame.count())
+            .from(boardGame)
+            .where(boardGame.name.containsIgnoreCase(keyword)
+                .and(boardGame.deletedDate.isNull()))
+            .fetchOne();
+
+        return new PageImpl<>(results, pageable, total);
+    }
 }

@@ -2,6 +2,8 @@ package com.elice.boardgame.game.controller;
 
 import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.common.dto.PaginationRequest;
+import com.elice.boardgame.common.dto.SearchRequest;
+import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.common.exceptions.GameErrorMessages;
 import com.elice.boardgame.common.exceptions.GameRootException;
@@ -126,16 +128,28 @@ public class    BoardGameController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<CommonResponse<Page<GameResponseDto>>> searchByName(
-            @RequestParam(required = true) @NotBlank String keyword,
-            @PageableDefault(page = 0, size = 20) Pageable pageable
-            ) {
+//    @GetMapping("/search")
+//    public ResponseEntity<CommonResponse<Page<GameResponseDto>>> searchByName(
+//            @RequestParam(required = true) @NotBlank String keyword,
+//            @PageableDefault(page = 0, size = 20) Pageable pageable
+//            ) {
+//
+//        Page<GameResponseDto> foundGames = boardGameService.findGameByName(keyword, pageable);
+//        CommonResponse<Page<GameResponseDto>> response = CommonResponse.<Page<GameResponseDto>>builder()
+//                .payload(foundGames)
+//                .build();
+//
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
 
-        Page<GameResponseDto> foundGames = boardGameService.findGameByName(keyword, pageable);
-        CommonResponse<Page<GameResponseDto>> response = CommonResponse.<Page<GameResponseDto>>builder()
-                .payload(foundGames)
-                .build();
+    @GetMapping("/search")
+    public ResponseEntity<CommonResponse<Page<SearchResponse>>> searchByKeyword(@ModelAttribute SearchRequest searchRequest) {
+        String keyword = searchRequest.getKeyword();
+        Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize());
+        Page<SearchResponse> foundGames = boardGameService.searchByKeyword(keyword, pageable);
+        CommonResponse<Page<SearchResponse>> response = CommonResponse.<Page<SearchResponse>>builder()
+            .payload(foundGames)
+            .build();
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
