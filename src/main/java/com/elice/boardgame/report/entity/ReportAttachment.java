@@ -1,11 +1,17 @@
 package com.elice.boardgame.report.entity;
 
-import com.elice.boardgame.post.entity.BaseEntity;
+import com.elice.boardgame.common.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@RequiredArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
 public class ReportAttachment extends BaseEntity {
 
     @Id

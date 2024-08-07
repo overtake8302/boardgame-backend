@@ -2,6 +2,7 @@ package com.elice.boardgame.post.entity;
 
 import com.elice.boardgame.auth.entity.User;
 
+import com.elice.boardgame.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import java.util.List;
 import lombok.AllArgsConstructor;

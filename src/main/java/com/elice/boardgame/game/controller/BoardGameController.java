@@ -23,7 +23,7 @@ import java.util.List;
 @RequestMapping("/api")
 @Validated
 @RequiredArgsConstructor
-public class BoardGameController {
+public class    BoardGameController {
 
     private final BoardGameService boardGameService;
     private final BoardGameMapper mapper;

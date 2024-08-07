@@ -4,11 +4,9 @@ import lombok.Data;
 
 @Data
 public class ReportAttachmentDto {
-    private Long attachmentId;
     private String attachmentUrl;
 
-    public ReportAttachmentDto(Long attachmentId, String attachmentUrl) {
-        this.attachmentId = attachmentId;
+    public ReportAttachmentDto(String attachmentUrl) {
         this.attachmentUrl = attachmentUrl;
     }
 }

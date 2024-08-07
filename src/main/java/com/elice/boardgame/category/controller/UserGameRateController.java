@@ -1,11 +1,9 @@
 package com.elice.boardgame.category.controller;
 
-import com.elice.boardgame.category.DTO.RatingCountDto;
+import com.elice.boardgame.category.dto.RatingCountDto;
 import com.elice.boardgame.category.service.RatingService;
-import com.elice.boardgame.game.dto.GameResponseDto;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/game-rate")
+@RequestMapping("/recommend")
 public class UserGameRateController {
 
     private final RatingService userGameRateService;

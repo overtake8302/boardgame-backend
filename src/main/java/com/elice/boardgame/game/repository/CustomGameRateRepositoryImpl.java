@@ -1,8 +1,7 @@
 package com.elice.boardgame.game.repository;
 
 import com.elice.boardgame.auth.entity.User;
-import com.elice.boardgame.category.DTO.BoardGameRateDto;
-import com.elice.boardgame.category.DTO.RatingCountDto;
+import com.elice.boardgame.category.dto.RatingCountDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameRate;
 import com.elice.boardgame.game.entity.QBoardGame;
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
-import static com.elice.boardgame.game.entity.QBoardGame.boardGame;
 import static com.elice.boardgame.game.entity.QGameRate.gameRate;
 
 @Repository
@@ -48,13 +46,8 @@ public class CustomGameRateRepositoryImpl implements CustomGameRateRepository{
 
     @Override
     public RatingCountDto findRatingCountByUserIdAndRate(Long userId, Double rate) {
-        List<String> gameNames = queryFactory
-            .select(boardGame.name)
-            .from(gameRate)
-            .join(gameRate.boardGame, boardGame)
-            .where(gameRate.user.id.eq(userId)
-                .and(gameRate.rate.eq(rate)))
-            .fetch();
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameRate gameRate = QGameRate.gameRate;
 
         Long totalCount = queryFactory
             .select(gameRate.count())
@@ -63,11 +56,16 @@ public class CustomGameRateRepositoryImpl implements CustomGameRateRepository{
                 .and(gameRate.rate.eq(rate)))
             .fetchOne();
 
+        List<String> gameNames = queryFactory
+            .select(boardGame.name)
+            .from(gameRate)
+            .join(gameRate.boardGame, boardGame)
+            .where(gameRate.user.id.eq(userId)
+                .and(gameRate.rate.eq(rate)))
+            .fetch();
+
         return new RatingCountDto(totalCount, gameNames);
     }
-
-
-
 
     @Override
     public List<BoardGame> findByUserId(Long userId) {
@@ -81,7 +79,6 @@ public class CustomGameRateRepositoryImpl implements CustomGameRateRepository{
             .where(gameRate.user.id.eq(userId))
             .fetch();
     }
-
 
     @Override
     public Optional<GameRate> findByUserAndBoardGame(User user, BoardGame boardGame) {

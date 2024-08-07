@@ -5,7 +5,7 @@ import com.elice.boardgame.common.exceptions.GenreNotFoundException;
 import com.elice.boardgame.common.exceptions.MemberNotFoundException;
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
-import com.elice.boardgame.category.DTO.GenreDto;
+import com.elice.boardgame.category.dto.GenreDto;
 import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.entity.LikeGenre;
 import com.elice.boardgame.category.entity.LikeGenreId;

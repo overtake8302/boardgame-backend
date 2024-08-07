@@ -4,9 +4,13 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import java.io.Serializable;
 import java.util.Objects;
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 @Embeddable
 public class LikeGenreId implements Serializable {
 

@@ -3,6 +3,7 @@ package com.elice.boardgame.common.enums;
 public class Enums {
     public enum Category {
         FREE("자유 게시판"),
+        REVIEW("후기 게시판"),
         USED("중고 거래 게시판"),
         MEETING("모임 게시판");
 

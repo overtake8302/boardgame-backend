@@ -1,6 +1,6 @@
 package com.elice.boardgame.category.controller;
 
-import com.elice.boardgame.category.DTO.BoardGameFilterDto;
+import com.elice.boardgame.category.dto.BoardGameFilterDto;
 import com.elice.boardgame.category.service.GameFilterService;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -19,4 +19,6 @@ public class GameFilterController {
     public List<GameResponseDto> getFilteredBoardGames(BoardGameFilterDto filterDTO) {
         return gameFilterService.getFilteredBoardGames(filterDTO);
     }
+
+
 }
