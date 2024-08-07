@@ -1,4 +1,4 @@
-package com.elice.boardgame.post.entity;
+package com.elice.boardgame.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
@@ -17,11 +17,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity {
     @CreatedDate
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    private boolean deletedAt = false;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }

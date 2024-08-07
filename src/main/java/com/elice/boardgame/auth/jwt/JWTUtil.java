@@ -34,9 +34,10 @@ public class JWTUtil {
         return Jwts.builder()
                 .claim("username", username)
                 .claim("role", role)
-                .issuedAt(new Date(System.currentTimeMillis()))                 //발행시간
-                .expiration(new Date(System.currentTimeMillis() + expiredMs))   //만료시간
+                .setIssuedAt(new Date(System.currentTimeMillis()))                 // 발행시간
+                .setExpiration(new Date(System.currentTimeMillis() + expiredMs))   // 만료시간
                 .signWith(secretKey)
                 .compact();
     }
+
 }

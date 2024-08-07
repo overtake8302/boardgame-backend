@@ -1,8 +1,7 @@
 package com.elice.boardgame.game.repository;
 
 import com.elice.boardgame.auth.entity.User;
-import com.elice.boardgame.category.DTO.BoardGameRateDto;
-import com.elice.boardgame.category.DTO.RatingCountDto;
+import com.elice.boardgame.category.dto.RatingCountDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameRate;
 import com.elice.boardgame.game.entity.QBoardGame;
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
-import static com.elice.boardgame.game.entity.QBoardGame.boardGame;
 import static com.elice.boardgame.game.entity.QGameRate.gameRate;
 
 @Repository
@@ -47,16 +45,26 @@ public class CustomGameRateRepositoryImpl implements CustomGameRateRepository{
     }
 
     @Override
-    public List<BoardGameRateDto> findByUserIdAndRate(Long userId, Double rate) {
-        return queryFactory
-            .select(Projections.fields(BoardGameRateDto.class,
-                boardGame,
-                gameRate.rate))
+    public RatingCountDto findRatingCountByUserIdAndRate(Long userId, Double rate) {
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameRate gameRate = QGameRate.gameRate;
+
+        Long totalCount = queryFactory
+            .select(gameRate.count())
+            .from(gameRate)
+            .where(gameRate.user.id.eq(userId)
+                .and(gameRate.rate.eq(rate)))
+            .fetchOne();
+
+        List<String> gameNames = queryFactory
+            .select(boardGame.name)
             .from(gameRate)
             .join(gameRate.boardGame, boardGame)
             .where(gameRate.user.id.eq(userId)
                 .and(gameRate.rate.eq(rate)))
             .fetch();
+
+        return new RatingCountDto(totalCount, gameNames);
     }
 
     @Override
@@ -71,7 +79,6 @@ public class CustomGameRateRepositoryImpl implements CustomGameRateRepository{
             .where(gameRate.user.id.eq(userId))
             .fetch();
     }
-
 
     @Override
     public Optional<GameRate> findByUserAndBoardGame(User user, BoardGame boardGame) {

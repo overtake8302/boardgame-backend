@@ -3,8 +3,8 @@ package com.elice.boardgame.post.entity;
 import com.elice.boardgame.auth.entity.User;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.elice.boardgame.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -18,8 +18,8 @@ import org.hibernate.annotations.Where;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@SQLDelete(sql = "UPDATE comment SET deletedAt = true WHERE id = ?")
-@Where(clause = "deletedAt = false")
+@SQLDelete(sql = "UPDATE comment SET deleted_at = CURRENT_TIMESTAMP WHERE comment_id = ?")
+@Where(clause = "deleted_at IS NULL")
 public class Comment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,4 +1,4 @@
-package com.elice.boardgame.category.DTO;
+package com.elice.boardgame.category.dto;
 
 import com.elice.boardgame.game.entity.BoardGame;
 import lombok.Data;

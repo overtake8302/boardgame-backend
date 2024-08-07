@@ -1,6 +1,6 @@
 package com.elice.boardgame.category.mapper;
 
-import com.elice.boardgame.category.DTO.GenreDto;
+import com.elice.boardgame.category.dto.GenreDto;
 import com.elice.boardgame.category.entity.Genre;
 import org.springframework.stereotype.Component;
 

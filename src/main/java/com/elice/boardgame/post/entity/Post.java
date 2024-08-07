@@ -1,6 +1,7 @@
 package com.elice.boardgame.post.entity;
 
 import com.elice.boardgame.auth.entity.User;
+import com.elice.boardgame.common.entity.BaseEntity;
 import com.elice.boardgame.game.entity.BoardGame;
 
 import java.util.ArrayList;
@@ -19,8 +20,8 @@ import org.hibernate.annotations.Where;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@SQLDelete(sql = "UPDATE post SET deletedAt = true WHERE post_id = ?")
-@Where(clause = "deletedAt = false")
+@SQLDelete(sql = "UPDATE post SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@Where(clause = "deleted_at IS NULL")
 public class Post extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,6 +46,8 @@ public class Post extends BaseEntity {
     private List<String> imageNames = new ArrayList<>();
     private String gameName;
     private List<String> gameImageUrls = new ArrayList<>();
+
+    private Long likes;
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private View view;

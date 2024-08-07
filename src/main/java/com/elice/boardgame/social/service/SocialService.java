@@ -1,6 +1,5 @@
 package com.elice.boardgame.social.service;
 
-import com.elice.boardgame.social.dto.SocialRequest;
 import com.elice.boardgame.social.entity.Social;
 import com.elice.boardgame.social.entity.SocialId;
 import com.elice.boardgame.social.exception.SocialAlreadyExistsException;
@@ -21,15 +20,11 @@ import org.springframework.stereotype.Service;
 public class SocialService {
     private final SocialRepositoryCustom socialRepository;
 
-    public List<Long> getFriendIds(Long userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public List<Long> getFriendIds(Long userId, Pageable pageable) {
         return socialRepository.findFriendIdsByUserId(userId, pageable).getContent();
     }
 
-    public void addFriend(SocialRequest socialRequest) {
-        Long userId = socialRequest.getUserId();
-        Long friendId = socialRequest.getFriendId();
-
+    public void addFriend(Long userId, Long friendId) {
         if (socialRepository.existsByUserIdAndFriendId(userId, friendId)) {
             throw new SocialAlreadyExistsException("Friend relationship already exists.");
         }
