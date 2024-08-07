@@ -109,8 +109,9 @@ public class    BoardGameController {
                 ,HttpStatus.OK);
     }
 
-    @PutMapping
+    @PutMapping("/{gameId}")
     public ResponseEntity<CommonResponse<GameResponseDto>> putGame(
+            @PathVariable Long gameId,
             @RequestPart("gamePutDto") @Validated GamePutDto gamePutDto,
             @RequestPart(value = "file", required = false) List<MultipartFile> files,
             BindingResult bindingResult
