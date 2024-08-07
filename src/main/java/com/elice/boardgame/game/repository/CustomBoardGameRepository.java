@@ -15,4 +15,6 @@ public interface CustomBoardGameRepository {
     Page<GameResponseDto> findByNameContainingAndDeletedDateIsNull(String keyword, Pageable pageable);
     Page<GameResponseDto> findAllByDeletedDateIsNull(Pageable pageable, Enums.GameListSortOption sortBy);
     List<GameResponseDto> findByGameGenresGenreGenre(String genre, Enums.GameListSortOption sort);
+
+    Page<GameResponseDto> findGamesLikedByUserId(Long userId, Pageable pageable);
 }

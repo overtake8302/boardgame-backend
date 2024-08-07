@@ -306,4 +306,8 @@ public class BoardGameService {
         return postDtos;
     }
 
+    public Page<GameResponseDto> getGamesLikedByUser(Long userId, Pageable pageable) {
+        return boardGameRepository.findGamesLikedByUserId(userId, pageable);
+    }
+
 }
