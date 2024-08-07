@@ -1,5 +1,6 @@
 package com.elice.boardgame.report.controller;
 
+import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.report.dto.ReportCreateRequestDto;
 import com.elice.boardgame.report.dto.ReportDto;
 import com.elice.boardgame.report.dto.ReportUpdateRequestDto;
@@ -22,8 +23,13 @@ public class ReportController {
     private final ReportService reportService;
 
     @GetMapping()
-    public List<ReportDto> findAll() {
-        return reportService.findAll();
+    public CommonResponse<List<ReportDto>> findAll() {
+        List<ReportDto> reportDtos = reportService.findAll();
+        return CommonResponse.<List<ReportDto>>builder()
+            .payload(reportDtos)
+            .message("")
+            .status(200)
+            .build();
     }
 
     @PostMapping("/send")

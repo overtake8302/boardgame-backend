@@ -3,6 +3,7 @@ package com.elice.boardgame.category.controller;
 import com.elice.boardgame.category.dto.PostListResponseDto;
 import com.elice.boardgame.category.dto.PostPageDto;
 import com.elice.boardgame.category.service.PostFilterService;
+import com.elice.boardgame.common.dto.CommonResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,34 +20,32 @@ public class PostFilterController {
     private final PostFilterService postFilterService;
 
     @GetMapping
-    public PostPageDto<PostListResponseDto> findAllByBoardType(Pageable pageable,
+    public CommonResponse<PostPageDto<PostListResponseDto>> findAllByBoardType(Pageable pageable,
         @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
         @RequestParam String boardType) {
-        Page<PostListResponseDto> page = postFilterService.findAllByType(pageable, sortBy, boardType);
-        System.out.println(page.getContent());
-        return new PostPageDto<>(
-            page.getContent(),
-            page.getNumber(),
-            page.getSize(),
-            page.getTotalElements(),
-            page.getTotalPages()
-        );
+
+        PostPageDto<PostListResponseDto> postPageDto = postFilterService.findAllByType(pageable, sortBy, boardType);
+
+        return CommonResponse.<PostPageDto<PostListResponseDto>>builder()
+            .payload(postPageDto)
+            .message("")
+            .status(200)
+            .build();
     }
 
     // 검색 엔드포인트
     @GetMapping("/search")
-    public PostPageDto<PostListResponseDto> searchPosts(
+    public CommonResponse<PostPageDto<PostListResponseDto>> searchPosts(
         Pageable pageable,
         @RequestParam String query,
         @RequestParam String boardType) {
 
-        Page<PostListResponseDto> page = postFilterService.searchByQuery(pageable, query, boardType);
-        return new PostPageDto<>(
-            page.getContent(),
-            page.getNumber(),
-            page.getSize(),
-            page.getTotalElements(),
-            page.getTotalPages()
-        );
+        PostPageDto<PostListResponseDto> postPageDto = postFilterService.searchByQuery(pageable, query, boardType);
+
+        return CommonResponse.<PostPageDto<PostListResponseDto>>builder()
+            .payload(postPageDto)
+            .message("")
+            .status(200)
+            .build();
     }
 }
