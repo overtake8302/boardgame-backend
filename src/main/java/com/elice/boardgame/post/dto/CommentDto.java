@@ -8,11 +8,15 @@ import lombok.Setter;
 import java.util.List;
 
 @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class CommentDto {
     private Long id;
     private String content;
     private Long userId;
     private String userName;
-//    private List<CommentDto> comInComs;
-//    private Long parentId;
+    private List<CommentDto> comInComs;
+    private Long parentId;
+    private String createdAt;
+    private List<CommentDto> replies;
 }

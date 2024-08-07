@@ -1,13 +1,11 @@
 package com.elice.boardgame.post.entity;
 
 import com.elice.boardgame.auth.entity.User;
-import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.game.entity.BoardGame;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -46,6 +44,7 @@ public class Post extends BaseEntity {
     private List<String> imageUrls = new ArrayList<>();
     private List<String> imageNames = new ArrayList<>();
     private String gameName;
+    private List<String> gameImageUrls = new ArrayList<>();
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private View view;

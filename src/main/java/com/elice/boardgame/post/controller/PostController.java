@@ -5,7 +5,6 @@ import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.post.dto.PostDto;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.service.PostService;
-import com.elice.boardgame.post.service.ViewService;
 import com.elice.boardgame.post.service.S3Uploader;
 
 import org.springframework.http.HttpStatus;
@@ -18,19 +17,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/posts")
 @RestController
 public class PostController {
-    private final ViewService viewService;
     private final PostService postService;
     private final S3Uploader s3Uploader;
 
-    public PostController(PostService postService, S3Uploader s3Uploader, ViewService viewService) {
+    public PostController(PostService postService, S3Uploader s3Uploader) {
         this.postService = postService;
         this.s3Uploader = s3Uploader;
-        this.viewService = viewService;
     }
 
     //  게시글 생성
     @PostMapping("/insert")
-    public ResponseEntity<Post> createPost(
+    public ResponseEntity<Long> createPost(
             @RequestParam("title") String title,
             @RequestParam("content") String content,
             @RequestParam("category") String category,
@@ -49,7 +46,7 @@ public class PostController {
 
 //            Post createdPost = postService.createPost(postDto, file, userId);
             Post createdPost = postService.createPost(postDto, file);
-            return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
+            return new ResponseEntity<>(createdPost.getId(), HttpStatus.CREATED);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -61,6 +58,20 @@ public class PostController {
     public ResponseEntity<PostDto> getPostByCategoryAndId(@PathVariable String category, @PathVariable("post_id") Long id) {
         try {
             PostDto postDto = postService.getPostDtoByCategoryAndId(category, id);
+            if (postDto == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+            return ResponseEntity.ok(postDto);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @PostMapping("/{category}/{post_id}/increment-view")
+    public ResponseEntity<PostDto> incrementViewAndGetPost(@PathVariable String category, @PathVariable("post_id") Long id) {
+        try {
+            PostDto postDto = postService.incrementViewAndGetPost(category, id);
             if (postDto == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }

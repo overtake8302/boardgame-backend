@@ -7,14 +7,18 @@ import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.post.dto.CommentDto;
 import com.elice.boardgame.post.dto.PostDto;
 import com.elice.boardgame.post.entity.Post;
+import com.elice.boardgame.post.entity.View;
 import com.elice.boardgame.post.repository.PostRepository;
+import com.elice.boardgame.game.entity.GameProfilePic;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -32,7 +36,13 @@ public class PostService {
     @Autowired
     private UserRepository userRepository;
 
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+//    @Autowired
+//    private ViewService viewService;
+
     //  게시글 생성
+//    @Transactional
 //    public Post createPost(PostDto postDto, MultipartFile file, Long userId) throws Exception {
 //        User user = userRepository.findById(userId)
 //                .orElseThrow(() -> new RuntimeException("로그인 후 진행해 주세요."));
@@ -57,6 +67,7 @@ public class PostService {
 //        return postRepository.save(post);
 //    }
     //  테스트
+    @Transactional
     public Post createPost(PostDto postDto, MultipartFile[] files) throws Exception {
         BoardGame boardGame = boardGameRepository.findById(postDto.getGameId())
                 .orElseThrow(() -> new RuntimeException("Game not found"));
@@ -68,11 +79,16 @@ public class PostService {
         post.setGameName(boardGame.getName());
         post.setBoardGame(boardGame);
 
+        List<String> gameImageUrls = boardGame.getGameProfilePics().stream()
+                .map(GameProfilePic::getPicAddress)
+                .collect(Collectors.toList());
+        post.setGameImageUrls(gameImageUrls);
+
         if (files != null && files.length > 0) {
             for (MultipartFile file : files) {
                 String imageUrl = s3Uploader.uploadFile(file);
-                post.addImageUrl(imageUrl); // Post 객체에 이미지 URL 추가
-                post.addImageName(file.getOriginalFilename()); // Post 객체에 이미지 이름 추가
+                post.addImageUrl(imageUrl);
+                post.addImageName(file.getOriginalFilename());
             }
         }
 
@@ -116,11 +132,21 @@ public class PostService {
 //        return postDto;
 //    }
     //  유저없을때 테스트용
+    @Transactional
     public PostDto getPostDtoByCategoryAndId(String category, Long id) {
         Post post = getPostByCategoryAndId(category, id);
         if (post == null) {
             return null;
         }
+
+        View view = post.getView();
+        if (view == null) {
+            view = new View();
+            view.setPost(post);
+            view.setViewCount(0);
+            post.setView(view);
+        }
+
         PostDto postDto = new PostDto();
         postDto.setTitle(post.getTitle());
         postDto.setContent(post.getContent());
@@ -139,14 +165,43 @@ public class PostService {
         postDto.setComments(post.getComments().stream().map(comment -> {
             CommentDto commentDto = new CommentDto();
             commentDto.setContent(comment.getContent());
+            commentDto.setCreatedAt(comment.getCreatedAt().format(formatter));
             return commentDto;
         }).collect(Collectors.toList()));
         postDto.setGameId(post.getBoardGame().getGameId());
 
+        List<String> gameImageUrls = post.getBoardGame().getGameProfilePics().stream()
+                .map(GameProfilePic::getPicAddress)
+                .collect(Collectors.toList());
+        postDto.setGameImageUrls(gameImageUrls);
+
+        postDto.setViewCount(post.getView().getViewCount()+1);
+        postDto.setCreatedAt(post.getCreatedAt().format(formatter));
+
         return postDto;
     }
 
+    @Transactional
+    public PostDto incrementViewAndGetPost(String category, Long id) {
+        Post post = getPostByCategoryAndId(category, id);
+        if (post == null) {
+            throw new NoSuchElementException("게시글을 찾을 수 없습니다!");
+        }
+
+        View view = post.getView();
+        if (view == null) {
+            view = new View(post, 0);
+            post.setView(view);
+        } else {
+            view.setViewCount(view.getViewCount() + 1);
+        }
+        postRepository.save(post);
+
+        return getPostDtoByCategoryAndId(category, id);
+    }
+
     //  카테고리별로 게시글 수정
+//    @Transactional
 //    public Post updatePostByCategory(Long id, String category, PostDto postDetails, Long userId) {
 //        Post post = postRepository.findByCategoryAndId(category, id)
 //                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다!"));
@@ -164,6 +219,7 @@ public class PostService {
 //        return postRepository.save(post);
 //    }
     //  유저없을때 테스트용
+    @Transactional
     public Post updatePostByCategory(Long id, String category, PostDto postDetails) {
         Post post = postRepository.findByCategoryAndId(category, id)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다!"));
@@ -178,6 +234,7 @@ public class PostService {
     }
 
     //  카테고리별로 게시글 삭제
+//    @Transactional
 //    public void deletePostByCategory(Long id, String category, Long userId) {
 //        Post post = postRepository.findByCategoryAndId(category, id)
 //            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다!"));
@@ -189,6 +246,7 @@ public class PostService {
 //        postRepository.delete(post);
 //    }
     //  유저없을때 테스트용
+    @Transactional
     public void deletePostByCategory(Long id, String category) {
         Post post = postRepository.findByCategoryAndId(category, id)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다!"));

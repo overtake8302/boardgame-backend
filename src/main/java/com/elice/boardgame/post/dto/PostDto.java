@@ -10,6 +10,7 @@ public class PostDto {
     private String content;
     private String title;
     private String category;
+    private int viewCount;
     private List<String> imageUrls = new ArrayList<>();
     private List<String> imageNames = new ArrayList<>();
     private Long userId;
@@ -17,4 +18,6 @@ public class PostDto {
     private List<CommentDto> comments;
     private String gameName;
     private Long gameId;
+    private List<String> gameImageUrls = new ArrayList<>();
+    private String createdAt;
 }
