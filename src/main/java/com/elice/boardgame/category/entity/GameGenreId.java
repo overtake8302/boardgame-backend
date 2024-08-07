@@ -3,10 +3,14 @@ package com.elice.boardgame.category.entity;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import java.util.Objects;
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Embeddable
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 public class GameGenreId {
 
     @JoinColumn(name = "game_id")

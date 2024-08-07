@@ -2,8 +2,8 @@ package com.elice.boardgame.game.service;
 
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
+import com.elice.boardgame.category.dto.GenreDto;
 import com.elice.boardgame.auth.service.AuthService;
-import com.elice.boardgame.category.DTO.GenreDto;
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.GameGenreId;
 import com.elice.boardgame.category.entity.Genre;
@@ -28,8 +28,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;

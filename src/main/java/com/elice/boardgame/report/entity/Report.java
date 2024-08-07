@@ -5,11 +5,17 @@ import com.elice.boardgame.game.entity.BaseEntity;
 import com.elice.boardgame.post.entity.Post;
 import jakarta.persistence.*;
 import java.util.List;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-
+@Getter
+@Setter
+@RequiredArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
+@Table(name = "report")
 public class Report extends BaseEntity {
 
     @Id
@@ -28,14 +34,10 @@ public class Report extends BaseEntity {
     @JoinColumn(name = "reported_post_id")
     private Post reportedPost;
 
-    @Column(nullable = false)
     private String reportStatus;
 
-    @Column(nullable = false)
     private String reportReason;
 
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReportAttachment> attachments;
-
 }
-
