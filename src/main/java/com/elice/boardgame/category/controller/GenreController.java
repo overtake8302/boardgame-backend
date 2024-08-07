@@ -1,7 +1,9 @@
 package com.elice.boardgame.category.controller;
 
 import com.elice.boardgame.category.dto.GenreDto;
+import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.service.GenreService;
+import com.elice.boardgame.common.dto.CommonResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,35 +24,49 @@ public class GenreController {
     private final GenreService genreService;
 
     @GetMapping
-    public ResponseEntity<List<GenreDto>> getAllGenres() {
-        return ResponseEntity.ok(genreService.findAll());
+    public CommonResponse<List<GenreDto>> getAllGenres() {
+        List<GenreDto> genreDtos = genreService.findAll();
+        return CommonResponse.<List<GenreDto>>builder()
+            .payload(genreDtos)
+            .message("")
+            .status(200)
+            .build();
     }
 
     @GetMapping("/{GenreId}")
-    public ResponseEntity<GenreDto> getGenreById(@PathVariable("GenreId") Long id) {
-        return ResponseEntity.ok(genreService.findById(id));
+    public CommonResponse<GenreDto> getGenreById(@PathVariable("GenreId") Long id) {
+        GenreDto genreDto = genreService.findById(id);
+        return CommonResponse.<GenreDto>builder()
+            .payload(genreDto)
+            .message("")
+            .status(200)
+            .build();
     }
 
     @GetMapping("/name/{name}")
-    public ResponseEntity<GenreDto> getGenreByName(@PathVariable String name) {
-        return ResponseEntity.ok(genreService.findByGenreName(name));
+    public CommonResponse<GenreDto> getGenreByName(@PathVariable String name) {
+        GenreDto genreDto = genreService.findByGenreName(name);
+        return CommonResponse.<GenreDto>builder()
+            .payload(genreDto)
+            .message("")
+            .status(200)
+            .build();
     }
 
     @PostMapping
-    public ResponseEntity<GenreDto> createGenre(@RequestBody GenreDto genreDto) {
-        return ResponseEntity.ok(genreService.save(genreDto));
+    public void createGenre(@RequestBody GenreDto genreDto) {
+        genreService.save(genreDto);
     }
 
     @PutMapping("/{GenreId}")
-    public ResponseEntity<GenreDto> updateGenre(@PathVariable("GenreId") Long id,
+    public void updateGenre(@PathVariable("GenreId") Long id,
         @RequestBody GenreDto genreDto) {
-        return ResponseEntity.ok(genreService.update(id, genreDto.getGenre()));
+        genreService.update(id, genreDto.getGenre());
     }
 
     @DeleteMapping("/{GenreId}")
-    public ResponseEntity<Void> deleteGenre(@PathVariable("GenreId") Long id) {
+    public void deleteGenre(@PathVariable("GenreId") Long id) {
         genreService.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 }
 
