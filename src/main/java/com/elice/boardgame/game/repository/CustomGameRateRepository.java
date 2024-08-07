@@ -1,7 +1,7 @@
 package com.elice.boardgame.game.repository;
 
 import com.elice.boardgame.auth.entity.User;
-import com.elice.boardgame.category.DTO.RatingCountDto;
+import com.elice.boardgame.category.dto.RatingCountDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameRate;
 import java.util.List;

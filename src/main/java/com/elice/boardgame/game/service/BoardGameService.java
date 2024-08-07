@@ -2,8 +2,8 @@ package com.elice.boardgame.game.service;
 
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
+import com.elice.boardgame.category.dto.GenreDto;
 import com.elice.boardgame.auth.service.AuthService;
-import com.elice.boardgame.category.DTO.GenreDto;
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.GameGenreId;
 import com.elice.boardgame.category.entity.Genre;

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/LiveView")
+@RequestMapping("/live")
 @RequiredArgsConstructor
 public class LiveViewController {
 
@@ -28,7 +28,7 @@ public class LiveViewController {
     }
 
     @Scheduled(cron = "0 0 4 * * ?")
-    @PutMapping("/update-score")
+    @PutMapping("/score")
     public void updateLiveViewScore() {
         liveViewService.updateLiveViewScore();
         liveViewService.updateRanking();

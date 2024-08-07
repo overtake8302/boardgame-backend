@@ -10,11 +10,15 @@ import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.util.Objects;
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "GameGenre")
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 public class GameGenre implements Serializable {
 
     @EmbeddedId

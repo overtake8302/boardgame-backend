@@ -1,6 +1,6 @@
 package com.elice.boardgame.category.controller;
 
-import com.elice.boardgame.category.DTO.GenreDto;
+import com.elice.boardgame.category.dto.GenreDto;
 import com.elice.boardgame.category.service.LikeGenreService;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import java.util.List;
@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/like-genre")
+@RequestMapping("/recommend")
 @RequiredArgsConstructor
 public class LikeGenreController {
 

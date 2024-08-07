@@ -1,10 +1,8 @@
 package com.elice.boardgame.category.controller;
 
-import com.elice.boardgame.category.DTO.GenreDto;
-import com.elice.boardgame.category.entity.Genre;
+import com.elice.boardgame.category.dto.GenreDto;
 import com.elice.boardgame.category.service.GenreService;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
