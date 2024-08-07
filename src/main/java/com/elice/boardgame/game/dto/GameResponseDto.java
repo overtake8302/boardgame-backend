@@ -1,6 +1,8 @@
 package com.elice.boardgame.game.dto;
 
 import com.elice.boardgame.category.entity.GameGenre;
+import com.elice.boardgame.post.dto.PostDto;
+import com.elice.boardgame.post.entity.Post;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -46,5 +48,7 @@ public class GameResponseDto {
     private List<GameGenre> gameGenres = new ArrayList<>();
 
     private Long views;
+
+    private List<PostDto> posts;
 
 }

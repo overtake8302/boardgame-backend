@@ -190,7 +190,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
     }
 
     @Override
-    public List<GameResponseDto> findByNameContainingAndDeletedDateIsNull(String keyword) {
+    public Page<GameResponseDto> findByNameContainingAndDeletedDateIsNull(String keyword, Pageable pageable) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
         QGameRate gameRate = QGameRate.gameRate;
@@ -274,7 +274,13 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
             result.setGameGenres(genres);
         }
 
-        return results;
+        long total = queryFactory
+                .select(boardGame.count())
+                .from(boardGame)
+                .where(boardGame.deletedDate.isNull())
+                .fetchOne();
+
+        return new PageImpl<>(results, pageable, total);
     }
 
     public Page<GameResponseDto> findAllByDeletedDateIsNull(Pageable pageable, Enums.GameListSortOption sortBy) {
@@ -392,14 +398,14 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
     }
 
     @Override
-    public List<GameResponseDto> findByGameGenresGenreGenre(String genre, Pageable pageable) {
+    public List<GameResponseDto> findByGameGenresGenreGenre(String genre, Enums.GameListSortOption sortBy) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameGenre gameGenre = QGameGenre.gameGenre;
         QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
         QGameRate gameRate = QGameRate.gameRate;
         QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
 
-        List<GameResponseDto> results = queryFactory
+        JPAQuery<GameResponseDto> query = queryFactory
                 .select(Projections.bean(GameResponseDto.class,
                         boardGame.gameId.as("gameId"),
                         boardGame.name.as("name"),
@@ -457,11 +463,29 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                         boardGame.youtubeLink,
                         gameRate.rate,
                         gameVisitor.id
-                )
-                .orderBy(gameRate.rate.avg().desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                );
+
+        if (sortBy.equals(Enums.GameListSortOption.GAME_ID)) {
+            query.orderBy(boardGame.gameId.desc());
+        } else if (sortBy.equals(Enums.GameListSortOption.AVERAGE_RATE)) {
+            NumberExpression<Double> averageRate = gameRate.rate.avg();
+            OrderSpecifier<Double> orderSpecifier = new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, averageRate);
+            query.orderBy(orderSpecifier);
+        } else if (sortBy.equals(Enums.GameListSortOption.DIFFICULTY)) {
+            NumberExpression<Integer> difficultyOrder = new CaseBuilder()
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then(0)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then(1)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then(2)
+                    .otherwise(3);
+            query.orderBy(new OrderSpecifier<>(com.querydsl.core.types.Order.ASC, difficultyOrder));
+        } else if (sortBy.equals(Enums.GameListSortOption.VIEWS)) {
+            query.orderBy(gameVisitor.id.count().desc());
+        }
+
+        List<GameResponseDto> results = query
+                .limit(5)
                 .fetch();
+
 
         for (GameResponseDto result : results) {
             List<String> profilePics = queryFactory
