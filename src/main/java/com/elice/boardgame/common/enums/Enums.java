@@ -8,7 +8,8 @@ public class Enums {
         FREE("자유 게시판"),
         REVIEW("후기 게시판"),
         USED("중고 거래 게시판"),
-        MEETING("모임 게시판");
+        MEETING("모임 게시판"),
+        TACTICS("전략 게시판");
 
         private final String label;
 

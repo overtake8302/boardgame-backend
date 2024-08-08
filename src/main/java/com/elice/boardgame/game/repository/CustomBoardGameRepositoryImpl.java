@@ -83,21 +83,18 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
     }
 
     @Override
-    public List<BoardGame> findByGenres(List<Long> genreIds, Long userId) {
+    public Page<BoardGame> findByGenres(List<Long> genreIds, Long userId, Pageable pageable) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameGenre gameGenre = QGameGenre.gameGenre;
         QGameLike gameLike = QGameLike.gameLike;
 
-        // 각 genreId를 확인하는 조건 추가
         BooleanExpression predicate = gameGenre.genre.genreId.in(genreIds);
 
-        // 좋아요를 누른 게임 ID 가져오기
         List<Long> likedGameIds = queryFactory.select(gameLike.boardGame.gameId)
             .from(gameLike)
             .where(gameLike.user.id.eq(userId))
             .fetch();
 
-        // game_id를 그룹화하고 count(genre_id)로 정렬
         List<Long> boardGameIds = queryFactory
             .select(gameGenre.boardGame.gameId)
             .from(gameGenre)
@@ -106,12 +103,22 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
             .orderBy(gameGenre.genre.genreId.count().desc())
             .fetch();
 
-        // 보드게임 ID로 보드게임을 조회하며 좋아요를 누른 게임은 제외
-        return queryFactory
+        List<BoardGame> boardGames = queryFactory
             .selectFrom(boardGame)
-            .where(boardGame.gameId.in(boardGameIds) //서브쿼리 사용해서 좋아요 누른 게임 제외
+            .where(boardGame.gameId.in(boardGameIds)
                 .and(boardGame.gameId.notIn(likedGameIds)))
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
             .fetch();
+
+        long total = queryFactory
+            .select(boardGame.count())
+            .from(boardGame)
+            .where(boardGame.gameId.in(boardGameIds)
+                .and(boardGame.gameId.notIn(likedGameIds)))
+            .fetchOne();
+
+        return new PageImpl<>(boardGames, pageable, total);
     }
 
     @Override

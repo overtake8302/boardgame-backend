@@ -11,7 +11,7 @@ public class PostListResponseDto {
     private String postType;
     private String title;
     private String writer;
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
     private Long views;
     private Long likes;
     private Long comments;

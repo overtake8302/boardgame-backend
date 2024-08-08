@@ -24,7 +24,13 @@ public class PostFilterController {
         @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
         @RequestParam String boardType) {
 
-        PostPageDto<PostListResponseDto> postPageDto = postFilterService.findAllByType(pageable, sortBy, boardType);
+        PostPageDto<PostListResponseDto> postPageDto;
+        if (boardType.equals("ALL")) {
+            postPageDto = postFilterService.findAll(pageable, sortBy);
+        }
+        else {
+            postPageDto = postFilterService.findAllByType(pageable, sortBy, boardType);
+        }
 
         return CommonResponse.<PostPageDto<PostListResponseDto>>builder()
             .payload(postPageDto)
@@ -40,7 +46,14 @@ public class PostFilterController {
         @RequestParam String query,
         @RequestParam String boardType) {
 
-        PostPageDto<PostListResponseDto> postPageDto = postFilterService.searchByQuery(pageable, query, boardType);
+        PostPageDto<PostListResponseDto> postPageDto;
+
+        if (boardType.equals("ALL")) {
+            postPageDto = postFilterService.searchByQuery(pageable, query);
+        }
+        else {
+            postPageDto = postFilterService.searchByQuery(pageable, query, boardType);
+        }
 
         return CommonResponse.<PostPageDto<PostListResponseDto>>builder()
             .payload(postPageDto)
