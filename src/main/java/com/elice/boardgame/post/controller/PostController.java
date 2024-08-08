@@ -1,12 +1,18 @@
 package com.elice.boardgame.post.controller;
 
+import com.elice.boardgame.common.dto.CommonResponse;
+import com.elice.boardgame.common.dto.SearchRequest;
 import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.post.dto.PostDto;
+import com.elice.boardgame.post.dto.SearchPostResponse;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.service.PostService;
 import com.elice.boardgame.post.service.ViewService;
 import com.elice.boardgame.post.service.S3Uploader;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,5 +56,13 @@ public class PostController {
     public ResponseEntity<Void> deletePostByCategory(@PathVariable Long id, @PathVariable Enums.Category category, @RequestParam Long userId) {
         postService.deletePostByCategory(id, category, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<CommonResponse<Page<SearchPostResponse>>> searchPosts(@ModelAttribute SearchRequest searchRequest) {
+        Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize());
+        String keyword = searchRequest.getKeyword();
+        CommonResponse<Page<SearchPostResponse>> response = postService.searchPostsByKeyword(keyword, pageable);
+        return ResponseEntity.ok(response);
     }
 }
