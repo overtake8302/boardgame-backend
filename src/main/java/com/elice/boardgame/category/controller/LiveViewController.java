@@ -1,6 +1,8 @@
 package com.elice.boardgame.category.controller;
 
+import com.elice.boardgame.category.dto.GenreDto;
 import com.elice.boardgame.category.service.LiveViewService;
+import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,8 +37,13 @@ public class LiveViewController {
     }
 
     //뷰 랭킹순 가져오기
-    @GetMapping("/list")
-    public List<GameResponseDto> getLiveViewRanking() {
-        return liveViewService.getLiveViewRanking();
+    @GetMapping()
+    public CommonResponse<List<GameResponseDto>> getLiveViewRanking() {
+        List<GameResponseDto> gameResponseDtos = liveViewService.getLiveViewRanking();
+        return CommonResponse.<List<GameResponseDto>>builder()
+            .payload(gameResponseDtos)
+            .message("")
+            .status(200)
+            .build();
     }
 }

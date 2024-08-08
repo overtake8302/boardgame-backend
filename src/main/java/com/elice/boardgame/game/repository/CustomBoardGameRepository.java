@@ -1,5 +1,6 @@
 package com.elice.boardgame.game.repository;
 
+import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
@@ -16,5 +17,6 @@ public interface CustomBoardGameRepository {
     Page<GameResponseDto> findAllByDeletedDateIsNull(Pageable pageable, Enums.GameListSortOption sortBy);
     List<GameResponseDto> findByGameGenresGenreGenre(String genre, Enums.GameListSortOption sort);
 
+    Page<SearchResponse> searchByKeyword(String keyword, Pageable pageable);
     Page<GameResponseDto> findGamesLikedByUserId(Long userId, Pageable pageable);
 }

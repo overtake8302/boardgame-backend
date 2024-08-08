@@ -10,6 +10,7 @@ import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.mapper.GenreMapper;
 import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.service.GenreService;
+import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.common.enums.GameRateResponseMessages;
 import com.elice.boardgame.common.exceptions.GameErrorMessages;
@@ -306,6 +307,9 @@ public class BoardGameService {
         return postDtos;
     }
 
+    public Page<SearchResponse> searchByKeyword(String keyword, Pageable pageable) {
+        return boardGameRepository.searchByKeyword(keyword, pageable);
+    }
     public Page<GameResponseDto> getGamesLikedByUser(Long userId, Pageable pageable) {
         return boardGameRepository.findGamesLikedByUserId(userId, pageable);
     }

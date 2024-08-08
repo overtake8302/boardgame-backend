@@ -20,8 +20,7 @@ import org.springframework.stereotype.Service;
 public class SocialService {
     private final SocialRepositoryCustom socialRepository;
 
-    public List<Long> getFriendIds(Long userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public List<Long> getFriendIds(Long userId, Pageable pageable) {
         return socialRepository.findFriendIdsByUserId(userId, pageable).getContent();
     }
 

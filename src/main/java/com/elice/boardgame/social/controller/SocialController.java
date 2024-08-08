@@ -8,6 +8,8 @@ import com.elice.boardgame.social.service.SocialService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,9 +33,8 @@ public class SocialController {
     public ResponseEntity<CommonResponse<List<Long>>> getFriends(@ModelAttribute PaginationRequest paginationRequest) {
         User currentUser = authService.getCurrentUser();
         Long userId = currentUser.getId();
-        int page = paginationRequest.getPage();
-        int size = paginationRequest.getSize();
-        List<Long> friends = socialService.getFriendIds(userId, page, size);
+        Pageable pageable = PageRequest.of(paginationRequest.getPage(), paginationRequest.getSize());
+        List<Long> friends = socialService.getFriendIds(userId, pageable);
         CommonResponse<List<Long>> response = CommonResponse.<List<Long>>builder()
             .payload(friends)
             .message("Friends retrieved successfully")
