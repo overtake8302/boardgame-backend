@@ -310,4 +310,8 @@ public class BoardGameService {
     public Page<SearchResponse> searchByKeyword(String keyword, Pageable pageable) {
         return boardGameRepository.searchByKeyword(keyword, pageable);
     }
+    public Page<GameResponseDto> getGamesLikedByUser(Long userId, Pageable pageable) {
+        return boardGameRepository.findGamesLikedByUserId(userId, pageable);
+    }
+
 }

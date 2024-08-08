@@ -18,4 +18,5 @@ public interface CustomBoardGameRepository {
     List<GameResponseDto> findByGameGenresGenreGenre(String genre, Enums.GameListSortOption sort);
 
     Page<SearchResponse> searchByKeyword(String keyword, Pageable pageable);
+    Page<GameResponseDto> findGamesLikedByUserId(Long userId, Pageable pageable);
 }
