@@ -1,11 +1,13 @@
 package com.elice.boardgame.category.service;
 
+import com.elice.boardgame.common.exceptions.BoardGameNotFoundException;
 import com.elice.boardgame.category.entity.LiveView;
 import com.elice.boardgame.category.entity.LiveViewRanking;
 import com.elice.boardgame.category.repository.LiveViewRankingRepository;
 import com.elice.boardgame.category.repository.LiveViewRepository;
+import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
-import com.elice.boardgame.game.repository.BoardGameRepository;
+import com.elice.boardgame.game.mapper.BoardGameMapper;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ public class LiveViewService {
 
     private final LiveViewRankingRepository liveViewRankingRepository;
 
-    private final BoardGameRepository boardGameRepository;
+    private final BoardGameMapper boardGameMapper;
 
     public void addViewScore(BoardGame game, String ipAddress) {
         Optional<LiveView> optionalEntity = liveViewRepository.findByGame(game);
@@ -34,11 +36,10 @@ public class LiveViewService {
         if (liveView.getIpAddress() != null && liveView.getIpAddress().equals(ipAddress)) {
             return;
         }
-
         LocalDate now = LocalDate.now();
 
         liveView.setGame(game);
-        liveView.setCreatedDate(now);
+        liveView.setCreatedDate(now.atStartOfDay());
         liveView.setViewScore(8L);
         liveView.setIpAddress(ipAddress);
 
@@ -52,7 +53,7 @@ public class LiveViewService {
         List<LiveView> dataList = liveViewRepository.findAll();
 
         for (LiveView data : dataList) {
-            LocalDate date = data.getCreatedDate();
+            LocalDate date = LocalDate.from(data.getCreatedDate());
             Period period = Period.between(date, currentDate);
 
             int days = period.getDays();
@@ -96,25 +97,23 @@ public class LiveViewService {
 
     }
 
-    public List<BoardGame> getLiveViewRanking() {
+    public List<GameResponseDto> getLiveViewRanking() {
         List<LiveViewRanking> liveViews = liveViewRankingRepository.findAllByOrderBySumScoreDesc();
         List<BoardGame> boardGames = new ArrayList<>();
 
-        // 로그 추가
-        System.out.println("Live Views Size: " + liveViews.size());
-
         for (LiveViewRanking liveView : liveViews) {
             BoardGame boardGame = liveView.getGame();
-
-            // 로그 추가
             if (boardGame == null) {
-                System.out.println("BoardGame is null for LiveViewRanking ID: " + liveView.getId());
-            } else {
-                System.out.println("BoardGame ID: " + boardGame.getGameId() + ", Name: " + boardGame.getName());
-                boardGames.add(boardGame);
+                throw new BoardGameNotFoundException("해당 보드게임이 존재하지 않습니다.");
             }
+            boardGames.add(boardGame);
         }
 
-        return boardGames;
+        List<GameResponseDto> dtos = new ArrayList<>();
+        for (BoardGame game : boardGames) {
+            dtos.add(boardGameMapper.boardGameToGameResponseDto(game));
+        }
+
+        return dtos;
     }
 }

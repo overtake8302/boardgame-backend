@@ -1,9 +1,12 @@
 package com.elice.boardgame.game.dto;
 
-import com.elice.boardgame.game.entity.BoardGame;
+import com.elice.boardgame.common.enums.Enums;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,11 +17,11 @@ public class GamePutDto {
 
     private String name;
 
-    private BoardGame.PlayTime playTime;
+    private Enums.PlayTime playTime;
 
-    private BoardGame.PlayNum playNum;
+    private Enums.PlayNum playNum;
 
-    private BoardGame.AgeLimit ageLimit;
+    private Enums.AgeLimit ageLimit;
 
     private int price;
 
@@ -28,7 +31,7 @@ public class GamePutDto {
 
     private String releaseDate;
 
-    private BoardGame.difficulty difficulty;
+    private Enums.Difficulty difficulty;
 
     private String publisher;
 
@@ -38,5 +41,5 @@ public class GamePutDto {
 
     private Double averageRate;
 
-    private GameProfilePicResponseDto gameProfilePics;
+    private List<Long> gameGenreIds = new ArrayList<>();
 }

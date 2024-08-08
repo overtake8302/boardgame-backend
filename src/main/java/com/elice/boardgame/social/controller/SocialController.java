@@ -1,70 +1,72 @@
 package com.elice.boardgame.social.controller;
 
-import com.elice.boardgame.social.dto.SocialRequest;
-import com.elice.boardgame.social.exception.SocialAlreadyExistsException;
-import com.elice.boardgame.social.exception.SocialNotFoundException;
+import com.elice.boardgame.auth.entity.User;
+import com.elice.boardgame.auth.service.AuthService;
+import com.elice.boardgame.common.dto.CommonResponse;
+import com.elice.boardgame.common.dto.PaginationRequest;
 import com.elice.boardgame.social.service.SocialService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/social")
+@RequestMapping("/social")
 @Slf4j
 public class SocialController {
 
     private final SocialService socialService;
+    private final AuthService authService;
 
-    @GetMapping("/friends")
-    public ResponseEntity<List<Long>> getFriends(@RequestParam Long userId) {
-        try {
-            List<Long> friends = socialService.getFriendIds(userId);
-            log.info("Retrieved friend IDs for user {}: {}", userId, friends);
-            return ResponseEntity.ok(friends);
-        } catch (Exception e) {
-            log.error("Failed to retrieve friends: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
-    @PostMapping("/add")
-    public ResponseEntity<String> addFriend(@RequestBody SocialRequest socialRequest) {
-        try {
-            socialService.addFriend(socialRequest);
-            log.info("Friend relationship added between user {} and friend {}", socialRequest.getUserId(), socialRequest.getFriendId());
-            return ResponseEntity.status(HttpStatus.CREATED).body("Friend added successfully.");
-        } catch (SocialAlreadyExistsException e) {
-            log.error("Failed to add friend: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            log.error("Unexpected error: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
-        }
+    @GetMapping
+    public ResponseEntity<CommonResponse<List<Long>>> getFriends(@ModelAttribute PaginationRequest paginationRequest) {
+        User currentUser = authService.getCurrentUser();
+        Long userId = currentUser.getId();
+        Pageable pageable = PageRequest.of(paginationRequest.getPage(), paginationRequest.getSize());
+        List<Long> friends = socialService.getFriendIds(userId, pageable);
+        CommonResponse<List<Long>> response = CommonResponse.<List<Long>>builder()
+            .payload(friends)
+            .message("Friends retrieved successfully")
+            .status(200)
+            .build();
+        return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/remove")
-    public ResponseEntity<String> removeFriend(@RequestParam Long userId, @RequestParam Long friendId) {
-        try {
-            socialService.removeFriend(userId, friendId);
-            log.info("Friend relationship removed between user {} and friend {}", userId, friendId);
-            return ResponseEntity.ok("Friend removed successfully.");
-        } catch (SocialNotFoundException e) {
-            log.error("Failed to remove friend: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            log.error("Unexpected error: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
-        }
+    @PostMapping("/{friendId}")
+    public ResponseEntity<CommonResponse<Void>> addFriend(@PathVariable Long friendId) {
+        User currentUser = authService.getCurrentUser();
+        Long userId = currentUser.getId();
+        socialService.addFriend(userId, friendId);
+        CommonResponse<Void> response = CommonResponse.<Void>builder()
+            .payload(null)
+            .message("Friend added successfully.")
+            .status(200)
+            .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-
+    @DeleteMapping("/{friendId}")
+    public ResponseEntity<CommonResponse<Void>> removeFriend(@PathVariable Long friendId) {
+        User currentUser = authService.getCurrentUser();
+        Long userId = currentUser.getId();
+        socialService.removeFriend(userId, friendId);
+        CommonResponse<Void> response = CommonResponse.<Void>builder()
+            .payload(null)
+            .message("Friend removed successfully.")
+            .status(200)
+            .build();
+        return ResponseEntity.ok(response);
+    }
 }
+

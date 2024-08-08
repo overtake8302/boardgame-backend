@@ -1,9 +1,8 @@
 package com.elice.boardgame.game.dto;
 
-import com.elice.boardgame.game.entity.BoardGame;
-import com.elice.boardgame.game.entity.GameLike;
-import com.elice.boardgame.game.entity.GameProfilePic;
-import com.elice.boardgame.game.entity.GameRate;
+import com.elice.boardgame.category.entity.GameGenre;
+import com.elice.boardgame.post.dto.PostDto;
+import com.elice.boardgame.post.entity.Post;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,11 +19,11 @@ public class GameResponseDto {
 
     private String name;
 
-    private BoardGame.PlayTime playTime;
+    private String playTime;
 
-    private BoardGame.PlayNum playNum;
+    private String playNum;
 
-    private BoardGame.AgeLimit ageLimit;
+    private String ageLimit;
 
     private int price;
 
@@ -34,7 +33,7 @@ public class GameResponseDto {
 
     private String releaseDate;
 
-    private BoardGame.difficulty difficulty;
+    private String difficulty;
 
     private String publisher;
 
@@ -44,5 +43,12 @@ public class GameResponseDto {
 
     private Double averageRate;
 
-    private GameProfilePicResponseDto gameProfilePics;
+    private List<String> gameProfilePics;
+
+    private List<GameGenre> gameGenres = new ArrayList<>();
+
+    private Long views;
+
+    private List<PostDto> posts;
+
 }

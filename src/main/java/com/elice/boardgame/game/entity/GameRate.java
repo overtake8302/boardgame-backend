@@ -1,5 +1,6 @@
 package com.elice.boardgame.game.entity;
 
+import com.elice.boardgame.auth.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,13 +18,14 @@ public class GameRate extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long rateId;
 
-    /*@ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;*/
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "game_id", nullable = false)
     private BoardGame boardGame;
 
     private Double rate;
+
 }
