@@ -7,6 +7,7 @@ import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -40,45 +41,38 @@ public class LikeGenreController {
             .build();
     }
 
-    // 좋아요 누른 게임 가져오기
-    @GetMapping("/user/game/like/{userId}")
-    public CommonResponse<List<GameResponseDto>> getLikeGame(@PathVariable Long userId) {
-        List<GameResponseDto> likedGames = likeGenreService.getLikeGames(userId);
-        return CommonResponse.<List<GameResponseDto>>builder()
-            .payload(likedGames)
-            .message("")
-            .status(200)
-            .build();
-    }
+    @GetMapping("/game")
+    public CommonResponse<Page<GameResponseDto>> getGames(
+        @RequestParam String type,
+        @RequestParam Long userId,
+        @RequestParam int page,
+        @RequestParam int size) {
 
-    //별점 준 게임 가져오기
-    @GetMapping("/user/game/rate/{userId}")
-    public CommonResponse<List<GameResponseDto>> getRateGame(@PathVariable Long userId) {
-        List<GameResponseDto> rateGames =  likeGenreService.getRateGames(userId);
-        return CommonResponse.<List<GameResponseDto>>builder()
-            .payload(rateGames)
-            .message("")
-            .status(200)
-            .build();
-    }
+        Page<GameResponseDto> games;
 
-    //좋아하는 장르 중 높은 평가를 받은 게임 (추천)
-    @GetMapping("/user/genre/rate/{userId}")
-    public CommonResponse<List<GameResponseDto>> getGenreGame(@PathVariable Long userId) {
-        List<GameResponseDto> genreGames = likeGenreService.getGenreGame(userId);
-        return CommonResponse.<List<GameResponseDto>>builder()
-            .payload(genreGames)
-            .message("")
-            .status(200)
-            .build();
-    }
+        switch (type) {
+            case "like":
+                games = likeGenreService.getLikeGames(userId, page, size);
+                break;
+            case "rate":
+                games = likeGenreService.getRateGames(userId, page, size);
+                break;
+            case "genre/rate":
+                games = likeGenreService.getGenreGame(userId, page, size);
+                break;
+            case "genre":
+                games = likeGenreService.getGamesFromLikeGenre(userId, page, size);
+                break;
+            default:
+                return CommonResponse.<Page<GameResponseDto>>builder()
+                    .payload(Page.empty())
+                    .message("")
+                    .status(400)
+                    .build();
+        }
 
-    //좋아하는 장르와 유사한 장르를 가진 게임 (추천)
-    @GetMapping("/user/game/genre/{userId}")
-    public CommonResponse<List<GameResponseDto>> getGamesFromLikeGenre(@PathVariable Long userId) {
-        List<GameResponseDto> likeGames = likeGenreService.getGamesFromLikeGenre(userId);
-        return CommonResponse.<List<GameResponseDto>>builder()
-            .payload(likeGames)
+        return CommonResponse.<Page<GameResponseDto>>builder()
+            .payload(games)
             .message("")
             .status(200)
             .build();

@@ -1,7 +1,8 @@
 package com.elice.boardgame.report.entity;
 
 import com.elice.boardgame.auth.entity.User;
-import com.elice.boardgame.game.entity.BaseEntity;
+
+import com.elice.boardgame.common.entity.BaseEntity;
 import com.elice.boardgame.post.entity.Post;
 import jakarta.persistence.*;
 import java.util.List;

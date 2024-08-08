@@ -29,6 +29,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -167,77 +170,42 @@ public class LikeGenreService {
     }
 
 
-    public List<GameResponseDto> getGenreGame(Long userId) {
+    public Page<GameResponseDto> getLikeGames(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<BoardGame> boardGames = gameLikeRepository.findLikedGamesByUserId(userId, pageable);
+
+        return boardGames.map(boardGameMapper::boardGameToGameResponseDto);
+    }
+
+    public Page<GameResponseDto> getRateGames(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<BoardGame> boardGames = gameRateRepository.findByUserId(userId, pageable);
+
+        return boardGames.map(boardGameMapper::boardGameToGameResponseDto);
+    }
+
+    public Page<GameResponseDto> getGenreGame(Long userId, int page, int size) {
         List<LikeGenre> likeGenres = likeGenreRepository.findByUserIdOrderByScoreDesc(userId);
         List<Genre> genres = likeGenres.stream()
             .map(LikeGenre::getGenre)
             .collect(Collectors.toList());
 
-        Optional<List<BoardGame>> boardGamesOpt = gameGenreRepository.findBoardGamesByGenresOrderByRatingDesc(
-            genres, userId);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<BoardGame> boardGames = gameGenreRepository.findBoardGamesByGenresOrderByRatingDesc(genres, userId, pageable);
 
-        if (!boardGamesOpt.isPresent()) {
-            return new ArrayList<>();
-        }
-
-        List<BoardGame> boardGames = boardGamesOpt.get();
-        List<GameResponseDto> dtos = new ArrayList<>();
-        for (BoardGame game : boardGames) {
-            dtos.add(boardGameMapper.boardGameToGameResponseDto(game));
-        }
-
-        return dtos;
+        return boardGames.map(boardGameMapper::boardGameToGameResponseDto);
     }
 
-
-    public List<GameResponseDto> getLikeGames(Long userId) {
-        List<BoardGame> boardGames = gameLikeRepository.findLikedGamesByUserId(userId);
-
-        if (boardGames == null) {
-            return Collections.emptyList();
-        }
-
-        List<GameResponseDto> dtos = new ArrayList<>();
-        for (BoardGame game : boardGames) {
-            dtos.add(boardGameMapper.boardGameToGameResponseDto(game));
-        }
-        return dtos;
-    }
-
-    public List<GameResponseDto> getRateGames(Long userId) {
-        List<BoardGame> boardGames = gameRateRepository.findByUserId(userId);
-
-        if (boardGames == null) {
-            return Collections.emptyList();
-        }
-
-        List<GameResponseDto> dtos = new ArrayList<>();
-        for (BoardGame game : boardGames) {
-            dtos.add(boardGameMapper.boardGameToGameResponseDto(game));
-        }
-        return dtos;
-    }
-
-    public List<GameResponseDto> getGamesFromLikeGenre(Long userId) {
+    public Page<GameResponseDto> getGamesFromLikeGenre(Long userId, int page, int size) {
         List<LikeGenre> likeGenres = likeGenreRepository.findByUserIdOrderByScoreDesc(userId);
-
-        // 상위 3개의 좋아하는 장르를 추출
         List<Long> topLikeGenreIds = likeGenres.stream()
             .limit(3)
             .map(likeGenre -> likeGenre.getGenre().getGenreId())
             .collect(Collectors.toList());
 
-        List<BoardGame> boardGames = boardGameRepository.findByGenres(topLikeGenreIds, userId);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<BoardGame> boardGames = boardGameRepository.findByGenres(topLikeGenreIds, userId, pageable);
 
-        if (boardGames == null) {
-            return Collections.emptyList();
-        }
-
-        List<GameResponseDto> dtos = new ArrayList<>();
-        for (BoardGame game : boardGames) {
-            dtos.add(boardGameMapper.boardGameToGameResponseDto(game));
-        }
-
-        return dtos;
+        return boardGames.map(boardGameMapper::boardGameToGameResponseDto);
     }
 }

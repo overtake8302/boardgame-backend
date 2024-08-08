@@ -6,6 +6,8 @@ import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameRate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface CustomGameRateRepository {
 
@@ -19,5 +21,5 @@ public interface CustomGameRateRepository {
 
     void deleteByUserAndBoardGame(User user, BoardGame boardGame);
 
-    List<BoardGame> findByUserId(Long userId);
+    Page<BoardGame> findByUserId(Long userId, Pageable pageable);
 }

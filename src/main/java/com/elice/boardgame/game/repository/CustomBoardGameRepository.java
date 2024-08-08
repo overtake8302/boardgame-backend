@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface CustomBoardGameRepository {
     List<BoardGame> findBoardGamesWithFilters(List<String> playTimes, List<String> playNums, List<String> ageLimits, List<String> prices, List<String> genres);
-    List<BoardGame> findByGenres(List<Long> genreIds, Long userId);
+    Page<BoardGame> findByGenres(List<Long> genreIds, Long userId, Pageable pageable);
     GameResponseDto getGameResponseDtoByGameIdAndDeletedDateIsNull(Long gameId);
     Page<GameResponseDto> findByNameContainingAndDeletedDateIsNull(String keyword, Pageable pageable);
     Page<GameResponseDto> findAllByDeletedDateIsNull(Pageable pageable, Enums.GameListSortOption sortBy);
