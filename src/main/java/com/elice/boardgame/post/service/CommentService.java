@@ -63,7 +63,9 @@ public class CommentService {
         dto.setParentId(comment.getParent() != null ? comment.getParent().getId() : null);
         dto.setComInComs(comment.getComInComs().stream().map(this::convertToDto).collect(Collectors.toList()));
         dto.setReplies(comment.getComInComs().stream().map(this::convertToDto).collect(Collectors.toList()));
-        dto.setCreatedAt(comment.getCreatedAt().format(formatter));
+        if (comment.getCreatedAt() != null) {
+            dto.setCreatedAt(comment.getCreatedAt().format(formatter));
+        }
         return dto;
     }
 

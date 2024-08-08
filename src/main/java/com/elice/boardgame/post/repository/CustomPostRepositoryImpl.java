@@ -27,7 +27,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         List<Post> posts = queryFactory
             .selectFrom(post)
-            .where(post.category.eq(Category.valueOf(boardType)))
+            .where(post.category.eq(boardType))
             .orderBy(getSortOrder(sortBy))
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
@@ -35,7 +35,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         long total = queryFactory
             .selectFrom(post)
-            .where(post.category.eq(Category.valueOf(boardType)))
+            .where(post.category.eq(boardType))
             .fetchCount();
 
         System.out.println(posts.size());
@@ -49,7 +49,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         List<Post> posts = queryFactory
             .selectFrom(post)
-            .where(post.category.eq(Category.valueOf(boardType))
+            .where(post.category.eq(boardType)
                 .and(post.title.containsIgnoreCase(query)
                     .or(post.content.containsIgnoreCase(query)
                         .or(post.user.username.containsIgnoreCase(query)))))
@@ -60,7 +60,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         long total = queryFactory
             .selectFrom(post)
-            .where(post.category.eq(Category.valueOf(boardType))
+            .where(post.category.eq(boardType)
                 .and(post.title.containsIgnoreCase(query)
                     .or(post.content.containsIgnoreCase(query))))
             .fetchCount();

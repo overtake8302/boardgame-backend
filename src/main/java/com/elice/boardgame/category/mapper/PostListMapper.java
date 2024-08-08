@@ -11,7 +11,7 @@ public class PostListMapper {
     public static Page<PostListResponseDto> toDtoPage(Page<Post> posts) {
         return posts.map(post -> new PostListResponseDto(
             post.getId(),
-            post.getCategory().name(),
+            post.getCategory(),
             post.getTitle(),
             post.getUser().getUsername(),
             post.getCreatedAt(),

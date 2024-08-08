@@ -29,6 +29,9 @@ public class CommentController {
     public ResponseEntity<Page<CommentDto>> getComments(@PathVariable String category, @PathVariable("post_id") Long postId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size) {
+        if (size < 1) {
+            size = 10; // 기본 페이지 사이즈 설정
+        }
         Post post = postService.getPostByCategoryAndId(category, postId);
         Pageable pageable = PageRequest.of(page, size);
         Page<Comment> comments = commentService.getCommentsByPost(post, pageable);

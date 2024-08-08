@@ -34,7 +34,6 @@ public class PostController {
             @RequestParam("gameName") String gameName,
             @RequestParam("gameId") Long gameId,
             @RequestParam(value = "file", required = false) MultipartFile[] file
-//            @RequestParam("userID") Long userId
     ) {
         try {
             PostDto postDto = new PostDto();
@@ -44,7 +43,6 @@ public class PostController {
             postDto.setGameName(gameName);
             postDto.setGameId(gameId);
 
-//            Post createdPost = postService.createPost(postDto, file, userId);
             Post createdPost = postService.createPost(postDto, file);
             return new ResponseEntity<>(createdPost.getId(), HttpStatus.CREATED);
         } catch (Exception e) {
@@ -68,6 +66,7 @@ public class PostController {
         }
     }
 
+    //  조회수 증가
     @PostMapping("/{category}/{post_id}/increment-view")
     public ResponseEntity<PostDto> incrementViewAndGetPost(@PathVariable String category, @PathVariable("post_id") Long id) {
         try {

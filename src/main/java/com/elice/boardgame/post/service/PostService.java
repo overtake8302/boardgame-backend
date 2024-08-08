@@ -17,6 +17,8 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,35 +44,25 @@ public class PostService {
 //    private ViewService viewService;
 
     //  게시글 생성
-//    @Transactional
-//    public Post createPost(PostDto postDto, MultipartFile file, Long userId) throws Exception {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new RuntimeException("로그인 후 진행해 주세요."));
-//
-//        BoardGame boardGame = boardGameRepository.findById(postDto.getGameId())
-//            .orElseThrow(() -> new RuntimeException("Game not found"));
-//
-//        Post post = new Post();
-//        post.setTitle(postDto.getTitle());
-//        post.setContent(postDto.getContent());
-//        post.setCategory(postDto.getCategory());
-//        post.setGameName(boardGame.getName());
-//        post.setBoardGame(boardGame);
-//        post.setUser(user);
-//
-//        if (file != null) {
-//            String imageUrl = s3Uploader.uploadFile(file);
-//            post.setImageUrl(imageUrl);
-//            post.setImageName(file.getOriginalFilename());
-//        }
-//
-//        return postRepository.save(post);
-//    }
-    //  테스트
     @Transactional
     public Post createPost(PostDto postDto, MultipartFile[] files) throws Exception {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username;
+        if (principal instanceof UserDetails) {
+            username = ((UserDetails) principal).getUsername();
+            if (username == null) {
+                throw new RuntimeException("UserDetails 객체에서 username이 null입니다.");
+            }
+            postDto.setUserName(username);
+        } else {
+            throw new RuntimeException("로그인 후 진행해 주세요.");
+        }
+
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
         BoardGame boardGame = boardGameRepository.findById(postDto.getGameId())
-                .orElseThrow(() -> new RuntimeException("Game not found"));
+            .orElseThrow(() -> new RuntimeException("Game not found"));
 
         Post post = new Post();
         post.setTitle(postDto.getTitle());
@@ -78,10 +70,11 @@ public class PostService {
         post.setCategory(postDto.getCategory());
         post.setGameName(boardGame.getName());
         post.setBoardGame(boardGame);
+        post.setUser(user);
 
         List<String> gameImageUrls = boardGame.getGameProfilePics().stream()
-                .map(GameProfilePic::getPicAddress)
-                .collect(Collectors.toList());
+            .map(GameProfilePic::getPicAddress)
+            .collect(Collectors.toList());
         post.setGameImageUrls(gameImageUrls);
 
         if (files != null && files.length > 0) {
@@ -94,17 +87,105 @@ public class PostService {
 
         return postRepository.save(post);
     }
+    //  테스트
+//    @Transactional
+//    public Post createPost(PostDto postDto, MultipartFile[] files) throws Exception {
+//        BoardGame boardGame = boardGameRepository.findById(postDto.getGameId())
+//                .orElseThrow(() -> new RuntimeException("Game not found"));
+//
+//        Post post = new Post();
+//        post.setTitle(postDto.getTitle());
+//        post.setContent(postDto.getContent());
+//        post.setCategory(postDto.getCategory());
+//        post.setGameName(boardGame.getName());
+//        post.setBoardGame(boardGame);
+//
+//        List<String> gameImageUrls = boardGame.getGameProfilePics().stream()
+//                .map(GameProfilePic::getPicAddress)
+//                .collect(Collectors.toList());
+//        post.setGameImageUrls(gameImageUrls);
+//
+//        if (files != null && files.length > 0) {
+//            for (MultipartFile file : files) {
+//                String imageUrl = s3Uploader.uploadFile(file);
+//                post.addImageUrl(imageUrl);
+//                post.addImageName(file.getOriginalFilename());
+//            }
+//        }
+//
+//        return postRepository.save(post);
+//    }
 
     //  카테고리별로 게시글 조회
     public Post getPostByCategoryAndId(String category, Long id) {
         return postRepository.findByCategoryAndId(category, id).orElseThrow(() -> new NoSuchElementException("게시글을 찾을 수 없습니다!"));
     }
 
+    @Transactional
+    public PostDto getPostDtoByCategoryAndId(String category, Long id) {
+        Post post = getPostByCategoryAndId(category, id);
+
+        View view = post.getView();
+        if (view == null) {
+            view = new View();
+            view.setPost(post);
+            view.setViewCount(0);
+            post.setView(view);
+        }
+
+        if (post == null) {
+            return null;
+        }
+        PostDto postDto = new PostDto();
+        postDto.setTitle(post.getTitle());
+        postDto.setContent(post.getContent());
+        postDto.setCategory(post.getCategory());
+        postDto.setImageUrls(post.getImageUrls());
+        postDto.setImageNames(post.getImageNames());
+        postDto.setGameName(post.getGameName());
+        postDto.setUserId(post.getUserId());
+
+        if (post.getUser() != null) {
+            postDto.setUserName(post.getUser().getUsername());
+        } else {
+            postDto.setUserName("비회원");
+        }
+
+        postDto.setComments(post.getComments().stream().map(comment -> {
+            CommentDto commentDto = new CommentDto();
+            commentDto.setContent(comment.getContent());
+            commentDto.setUserId(comment.getUser().getId());
+            commentDto.setCreatedAt(comment.getCreatedAt().format(formatter));
+            return commentDto;
+        }).collect(Collectors.toList()));
+        postDto.setGameId(post.getBoardGame().getGameId());
+
+        List<String> gameImageUrls = post.getBoardGame().getGameProfilePics().stream()
+            .map(GameProfilePic::getPicAddress)
+            .collect(Collectors.toList());
+        postDto.setGameImageUrls(gameImageUrls);
+
+        postDto.setViewCount(post.getView().getViewCount()+1);
+        postDto.setCreatedAt(post.getCreatedAt().format(formatter));
+
+        return postDto;
+    }
+    //  유저없을때 테스트용
+//    @Transactional
 //    public PostDto getPostDtoByCategoryAndId(String category, Long id) {
 //        Post post = getPostByCategoryAndId(category, id);
 //        if (post == null) {
 //            return null;
 //        }
+//
+//        View view = post.getView();
+//        if (view == null) {
+//            view = new View();
+//            view.setPost(post);
+//            view.setViewCount(0);
+//            post.setView(view);
+//        }
+//
 //        PostDto postDto = new PostDto();
 //        postDto.setTitle(post.getTitle());
 //        postDto.setContent(post.getContent());
@@ -123,63 +204,21 @@ public class PostService {
 //        postDto.setComments(post.getComments().stream().map(comment -> {
 //            CommentDto commentDto = new CommentDto();
 //            commentDto.setContent(comment.getContent());
-//            commentDto.setUserId(comment.getUser().getId());
-//            commentDto.setUserName(comment.getUser().getUsername());
+//            commentDto.setCreatedAt(comment.getCreatedAt().format(formatter));
 //            return commentDto;
 //        }).collect(Collectors.toList()));
 //        postDto.setGameId(post.getBoardGame().getGameId());
 //
+//        List<String> gameImageUrls = post.getBoardGame().getGameProfilePics().stream()
+//                .map(GameProfilePic::getPicAddress)
+//                .collect(Collectors.toList());
+//        postDto.setGameImageUrls(gameImageUrls);
+//
+//        postDto.setViewCount(post.getView().getViewCount()+1);
+//        postDto.setCreatedAt(post.getCreatedAt().format(formatter));
+//
 //        return postDto;
 //    }
-    //  유저없을때 테스트용
-    @Transactional
-    public PostDto getPostDtoByCategoryAndId(String category, Long id) {
-        Post post = getPostByCategoryAndId(category, id);
-        if (post == null) {
-            return null;
-        }
-
-        View view = post.getView();
-        if (view == null) {
-            view = new View();
-            view.setPost(post);
-            view.setViewCount(0);
-            post.setView(view);
-        }
-
-        PostDto postDto = new PostDto();
-        postDto.setTitle(post.getTitle());
-        postDto.setContent(post.getContent());
-        postDto.setCategory(post.getCategory());
-        postDto.setImageUrls(post.getImageUrls());
-        postDto.setImageNames(post.getImageNames());
-        postDto.setGameName(post.getGameName());
-        postDto.setUserId(post.getUserId());
-
-        if (post.getUser() != null) {
-            postDto.setUserName(post.getUser().getUsername());
-        } else {
-            postDto.setUserName("Unknown");
-        }
-
-        postDto.setComments(post.getComments().stream().map(comment -> {
-            CommentDto commentDto = new CommentDto();
-            commentDto.setContent(comment.getContent());
-            commentDto.setCreatedAt(comment.getCreatedAt().format(formatter));
-            return commentDto;
-        }).collect(Collectors.toList()));
-        postDto.setGameId(post.getBoardGame().getGameId());
-
-        List<String> gameImageUrls = post.getBoardGame().getGameProfilePics().stream()
-                .map(GameProfilePic::getPicAddress)
-                .collect(Collectors.toList());
-        postDto.setGameImageUrls(gameImageUrls);
-
-        postDto.setViewCount(post.getView().getViewCount()+1);
-        postDto.setCreatedAt(post.getCreatedAt().format(formatter));
-
-        return postDto;
-    }
 
     @Transactional
     public PostDto incrementViewAndGetPost(String category, Long id) {
