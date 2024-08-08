@@ -24,7 +24,7 @@ public class JoinService {
         Integer age = joinDTO.getAge();
         String phonenumber = joinDTO.getPhonenumber();
         String location = joinDTO.getLocation();
-        String detail_location = joinDTO.getDetail_location();
+        String detail_location = joinDTO.getDetailLocation();
         Integer post_code = joinDTO.getPost_code();
         String name = joinDTO.getName();
 
