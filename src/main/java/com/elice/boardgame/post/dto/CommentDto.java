@@ -19,4 +19,5 @@ public class CommentDto {
     private Long parentId;
     private String createdAt;
     private List<CommentDto> replies;
+    private Long likeCount;
 }

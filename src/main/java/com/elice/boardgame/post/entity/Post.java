@@ -20,7 +20,7 @@ import org.hibernate.annotations.Where;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@SQLDelete(sql = "UPDATE post SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE post SET deleted_at = CURRENT_TIMESTAMP WHERE post_id = ?")
 @Where(clause = "deleted_at IS NULL")
 public class Post extends BaseEntity {
     @Id
@@ -29,7 +29,7 @@ public class Post extends BaseEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = true)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
@@ -47,7 +47,7 @@ public class Post extends BaseEntity {
     private String gameName;
     private List<String> gameImageUrls = new ArrayList<>();
 
-    private Long likes;
+    private Long likeCount;
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private View view;

@@ -73,7 +73,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         switch (sortBy) {
             case "추천순":
-                return post.likes.desc();
+                return post.likeCount.desc();
             case "조회순":
                 return post.view.viewCount.desc();
             case "최신순":

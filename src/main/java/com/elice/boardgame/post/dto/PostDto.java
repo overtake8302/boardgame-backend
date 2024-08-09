@@ -20,4 +20,5 @@ public class PostDto {
     private Long gameId;
     private List<String> gameImageUrls = new ArrayList<>();
     private String createdAt;
+    private Long likeCount;
 }

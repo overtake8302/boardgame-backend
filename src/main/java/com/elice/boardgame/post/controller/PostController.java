@@ -1,5 +1,7 @@
 package com.elice.boardgame.post.controller;
 
+import com.elice.boardgame.common.dto.CommonResponse;
+import com.elice.boardgame.game.dto.ClickLikeResponseDto;
 import com.elice.boardgame.post.dto.CommentDto;
 import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.post.dto.PostDto;
@@ -7,6 +9,8 @@ import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.service.PostService;
 import com.elice.boardgame.post.service.S3Uploader;
 
+import jakarta.validation.constraints.Min;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequestMapping("/posts")
 @RestController
 public class PostController {
@@ -81,6 +86,19 @@ public class PostController {
         }
     }
 
+    //  좋아요~
+    @PostMapping("/{category}/{post_id}/like")
+    public ResponseEntity<CommonResponse<PostDto>> clickLike(@PathVariable("post_id") Long postId) {//@RequestParam @Min(1) Long postId) {
+
+        PostDto postDto = postService.clickLike(postId);
+        CommonResponse<PostDto> response = CommonResponse.<PostDto>builder()
+            .payload(postDto)
+            .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
     //  수정을 위해 수정전 게시글 불러오기
     @GetMapping("/edit/{category}/{post_id}")
     public ResponseEntity<PostDto> getPostForEdit(@PathVariable String category, @PathVariable("post_id") Long id) {
@@ -102,6 +120,7 @@ public class PostController {
             @PathVariable("post_id") Long id,
             @PathVariable String category,
             @RequestBody PostDto postDetails) {
+        log.info("PostDto {}",postDetails);
         Post updatedPost = postService.updatePostByCategory(id, category, postDetails);
         return ResponseEntity.ok(updatedPost);
     }

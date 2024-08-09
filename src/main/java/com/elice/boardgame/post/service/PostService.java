@@ -6,63 +6,55 @@ import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.post.dto.CommentDto;
 import com.elice.boardgame.post.dto.PostDto;
+import com.elice.boardgame.post.entity.PostLike;
+import com.elice.boardgame.post.entity.PostLikePK;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.entity.View;
+import com.elice.boardgame.post.repository.PostLikeRepository;
 import com.elice.boardgame.post.repository.PostRepository;
 import com.elice.boardgame.game.entity.GameProfilePic;
+import com.elice.boardgame.auth.service.AuthService;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class PostService {
-
-    @Autowired
-    private PostRepository postRepository;
-
-    @Autowired
-    private S3Uploader s3Uploader;
-
-    @Autowired
-    private BoardGameRepository boardGameRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final S3Uploader s3Uploader;
+    private final BoardGameRepository boardGameRepository;
+    private final UserRepository userRepository;
+    private final AuthService authService;
+    private final PostLikeRepository postLikeRepository;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-//    @Autowired
-//    private ViewService viewService;
 
     //  게시글 생성
     @Transactional
     public Post createPost(PostDto postDto, MultipartFile[] files) throws Exception {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username;
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
-            if (username == null) {
-                throw new RuntimeException("UserDetails 객체에서 username이 null입니다.");
-            }
-            postDto.setUserName(username);
-        } else {
-            throw new RuntimeException("로그인 후 진행해 주세요.");
-        }
-
-        User user = userRepository.findByUsername(username)
+        String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(currentUserName)
             .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
+        postDto.setUserName(currentUser.getUsername());
+
         BoardGame boardGame = boardGameRepository.findById(postDto.getGameId())
-            .orElseThrow(() -> new RuntimeException("Game not found"));
+            .orElseThrow(() -> new RuntimeException("게임을 찾을 수 없습니다."));
 
         Post post = new Post();
         post.setTitle(postDto.getTitle());
@@ -70,7 +62,7 @@ public class PostService {
         post.setCategory(postDto.getCategory());
         post.setGameName(boardGame.getName());
         post.setBoardGame(boardGame);
-        post.setUser(user);
+        post.setUser(currentUser);
 
         List<String> gameImageUrls = boardGame.getGameProfilePics().stream()
             .map(GameProfilePic::getPicAddress)
@@ -123,6 +115,11 @@ public class PostService {
 
     @Transactional
     public PostDto getPostDtoByCategoryAndId(String category, Long id) {
+        Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
+        log.info("currentUser {}",currentUser.getName());
+        User user = userRepository.findByUsername(currentUser.getName())
+            .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
         Post post = getPostByCategoryAndId(category, id);
 
         View view = post.getView();
@@ -133,9 +130,6 @@ public class PostService {
             post.setView(view);
         }
 
-        if (post == null) {
-            return null;
-        }
         PostDto postDto = new PostDto();
         postDto.setTitle(post.getTitle());
         postDto.setContent(post.getContent());
@@ -154,7 +148,13 @@ public class PostService {
         postDto.setComments(post.getComments().stream().map(comment -> {
             CommentDto commentDto = new CommentDto();
             commentDto.setContent(comment.getContent());
-            commentDto.setUserId(comment.getUser().getId());
+            if (comment.getUser() != null) {
+                commentDto.setUserId(comment.getUser().getId());
+                commentDto.setUserName(comment.getUser().getUsername());
+            } else {
+                commentDto.setUserId(null);
+                commentDto.setUserName("비회원");
+            }
             commentDto.setCreatedAt(comment.getCreatedAt().format(formatter));
             return commentDto;
         }).collect(Collectors.toList()));
@@ -167,6 +167,7 @@ public class PostService {
 
         postDto.setViewCount(post.getView().getViewCount()+1);
         postDto.setCreatedAt(post.getCreatedAt().format(formatter));
+        postDto.setLikeCount(postLikeRepository.countLikesByPostId(post.getId()));
 
         return postDto;
     }
@@ -219,7 +220,7 @@ public class PostService {
 //
 //        return postDto;
 //    }
-
+    //  조회수
     @Transactional
     public PostDto incrementViewAndGetPost(String category, Long id) {
         Post post = getPostByCategoryAndId(category, id);
@@ -239,29 +240,48 @@ public class PostService {
         return getPostDtoByCategoryAndId(category, id);
     }
 
+    //  좋아요~
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
+    public PostDto clickLike(Long postId) {
+        String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(currentUserName)
+            .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+
+        Post targetPost = postRepository.findByIdAndDeletedAtIsNull(postId);
+        PostLikePK postLikePK = new PostLikePK(currentUser.getId(), postId);
+
+        Optional<PostLike> target = postLikeRepository.findById(postLikePK);
+
+        PostDto postDto = new PostDto();
+
+        if (target.isPresent()) {
+            postLikeRepository.delete(target.get());
+        } else {
+            PostLike postLike = new PostLike(postLikePK, targetPost, currentUser);
+            postLikeRepository.save(postLike);
+        }
+
+        Long likeCount = postLikeRepository.countLikesByPostId(postId);
+        postDto.setLikeCount(likeCount);
+
+        return postDto;
+    }
+
     //  카테고리별로 게시글 수정
-//    @Transactional
-//    public Post updatePostByCategory(Long id, String category, PostDto postDetails, Long userId) {
-//        Post post = postRepository.findByCategoryAndId(category, id)
-//                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다!"));
-//
-//        if (!post.getUserId().equals(userId)) {
-//            throw new RuntimeException("수정 및 삭제는 작성자만 가능합니다!");
-//        }
-//
-//        post.setTitle(postDetails.getTitle());
-//        post.setContent(postDetails.getContent());
-//        post.setCategory(postDetails.getCategory());
-//        post.setImageUrls(postDetails.getImageUrls());
-//        post.setImageNames(postDetails.getImageNames());
-//
-//        return postRepository.save(post);
-//    }
-    //  유저없을때 테스트용
     @Transactional
     public Post updatePostByCategory(Long id, String category, PostDto postDetails) {
+        String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("currentUserName {}",currentUserName);  //  anonymousUser
+        User currentUser = userRepository.findByUsername(currentUserName)
+            .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
         Post post = postRepository.findByCategoryAndId(category, id)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다!"));
+
+        if (!post.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("작성자만 게시글을 삭제할 수 있습니다!");
+        }
 
         post.setTitle(postDetails.getTitle());
         post.setContent(postDetails.getContent());
@@ -271,25 +291,44 @@ public class PostService {
 
         return postRepository.save(post);
     }
+    //  유저없을때 테스트용
+//    @Transactional
+//    public Post updatePostByCategory(Long id, String category, PostDto postDetails) {
+//        Post post = postRepository.findByCategoryAndId(category, id)
+//                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다!"));
+//
+//        post.setTitle(postDetails.getTitle());
+//        post.setContent(postDetails.getContent());
+//        post.setCategory(postDetails.getCategory());
+//        post.setImageUrls(postDetails.getImageUrls());
+//        post.setImageNames(postDetails.getImageNames());
+//
+//        return postRepository.save(post);
+//    }
 
     //  카테고리별로 게시글 삭제
-//    @Transactional
-//    public void deletePostByCategory(Long id, String category, Long userId) {
-//        Post post = postRepository.findByCategoryAndId(category, id)
-//            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다!"));
-//
-//        if (!post.getUserId().equals(userId)) {
-//            throw new RuntimeException("수정및 삭제는 작성자만 가능합니다!");
-//        }
-//
-//        postRepository.delete(post);
-//    }
-    //  유저없을때 테스트용
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     @Transactional
     public void deletePostByCategory(Long id, String category) {
+        String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(currentUserName)
+            .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
         Post post = postRepository.findByCategoryAndId(category, id)
-                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다!"));
+            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다!"));
+
+        if (!post.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("작성자만 게시글을 삭제할 수 있습니다!");
+        }
 
         postRepository.delete(post);
     }
+    //  유저없을때 테스트용
+//    @Transactional
+//    public void deletePostByCategory(Long id, String category) {
+//        Post post = postRepository.findByCategoryAndId(category, id)
+//                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다!"));
+//
+//        postRepository.delete(post);
+//    }
 }
