@@ -221,4 +221,10 @@ public class    BoardGameController {
         Page<GameResponseDto> gameResponseDtoPage = boardGameService.getGamesLikedByUser(authService.getCurrentUser().getId(), pageable);
         return new ResponseEntity<>(gameResponseDtoPage, HttpStatus.OK);
     }
+
+    //ToDo
+    /*@GetMapping("/IsFirstCreator")
+    public ResponseEntity<Boolean> isFirstCreator() {
+        Boolean result = boar
+    }*/
 }

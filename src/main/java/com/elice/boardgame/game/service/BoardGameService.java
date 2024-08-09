@@ -140,7 +140,7 @@ public class BoardGameService {
             throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND,HttpStatus.NOT_FOUND);
         }
 
-        if (currentUser != null && targetGame.getFirstCreator() != null) {
+        if (targetGame.getFirstCreator() != null) {
             if (!currentUser.getRole().equals("ROLE_ADMIN") && !(targetGame.getFirstCreator().getId().equals(currentUser.getId()))) {
                 throw new GameRootException(GameErrorMessages.ACCESS_DENIED, HttpStatus.FORBIDDEN);
             }
