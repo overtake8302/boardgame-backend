@@ -1,5 +1,6 @@
 package com.elice.boardgame.auth.jwt;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,8 @@ public class JWTUtil {
     public Boolean isExpired(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
+
+
 
     public String createJwt(String username, String role, Long expiredMs) {
         return Jwts.builder()

@@ -2,6 +2,7 @@ package com.elice.boardgame.report.service;
 
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
+import com.elice.boardgame.category.dto.PostPageDto;
 import com.elice.boardgame.common.exceptions.ReportNotFoundException;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.post.entity.Post;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,25 +36,42 @@ public class ReportService {
 
     private final ReportS3Service reportS3Service;
 
-    public List<ReportDto> findAll() {
-        List<Report> reports = reportRepository.findAll();
-        return reports.stream().map(report -> {
-            String reporterName = report.getReporter().getUsername();
-            String reportedUserName = report.getReportedUser() != null ? report.getReportedUser().getUsername() : null;
-            Long reportedPostId = report.getReportedPost() != null ? report.getReportedPost().getId() : null;
-            List<ReportAttachmentDto> attachments = report.getAttachments().stream()
+    public PostPageDto<ReportDto> findWaitingReports(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Report> reports = reportRepository.findWaitingReports(pageRequest);
+
+        List<ReportDto> content = reports.getContent().stream().map(report -> new ReportDto(
+            report.getReportId(),
+            report.getReporter().getUsername(),
+            report.getReportedUser() != null ? report.getReportedUser().getUsername() : null,
+            report.getReportedPost() != null ? report.getReportedPost().getId() : null,
+            report.getReportStatus(),
+            report.getReportReason(),
+            report.getAttachments().stream()
                 .map(attachment -> new ReportAttachmentDto(attachment.getAttachmentUrl()))
-                .collect(Collectors.toList());
-            return new ReportDto(
-                report.getReportId(),
-                reporterName,
-                reportedUserName,
-                reportedPostId,
-                report.getReportStatus(),
-                report.getReportReason(),
-                attachments
-            );
-        }).collect(Collectors.toList());
+                .collect(Collectors.toList())
+        )).collect(Collectors.toList());
+
+        return new PostPageDto<>(content, page, size, reports.getTotalElements(), reports.getTotalPages());
+    }
+
+    public PostPageDto<ReportDto> findCompletedReports(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Report> reports = reportRepository.findCompletedReports(pageRequest);
+
+        List<ReportDto> content = reports.getContent().stream().map(report -> new ReportDto(
+            report.getReportId(),
+            report.getReporter().getUsername(),
+            report.getReportedUser() != null ? report.getReportedUser().getUsername() : null,
+            report.getReportedPost() != null ? report.getReportedPost().getId() : null,
+            report.getReportStatus(),
+            report.getReportReason(),
+            report.getAttachments().stream()
+                .map(attachment -> new ReportAttachmentDto(attachment.getAttachmentUrl()))
+                .collect(Collectors.toList())
+        )).collect(Collectors.toList());
+
+        return new PostPageDto<>(content, page, size, reports.getTotalElements(), reports.getTotalPages());
     }
 
     @Transactional
@@ -77,7 +97,7 @@ public class ReportService {
         }
 
         report.setReportReason(requestDto.getReportReason());
-        report.setReportStatus("NEW");
+        report.setReportStatus("진행 전");
 
         attachments.forEach(file -> {
             ReportAttachment attachment = new ReportAttachment();
