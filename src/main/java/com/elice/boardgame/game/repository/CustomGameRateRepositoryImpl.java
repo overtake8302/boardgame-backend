@@ -10,6 +10,9 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import static com.elice.boardgame.game.entity.QGameRate.gameRate;
@@ -68,16 +71,27 @@ public class CustomGameRateRepositoryImpl implements CustomGameRateRepository{
     }
 
     @Override
-    public List<BoardGame> findByUserId(Long userId) {
+    public Page<BoardGame> findByUserId(Long userId, Pageable pageable) {
         QGameRate gameRate = QGameRate.gameRate;
         QBoardGame boardGame = QBoardGame.boardGame;
 
-        return queryFactory
+        List<BoardGame> boardGames = queryFactory
             .select(boardGame)
             .from(gameRate)
             .join(gameRate.boardGame, boardGame)
             .where(gameRate.user.id.eq(userId))
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
             .fetch();
+
+        long total = queryFactory
+            .select(boardGame.count())
+            .from(gameRate)
+            .where(gameRate.user.id.eq(userId))
+            .fetchOne();
+
+        return new PageImpl<>(boardGames, pageable, total);
+
     }
 
     @Override

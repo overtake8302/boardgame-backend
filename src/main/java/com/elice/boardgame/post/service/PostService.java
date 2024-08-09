@@ -5,9 +5,11 @@ import com.elice.boardgame.auth.repository.UserRepository;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.post.dto.CommentDto;
+import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.post.dto.PostDto;
 import com.elice.boardgame.post.entity.PostLike;
 import com.elice.boardgame.post.entity.PostLikePK;
+import com.elice.boardgame.post.dto.SearchPostResponse;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.entity.View;
 import com.elice.boardgame.post.repository.PostLikeRepository;
@@ -27,6 +29,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -331,4 +336,14 @@ public class PostService {
 //
 //        postRepository.delete(post);
 //    }
+
+    public CommonResponse<Page<SearchPostResponse>> searchPostsByKeyword(String keyword, Pageable pageable) {
+        Page<SearchPostResponse> results = postRepository.searchPostsByKeyword(keyword, pageable);
+
+        return CommonResponse.<Page<SearchPostResponse>>builder()
+            .payload(results)
+            .message("검색 성공")
+            .status(200)
+            .build();
+    }
 }

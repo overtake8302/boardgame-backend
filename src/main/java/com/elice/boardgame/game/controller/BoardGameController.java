@@ -1,5 +1,6 @@
 package com.elice.boardgame.game.controller;
 
+import com.elice.boardgame.auth.service.AuthService;
 import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.common.dto.PaginationRequest;
 import com.elice.boardgame.common.dto.SearchRequest;
@@ -39,6 +40,7 @@ public class    BoardGameController {
 
     private final BoardGameService boardGameService;
     private final BoardGameMapper mapper;
+    private final AuthService authService;
 
     @PostMapping
     public ResponseEntity<CommonResponse<GameResponseDto>> postGame(
@@ -109,8 +111,9 @@ public class    BoardGameController {
                 ,HttpStatus.OK);
     }
 
-    @PutMapping
+    @PutMapping("/{gameId}")
     public ResponseEntity<CommonResponse<GameResponseDto>> putGame(
+            @PathVariable Long gameId,
             @RequestPart("gamePutDto") @Validated GamePutDto gamePutDto,
             @RequestPart(value = "file", required = false) List<MultipartFile> files,
             BindingResult bindingResult
@@ -214,5 +217,11 @@ public class    BoardGameController {
                 .build();
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<Page<GameResponseDto>> test(@PageableDefault Pageable pageable) {
+        Page<GameResponseDto> gameResponseDtoPage = boardGameService.getGamesLikedByUser(authService.getCurrentUser().getId(), pageable);
+        return new ResponseEntity<>(gameResponseDtoPage, HttpStatus.OK);
     }
 }
