@@ -1,8 +1,9 @@
 package com.elice.boardgame.category.controller;
 
+import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.category.dto.GenreDto;
-import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.service.LikeGenreService;
+import com.elice.boardgame.common.annotation.CurrentUser;
 import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import java.util.List;
@@ -21,16 +22,16 @@ public class LikeGenreController {
     private final LikeGenreService likeGenreService;
 
     // 유저 좋아요 처리
-    @PutMapping("/like/{gameId}/{userId}")
-    public void handleLike(@PathVariable Long userId, @PathVariable Long gameId) {
-        likeGenreService.likeGenreScore(userId, gameId);
+    @PutMapping("/like/{gameId}")
+    public void handleLike(@CurrentUser User user, @PathVariable Long gameId) {
+        likeGenreService.likeGenreScore(user.getId(), gameId);
     }
 
     // 유저 평점 처리
-    @PutMapping("/rate/{gameId}/{userId}/{rating}")
-    public void addRateGenreScore(@PathVariable Long userId, @PathVariable Long gameId,
+    @PutMapping("/rate/{gameId}/{rating}")
+    public void handleRateScore(@CurrentUser User user, @PathVariable Long gameId,
         @PathVariable Double rating) {
-        likeGenreService.genreRatingScore(userId, gameId, rating);
+        likeGenreService.genreRatingScore(user.getId(), gameId, rating);
     }
 
     //유저별 좋아하는 장르 가져오기
