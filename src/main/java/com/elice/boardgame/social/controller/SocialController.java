@@ -4,10 +4,12 @@ import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.service.AuthService;
 import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.common.dto.PaginationRequest;
+import com.elice.boardgame.social.dto.SocialResponse;
 import com.elice.boardgame.social.service.SocialService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -30,12 +32,12 @@ public class SocialController {
     private final AuthService authService;
 
     @GetMapping
-    public ResponseEntity<CommonResponse<List<Long>>> getFriends(@ModelAttribute PaginationRequest paginationRequest) {
+    public ResponseEntity<CommonResponse<Page<SocialResponse>>> getFriends(@ModelAttribute PaginationRequest paginationRequest) {
         User currentUser = authService.getCurrentUser();
         Long userId = currentUser.getId();
         Pageable pageable = PageRequest.of(paginationRequest.getPage(), paginationRequest.getSize());
-        List<Long> friends = socialService.getFriendIds(userId, pageable);
-        CommonResponse<List<Long>> response = CommonResponse.<List<Long>>builder()
+        Page<SocialResponse> friends = socialService.getFriendIds(userId, pageable);
+        CommonResponse<Page<SocialResponse>> response = CommonResponse.<Page<SocialResponse>>builder()
             .payload(friends)
             .message("Friends retrieved successfully")
             .status(200)
