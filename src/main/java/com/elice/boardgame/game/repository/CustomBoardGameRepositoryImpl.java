@@ -1,12 +1,19 @@
 package com.elice.boardgame.game.repository;
 
+import com.elice.boardgame.auth.entity.QUser;
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.QGameGenre;
 import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.common.enums.Enums;
+import com.elice.boardgame.game.dto.GameListResponseDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
+import com.elice.boardgame.game.dto.HomeGamesResponseDto;
 import com.elice.boardgame.game.entity.*;
+import com.elice.boardgame.post.dto.CommentDto;
+import com.elice.boardgame.post.entity.QComment;
+import com.elice.boardgame.post.entity.QPost;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.QueryFactory;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -291,7 +298,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         return new PageImpl<>(results, pageable, total);
     }
 
-    public Page<GameResponseDto> findAllByDeletedDateIsNull(Pageable pageable, Enums.GameListSortOption sortBy) {
+    /*public Page<GameResponseDto> findAllByDeletedDateIsNull(Pageable pageable, Enums.GameListSortOption sortBy) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
         QGameRate gameRate = QGameRate.gameRate;
@@ -403,9 +410,81 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .fetchOne();
 
         return new PageImpl<>(results, pageable, total);
+    }*/
+
+    public Page<GameListResponseDto> findAllByDeletedDateIsNull(Pageable pageable, Enums.GameListSortOption sortBy) {
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
+        QGameRate gameRate = QGameRate.gameRate;
+        QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
+
+        JPAQuery<GameListResponseDto> query = queryFactory
+                .select(Projections.bean(GameListResponseDto.class,
+                        boardGame.gameId.as("gameId"),
+                        boardGame.name.as("name"),
+                        new CaseBuilder()
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then("쉬움")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then("보통")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then("어려움")
+                                .otherwise(boardGame.difficulty.stringValue()).as("difficulty"),
+                        boardGame.gameLikes.size().as("likeCount"),
+                        gameRate.rate.avg().as("averageRate"),
+                        gameVisitor.id.count().as("views")
+                ))
+                .from(boardGame)
+                .leftJoin(boardGame.gameRates, gameRate)
+                .leftJoin(boardGame.gameVisitors, gameVisitor)
+                .leftJoin(boardGame.gameProfilePics, gameProfilePic)
+                .where(boardGame.deletedDate.isNull())
+                .groupBy(
+                        boardGame.gameId,
+                        boardGame.name,
+                        boardGame.difficulty,
+                        gameRate.rate,
+                        gameVisitor.id
+                );
+
+        if (sortBy.equals(Enums.GameListSortOption.GAME_ID)) {
+            query.orderBy(boardGame.gameId.desc());
+        } else if (sortBy.equals(Enums.GameListSortOption.AVERAGE_RATE)) {
+            NumberExpression<Double> averageRate = gameRate.rate.avg();
+            OrderSpecifier<Double> orderSpecifier = new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, averageRate);
+            query.orderBy(orderSpecifier);
+        } else if (sortBy.equals(Enums.GameListSortOption.DIFFICULTY)) {
+            NumberExpression<Integer> difficultyOrder = new CaseBuilder()
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then(0)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then(1)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then(2)
+                    .otherwise(3);
+            query.orderBy(new OrderSpecifier<>(com.querydsl.core.types.Order.ASC, difficultyOrder));
+        } else if (sortBy.equals(Enums.GameListSortOption.VIEWS)) {
+            query.orderBy(gameVisitor.id.count().desc());
+        }
+
+        List<GameListResponseDto> results = query
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        for (GameListResponseDto result : results) {
+            List<String> profilePics = queryFactory
+                    .select(gameProfilePic.picAddress)
+                    .from(gameProfilePic)
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .fetch();
+            result.setGameProfilePics(profilePics);
+        }
+
+        long total = queryFactory
+                .select(boardGame.count())
+                .from(boardGame)
+                .where(boardGame.deletedDate.isNull())
+                .fetchOne();
+
+        return new PageImpl<>(results, pageable, total);
     }
 
-    @Override
+    /*@Override
     public List<GameResponseDto> findByGameGenresGenreGenre(String genre, Enums.GameListSortOption sortBy) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameGenre gameGenre = QGameGenre.gameGenre;
@@ -496,6 +575,82 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
 
 
         for (GameResponseDto result : results) {
+            List<String> profilePics = queryFactory
+                    .select(gameProfilePic.picAddress)
+                    .from(gameProfilePic)
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .fetch();
+            result.setGameProfilePics(profilePics);
+
+            List<GameGenre> genres = queryFactory
+                    .select(gameGenre)
+                    .from(gameGenre)
+                    .where(gameGenre.boardGame.gameId.eq(result.getGameId()))
+                    .fetch();
+            result.setGameGenres(genres);
+        }
+
+        return results;
+    }*/
+
+    @Override
+    public List<HomeGamesResponseDto> findByGameGenresGenreGenre(String genre, Enums.GameListSortOption sortBy) {
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameGenre gameGenre = QGameGenre.gameGenre;
+        QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
+        QGameRate gameRate = QGameRate.gameRate;
+        QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
+
+        JPAQuery<HomeGamesResponseDto> query = queryFactory
+                .select(Projections.bean(HomeGamesResponseDto.class,
+                        boardGame.gameId.as("gameId"),
+                        boardGame.name.as("name"),
+                        new CaseBuilder()
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then("쉬움")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then("보통")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then("어려움")
+                                .otherwise(boardGame.difficulty.stringValue()).as("difficulty"),
+                        boardGame.gameLikes.size().as("likeCount"),
+                        gameRate.rate.avg().as("averageRate"),
+                        gameVisitor.id.count().as("views")
+                ))
+                .from(boardGame)
+                .leftJoin(boardGame.gameRates, gameRate)
+                .leftJoin(boardGame.gameVisitors, gameVisitor)
+                .leftJoin(boardGame.gameProfilePics, gameProfilePic) // 프로필 사진 조인
+                .leftJoin(boardGame.gameGenres, gameGenre) // 장르 조인
+                .where(gameGenre.genre.genre.eq(genre).and(boardGame.deletedDate.isNull()))
+                .groupBy(
+                        boardGame.gameId,
+                        boardGame.name,
+                        boardGame.difficulty,
+                        gameRate.rate,
+                        gameVisitor.id
+                );
+
+        if (sortBy.equals(Enums.GameListSortOption.GAME_ID)) {
+            query.orderBy(boardGame.gameId.desc());
+        } else if (sortBy.equals(Enums.GameListSortOption.AVERAGE_RATE)) {
+            NumberExpression<Double> averageRate = gameRate.rate.avg();
+            OrderSpecifier<Double> orderSpecifier = new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, averageRate);
+            query.orderBy(orderSpecifier);
+        } else if (sortBy.equals(Enums.GameListSortOption.DIFFICULTY)) {
+            NumberExpression<Integer> difficultyOrder = new CaseBuilder()
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then(0)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then(1)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then(2)
+                    .otherwise(3);
+            query.orderBy(new OrderSpecifier<>(com.querydsl.core.types.Order.ASC, difficultyOrder));
+        } else if (sortBy.equals(Enums.GameListSortOption.VIEWS)) {
+            query.orderBy(gameVisitor.id.count().desc());
+        }
+
+        List<HomeGamesResponseDto> results = query
+                .limit(5)
+                .fetch();
+
+
+        for (HomeGamesResponseDto result : results) {
             List<String> profilePics = queryFactory
                     .select(gameProfilePic.picAddress)
                     .from(gameProfilePic)
@@ -638,6 +793,106 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .from(boardGame)
                 .leftJoin(boardGame.gameLikes, gameLike)
                 .where(gameLike.user.id.eq(userId).and(boardGame.deletedDate.isNull()))
+                .fetchOne();
+
+        return new PageImpl<>(results, pageable, total);
+    }
+
+    @Override
+    public List<CommentDto> findComentsByGameId(Long gameId) {
+
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QPost post = QPost.post;
+        QComment comment = QComment.comment;
+        QUser user = QUser.user;
+
+        List<CommentDto> commentDtos = queryFactory
+                .select(Projections.fields(CommentDto.class,
+                        comment.id.as("id"),
+                        user.id.as("userId"),
+                        comment.content.as("content"),
+                        user.username.as("userName"))
+                )
+                .from(comment)
+                .leftJoin(comment.user, user)
+                .leftJoin(comment.post, post)
+                .leftJoin(post.boardGame, boardGame)
+                .where(comment.post.boardGame.gameId.eq(gameId))
+                .limit(10)
+                .fetch();
+
+        return commentDtos;
+    }
+
+    @Override
+    public Page<GameListResponseDto> findByNameContainingAndDeletedDateIsNull(Pageable pageable, Enums.GameListSortOption sortBy, String keyword) {
+
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
+        QGameRate gameRate = QGameRate.gameRate;
+        QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
+
+        JPAQuery<GameListResponseDto> query = queryFactory
+                .select(Projections.bean(GameListResponseDto.class,
+                        boardGame.gameId.as("gameId"),
+                        boardGame.name.as("name"),
+                        new CaseBuilder()
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then("쉬움")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then("보통")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then("어려움")
+                                .otherwise(boardGame.difficulty.stringValue()).as("difficulty"),
+                        boardGame.gameLikes.size().as("likeCount"),
+                        gameRate.rate.avg().as("averageRate"),
+                        gameVisitor.id.count().as("views")
+                ))
+                .from(boardGame)
+                .leftJoin(boardGame.gameRates, gameRate)
+                .leftJoin(boardGame.gameVisitors, gameVisitor)
+                .leftJoin(boardGame.gameProfilePics, gameProfilePic)
+                .where(boardGame.deletedDate.isNull().and(boardGame.name.contains(keyword)))
+                .groupBy(
+                        boardGame.gameId,
+                        boardGame.name,
+                        boardGame.difficulty,
+                        gameRate.rate,
+                        gameVisitor.id
+                );
+
+        if (sortBy.equals(Enums.GameListSortOption.GAME_ID)) {
+            query.orderBy(boardGame.gameId.desc());
+        } else if (sortBy.equals(Enums.GameListSortOption.AVERAGE_RATE)) {
+            NumberExpression<Double> averageRate = gameRate.rate.avg();
+            OrderSpecifier<Double> orderSpecifier = new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, averageRate);
+            query.orderBy(orderSpecifier);
+        } else if (sortBy.equals(Enums.GameListSortOption.DIFFICULTY)) {
+            NumberExpression<Integer> difficultyOrder = new CaseBuilder()
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then(0)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then(1)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then(2)
+                    .otherwise(3);
+            query.orderBy(new OrderSpecifier<>(com.querydsl.core.types.Order.ASC, difficultyOrder));
+        } else if (sortBy.equals(Enums.GameListSortOption.VIEWS)) {
+            query.orderBy(gameVisitor.id.count().desc());
+        }
+
+        List<GameListResponseDto> results = query
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        for (GameListResponseDto result : results) {
+            List<String> profilePics = queryFactory
+                    .select(gameProfilePic.picAddress)
+                    .from(gameProfilePic)
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .fetch();
+            result.setGameProfilePics(profilePics);
+        }
+
+        long total = queryFactory
+                .select(boardGame.count())
+                .from(boardGame)
+                .where(boardGame.deletedDate.isNull())
                 .fetchOne();
 
         return new PageImpl<>(results, pageable, total);
