@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -594,7 +595,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
     }*/
 
     @Override
-    public List<HomeGamesResponseDto> findByGameGenresGenreGenre(String genre, Enums.GameListSortOption sortBy) {
+    public List<HomeGamesResponseDto> findByGameGenresGenreGenre(Enums.GameListSortOption sortBy, String genre) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameGenre gameGenre = QGameGenre.gameGenre;
         QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
@@ -619,7 +620,6 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .leftJoin(boardGame.gameVisitors, gameVisitor)
                 .leftJoin(boardGame.gameProfilePics, gameProfilePic) // 프로필 사진 조인
                 .leftJoin(boardGame.gameGenres, gameGenre) // 장르 조인
-                .where(gameGenre.genre.genre.eq(genre).and(boardGame.deletedDate.isNull()))
                 .groupBy(
                         boardGame.gameId,
                         boardGame.name,
@@ -627,6 +627,12 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                         gameRate.rate,
                         gameVisitor.id
                 );
+
+        if (genre == null || genre.isEmpty()) {
+            query.where(boardGame.deletedDate.isNull());
+        } else {
+            query.where(gameGenre.genre.genre.eq(genre).and(boardGame.deletedDate.isNull()));
+        }
 
         if (sortBy.equals(Enums.GameListSortOption.GAME_ID)) {
             query.orderBy(boardGame.gameId.desc());
