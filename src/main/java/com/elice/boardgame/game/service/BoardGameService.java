@@ -308,9 +308,9 @@ public class BoardGameService {
 
     }*/
 
-    public List<HomeGamesResponseDto> findGamesByGenreAndSort(String genre, Enums.GameListSortOption sort) {
+    public List<HomeGamesResponseDto> findGamesByGenreAndSort(Enums.GameListSortOption sort, String genre) {
 
-        return boardGameRepository.findByGameGenresGenreGenre(genre, sort);
+        return boardGameRepository.findByGameGenresGenreGenre(sort, genre);
 
     }
 

@@ -206,9 +206,12 @@ public class    BoardGameController {
     }
 
     @GetMapping("/home")
-    public ResponseEntity<CommonResponse<List<HomeGamesResponseDto>>> getHomeGames(@RequestParam @NotBlank String genre, @RequestParam @NotNull Enums.GameListSortOption sort) {
+    public ResponseEntity<CommonResponse<List<HomeGamesResponseDto>>> getHomeGames(
+            @RequestParam @NotNull Enums.GameListSortOption sort,
+            @RequestParam(required = false) String genre
+            ) {
 
-        List<HomeGamesResponseDto> homeGamesResponseDtos = boardGameService.findGamesByGenreAndSort(genre, sort);
+        List<HomeGamesResponseDto> homeGamesResponseDtos = boardGameService.findGamesByGenreAndSort(sort, genre);
         CommonResponse<List<HomeGamesResponseDto>> response = CommonResponse.<List<HomeGamesResponseDto>>builder()
                 .payload(homeGamesResponseDtos)
                 .build();
