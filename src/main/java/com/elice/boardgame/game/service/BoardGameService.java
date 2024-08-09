@@ -10,6 +10,7 @@ import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.mapper.GenreMapper;
 import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.service.GenreService;
+import com.elice.boardgame.common.annotation.CurrentUser;
 import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.common.enums.GameRateResponseMessages;
@@ -66,11 +67,11 @@ public class BoardGameService {
 
     @Transactional
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public GameResponseDto create(GamePostDto gamePostDto, List<MultipartFile> files) throws IOException {
+    public GameResponseDto create(GamePostDto gamePostDto, List<MultipartFile> files, User user) throws IOException {
 
-        User currentUser = authService.getCurrentUser();
+
         BoardGame newBoardGame = boardGameMapper.gamePostDtoToBoardGame(gamePostDto);
-        newBoardGame.setFirstCreator(currentUser);
+        newBoardGame.setFirstCreator(user);
         BoardGame savedBoardGame = boardGameRepository.save(newBoardGame);
 
         if (files != null && !files.isEmpty()) {
@@ -229,11 +230,10 @@ public class BoardGameService {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public ClickLikeResponseDto clickLike(Long gameId) {
+    public ClickLikeResponseDto clickLike(Long gameId, User user) {
 
         BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
-        User currentUser = authService.getCurrentUser();
-        GameLikePK gameLikePK = new GameLikePK(currentUser.getId(), gameId);
+        GameLikePK gameLikePK = new GameLikePK(user.getId(), gameId);
 
         Optional<GameLike> target = gameLikeRepository.findById(gameLikePK);
 
@@ -243,7 +243,7 @@ public class BoardGameService {
             gameLikeRepository.delete(target.get());
             clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_REMOVED.getMessage());
         } else {
-            GameLike gameLike = new GameLike(gameLikePK, targetGame, currentUser);
+            GameLike gameLike = new GameLike(gameLikePK, targetGame, user);
             gameLikeRepository.save(gameLike);
             clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_ADDED.getMessage());
         }
@@ -255,11 +255,10 @@ public class BoardGameService {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public GameRateResponseDto clickGameRate(Long gameId, GameRatePostDto gameRatePostDto) {
+    public GameRateResponseDto clickGameRate(Long gameId, GameRatePostDto gameRatePostDto, User user) {
 
         BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
-        User currentUser = authService.getCurrentUser();
-        GameRate foundGameRate = gameRateRepository.findByUserIdAndBoardGameGameId(currentUser.getId(), gameId);
+        GameRate foundGameRate = gameRateRepository.findByUserIdAndBoardGameGameId(user.getId(), gameId);
 
         if (foundGameRate != null) {
             foundGameRate.setRate(gameRatePostDto.getRate());
@@ -270,7 +269,7 @@ public class BoardGameService {
 
         GameRate newGameRate = new GameRate();
         newGameRate.setBoardGame(foundGame);
-        newGameRate.setUser(currentUser);
+        newGameRate.setUser(user);
         newGameRate.setRate(gameRatePostDto.getRate());
         gameRateRepository.save(newGameRate);
 

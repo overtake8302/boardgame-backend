@@ -1,6 +1,8 @@
 package com.elice.boardgame.game.controller;
 
+import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.service.AuthService;
+import com.elice.boardgame.common.annotation.CurrentUser;
 import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.common.dto.PaginationRequest;
 import com.elice.boardgame.common.dto.SearchRequest;
@@ -46,14 +48,15 @@ public class    BoardGameController {
     public ResponseEntity<CommonResponse<GameResponseDto>> postGame(
             @RequestPart("gamePostDto") @Validated GamePostDto gamePostDto,
             BindingResult bindingResult,
-            @RequestPart(value = "file", required = false) List<MultipartFile> files
+            @RequestPart(value = "file", required = false) List<MultipartFile> files,
+            @CurrentUser User user
     ) throws IOException {
 
         if (bindingResult.hasErrors()) {
             throw new GameRootException(GameErrorMessages.GAME_POST_ERROR, HttpStatus.BAD_REQUEST);
         }
 
-        GameResponseDto gameResponseDto = boardGameService.create(gamePostDto, files);
+        GameResponseDto gameResponseDto = boardGameService.create(gamePostDto, files, user);
         CommonResponse<GameResponseDto> response = CommonResponse.<GameResponseDto>builder()
                 .payload(gameResponseDto)
                 .build();
@@ -158,9 +161,9 @@ public class    BoardGameController {
     }
 
     @PostMapping("/like")
-    public ResponseEntity<CommonResponse<ClickLikeResponseDto>> clickLike(@RequestParam @Min(1) Long gameId) {
+    public ResponseEntity<CommonResponse<ClickLikeResponseDto>> clickLike(@RequestParam @Min(1) Long gameId, @CurrentUser User user) {
 
-        ClickLikeResponseDto clickLikeResponseDto = boardGameService.clickLike(gameId);
+        ClickLikeResponseDto clickLikeResponseDto = boardGameService.clickLike(gameId, user);
         CommonResponse<ClickLikeResponseDto> response = CommonResponse.<ClickLikeResponseDto>builder()
                 .payload(clickLikeResponseDto)
                 .build();
@@ -171,9 +174,10 @@ public class    BoardGameController {
     @PostMapping("/rate")
     public ResponseEntity<CommonResponse<GameRateResponseDto>> postGameRate(
             @RequestParam @Min(1) Long gameId,
-            @RequestBody @Validated GameRatePostDto gameRatePostDto) {
+            @RequestBody @Validated GameRatePostDto gameRatePostDto,
+            @CurrentUser User user) {
 
-        GameRateResponseDto responseDto = boardGameService.clickGameRate(gameId, gameRatePostDto);
+        GameRateResponseDto responseDto = boardGameService.clickGameRate(gameId, gameRatePostDto, user);
         CommonResponse<GameRateResponseDto> response = CommonResponse.<GameRateResponseDto>builder()
                 .payload(responseDto)
                 .build();

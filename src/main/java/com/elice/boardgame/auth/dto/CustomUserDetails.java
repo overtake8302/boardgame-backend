@@ -63,6 +63,10 @@ public class CustomUserDetails implements UserDetails {
         return true;
     }
 
+    public User getUser() {
+        return user;
+    }
+
 //    public Integer getAge(){ return user.getAge(); }
 //
 //    public String getPhoneNumber() { return user.getPhonenumber(); }
