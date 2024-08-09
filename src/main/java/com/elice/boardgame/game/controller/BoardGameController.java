@@ -219,15 +219,30 @@ public class    BoardGameController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/test")
+    /*@GetMapping("/test")
     public ResponseEntity<Page<GameResponseDto>> test(@PageableDefault Pageable pageable) {
         Page<GameResponseDto> gameResponseDtoPage = boardGameService.getGamesLikedByUser(authService.getCurrentUser().getId(), pageable);
         return new ResponseEntity<>(gameResponseDtoPage, HttpStatus.OK);
+    }*/
+
+    @GetMapping("/test/login-check")
+    public ResponseEntity<Boolean> test(@CurrentUser User user) {
+
+        if (user == null) {
+            return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
+        } else if (user != null && user.getId() != null) {
+            return new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
     }
 
     //ToDo
     /*@GetMapping("/IsFirstCreator")
-    public ResponseEntity<Boolean> isFirstCreator() {
-        Boolean result = boar
+    public ResponseEntity<Boolean> isFirstCreator(@RequestParam Long gameId, @CurrentUser User user) {
+
+        Boolean result = boardGameService.checkFirstCreatorOrAdmin(gameId, user);
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }*/
 }

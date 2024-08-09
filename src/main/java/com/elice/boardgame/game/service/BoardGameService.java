@@ -65,6 +65,9 @@ public class BoardGameService {
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public GameResponseDto create(GamePostDto gamePostDto, List<MultipartFile> files, User user) throws IOException {
 
+        if (user == null) {
+            throw new GameRootException(GameErrorMessages.UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
+        }
 
         BoardGame newBoardGame = boardGameMapper.gamePostDtoToBoardGame(gamePostDto);
         newBoardGame.setFirstCreator(user);
@@ -172,7 +175,12 @@ public class BoardGameService {
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public GameResponseDto editGame(GamePutDto gamePutDto, List<MultipartFile> files) throws IOException {
 
-        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gamePutDto.getGameId());;
+        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gamePutDto.getGameId());
+
+        if (foundGame == null) {
+            throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.BAD_REQUEST);
+        }
+
         BoardGame target = boardGameMapper.boardGameUpdateMapper(foundGame, gamePutDto);
 
         gameProfilePicService.deleteImages(target.getGameProfilePics(), foundGame.getGameId());
@@ -339,4 +347,13 @@ public class BoardGameService {
     public List<CommentDto> findComentsByGameId(Long gameId) {
         return boardGameRepository.findComentsByGameId(gameId);
     }
+
+    /*public Boolean checkFirstCreatorOrAdmin(Long gameId, User user) {
+
+        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
+
+        if (user == null) {
+
+        }
+    }*/
 }
