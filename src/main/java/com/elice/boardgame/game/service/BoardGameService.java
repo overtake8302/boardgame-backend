@@ -10,7 +10,6 @@ import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.mapper.GenreMapper;
 import com.elice.boardgame.category.repository.GameGenreRepository;
 import com.elice.boardgame.category.service.GenreService;
-import com.elice.boardgame.common.annotation.CurrentUser;
 import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.common.enums.GameRateResponseMessages;
@@ -23,19 +22,16 @@ import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
 import com.elice.boardgame.game.repository.GameRateRepository;
 import com.elice.boardgame.game.repository.GameVisitorRepository;
+import com.elice.boardgame.post.dto.CommentDto;
 import com.elice.boardgame.post.dto.PostDto;
-import com.elice.boardgame.post.entity.Comment;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.repository.CommentRepository;
 import com.elice.boardgame.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -109,15 +105,25 @@ public class BoardGameService {
         savedBoardGame.setGameGenres(genres);
         savedBoardGame = boardGameRepository.save(savedBoardGame);
 
-        return findGameByGameId(savedBoardGame.getGameId());
+        return findGameByGameId(savedBoardGame.getGameId(), false, false, null);
     }
 
-    public GameResponseDto findGameByGameId(Long gameId) {
+    public GameResponseDto findGameByGameId(Long gameId, boolean wantComments, boolean wantPosts, Enums.Category category) {
 
         GameResponseDto foundGame = boardGameRepository.getGameResponseDtoByGameIdAndDeletedDateIsNull(gameId);
 
         if (foundGame == null) {
             throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+
+        if (wantComments) {
+            List<CommentDto> comments = findComentsByGameId(gameId);
+            foundGame.setComments(comments);
+        }
+
+        if (wantPosts && category != null) {
+            List<PostDto> posts = getTop10Posts(gameId,category);
+            foundGame.setPosts(posts);
         }
 
         return foundGame;
@@ -276,7 +282,16 @@ public class BoardGameService {
         return new GameRateResponseDto(GameRateResponseMessages.REGISTERED.getMessage());
     }
 
-    public Page<GameResponseDto> findAll(Pageable pageable, Enums.GameListSortOption sortBy) {
+    /*public Page<GameResponseDto> findAll(Pageable pageable, Enums.GameListSortOption sortBy) {
+
+        return boardGameRepository.findAllByDeletedDateIsNull(pageable, sortBy);
+    }*/
+
+    public Page<GameListResponseDto> findAll(Pageable pageable, Enums.GameListSortOption sortBy, String keyword) {
+
+        if (keyword != null && !keyword.isEmpty()) {
+            return boardGameRepository.findByNameContainingAndDeletedDateIsNull(pageable, sortBy, keyword);
+        }
 
         return boardGameRepository.findAllByDeletedDateIsNull(pageable, sortBy);
     }
@@ -287,7 +302,13 @@ public class BoardGameService {
         gameVisitorRepository.insertIgnore(visitorId, gameId);
     }
 
-    public List<GameResponseDto> findGamesByGenreAndSort(String genre, Enums.GameListSortOption sort) {
+    /*public List<GameResponseDto> findGamesByGenreAndSort(String genre, Enums.GameListSortOption sort) {
+
+        return boardGameRepository.findByGameGenresGenreGenre(genre, sort);
+
+    }*/
+
+    public List<HomeGamesResponseDto> findGamesByGenreAndSort(String genre, Enums.GameListSortOption sort) {
 
         return boardGameRepository.findByGameGenresGenreGenre(genre, sort);
 
@@ -298,9 +319,11 @@ public class BoardGameService {
         List<PostDto> postDtos = new ArrayList<>();
         for (Post post : posts) {
             PostDto postDto = new PostDto();
+            postDto.setPostId(post.getId());
             postDto.setCategory(post.getCategory());
             postDto.setTitle(post.getTitle());
             postDto.setContent(post.getContent());
+            postDto.setCreatedAt(post.getCreatedAt());
             postDtos.add(postDto);
         }
         return postDtos;
@@ -313,4 +336,7 @@ public class BoardGameService {
         return boardGameRepository.findGamesLikedByUserId(userId, pageable);
     }
 
+    public List<CommentDto> findComentsByGameId(Long gameId) {
+        return boardGameRepository.findComentsByGameId(gameId);
+    }
 }
