@@ -81,6 +81,7 @@ import com.elice.boardgame.auth.jwt.LoginFilter;
 import com.elice.boardgame.auth.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -124,6 +125,11 @@ public class SecurityConfig {
         http.authorizeHttpRequests((auth) -> auth
                 .requestMatchers("/login", "/", "/join").permitAll()
                 .requestMatchers("/admin").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/game/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/game/view").permitAll()
+                .requestMatchers(HttpMethod.POST, "/game/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/game/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/game/**").authenticated()
                 .anyRequest().permitAll());
 
         // 로그아웃 설정
