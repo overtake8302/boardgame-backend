@@ -70,7 +70,7 @@ public class AuthController {
     }
 
     @GetMapping("/login-check")
-    public ResponseEntity<Boolean> test(@CurrentUser User user) {
+    public ResponseEntity<Boolean> loginCheck(@CurrentUser User user) {
 
         if (user == null) {
             return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
