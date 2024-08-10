@@ -337,12 +337,18 @@ public class BoardGameService {
         return boardGameRepository.findComentsByGameId(gameId);
     }
 
-    /*public Boolean checkFirstCreatorOrAdmin(Long gameId, User user) {
+    public Boolean checkFirstCreatorOrAdmin(Long gameId, User user) {
 
         BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
 
         if (user == null) {
-
+            return false;
         }
-    }*/
+
+        if (foundGame.getFirstCreator() == null || user.getId().equals(foundGame.getFirstCreator().getId()) || user.getRole().equals("ROLE_ADMIN") ) {
+            return true;
+        }
+
+        return false;
+    }
 }

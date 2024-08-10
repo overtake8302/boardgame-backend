@@ -189,11 +189,11 @@ public class    BoardGameController {
     }
 
     //ToDo
-    /*@GetMapping("/IsFirstCreator")
+    @GetMapping("/isFirstCreator")
     public ResponseEntity<Boolean> isFirstCreator(@RequestParam Long gameId, @CurrentUser User user) {
 
         Boolean result = boardGameService.checkFirstCreatorOrAdmin(gameId, user);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
-    }*/
+    }
 }
