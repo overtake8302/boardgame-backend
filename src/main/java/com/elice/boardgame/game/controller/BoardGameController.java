@@ -4,7 +4,6 @@ import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.service.AuthService;
 import com.elice.boardgame.common.annotation.CurrentUser;
 import com.elice.boardgame.common.dto.CommonResponse;
-import com.elice.boardgame.common.dto.PaginationRequest;
 import com.elice.boardgame.common.dto.SearchRequest;
 import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.common.enums.Enums;
@@ -13,10 +12,6 @@ import com.elice.boardgame.common.exceptions.GameRootException;
 import com.elice.boardgame.game.dto.*;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
 import com.elice.boardgame.game.service.BoardGameService;
-import com.elice.boardgame.post.dto.CommentDto;
-import com.elice.boardgame.post.dto.PostDto;
-import com.elice.boardgame.post.entity.Comment;
-import com.elice.boardgame.post.entity.Post;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -64,17 +58,6 @@ public class    BoardGameController {
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-
-    /*@GetMapping("/{gameId}")
-    public ResponseEntity<CommonResponse<GameResponseDto>> getGame(@PathVariable @Min(1) Long gameId) {
-
-        GameResponseDto foundGame = boardGameService.findGameByGameId(gameId);
-        CommonResponse<GameResponseDto> response = CommonResponse.<GameResponseDto>builder()
-                .payload(foundGame)
-                .build();
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }*/
 
     @GetMapping("/{gameId}")
     public ResponseEntity<CommonResponse<GameResponseDto>> getGame(
@@ -125,20 +108,6 @@ public class    BoardGameController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
-   /* @GetMapping("/keyword")
-    public ResponseEntity<CommonResponse<Page<GameResponseDto>>> searchByName(
-            @RequestParam(required = true) @NotBlank String keyword,
-            @PageableDefault(page = 0, size = 20) Pageable pageable
-            ) {
-
-        Page<GameResponseDto> foundGames = boardGameService.findGameByName(keyword, pageable);
-        CommonResponse<Page<GameResponseDto>> response = CommonResponse.<Page<GameResponseDto>>builder()
-                .payload(foundGames)
-                .build();
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }*/
 
     @GetMapping("/search")
     public ResponseEntity<CommonResponse<Page<SearchResponse>>> searchByKeyword(@ModelAttribute SearchRequest searchRequest) {
@@ -219,15 +188,12 @@ public class    BoardGameController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<Page<GameResponseDto>> test(@PageableDefault Pageable pageable) {
-        Page<GameResponseDto> gameResponseDtoPage = boardGameService.getGamesLikedByUser(authService.getCurrentUser().getId(), pageable);
-        return new ResponseEntity<>(gameResponseDtoPage, HttpStatus.OK);
-    }
-
     //ToDo
-    /*@GetMapping("/IsFirstCreator")
-    public ResponseEntity<Boolean> isFirstCreator() {
-        Boolean result = boar
-    }*/
+    @GetMapping("/isFirstCreator")
+    public ResponseEntity<Boolean> isFirstCreator(@RequestParam Long gameId, @CurrentUser User user) {
+
+        Boolean result = boardGameService.checkFirstCreatorOrAdmin(gameId, user);
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }

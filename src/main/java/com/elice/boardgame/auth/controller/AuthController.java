@@ -5,8 +5,12 @@ import com.elice.boardgame.auth.dto.JoinDTO;
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
 import com.elice.boardgame.auth.service.JoinService;
+import com.elice.boardgame.common.annotation.CurrentUser;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -53,4 +57,27 @@ public class AuthController {
 
 
     //react navigating
+
+    @PostMapping("/logout")
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        // JWT 쿠키 삭제
+        Cookie cookie = new Cookie("JWT", null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+
+        response.addCookie(cookie);
+    }
+
+    @GetMapping("/login-check")
+    public ResponseEntity<Boolean> loginCheck(@CurrentUser User user) {
+
+        if (user == null) {
+            return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
+        } else if (user != null && user.getId() != null) {
+            return new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
+    }
 }

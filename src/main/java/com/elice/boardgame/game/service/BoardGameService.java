@@ -2,8 +2,8 @@ package com.elice.boardgame.game.service;
 
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
-import com.elice.boardgame.category.dto.GenreDto;
 import com.elice.boardgame.auth.service.AuthService;
+import com.elice.boardgame.category.dto.GenreDto;
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.GameGenreId;
 import com.elice.boardgame.category.entity.Genre;
@@ -31,7 +31,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -62,9 +61,11 @@ public class BoardGameService {
     private final CommentRepository commentRepository;
 
     @Transactional
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public GameResponseDto create(GamePostDto gamePostDto, List<MultipartFile> files, User user) throws IOException {
 
+        if (user == null) {
+            throw new GameRootException(GameErrorMessages.UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
+        }
 
         BoardGame newBoardGame = boardGameMapper.gamePostDtoToBoardGame(gamePostDto);
         newBoardGame.setFirstCreator(user);
@@ -130,7 +131,6 @@ public class BoardGameService {
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public void deleteGameByGameId(Long gameId) {
 
         User currentUser = authService.getCurrentUser();
@@ -169,10 +169,14 @@ public class BoardGameService {
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public GameResponseDto editGame(GamePutDto gamePutDto, List<MultipartFile> files) throws IOException {
 
-        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gamePutDto.getGameId());;
+        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gamePutDto.getGameId());
+
+        if (foundGame == null) {
+            throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.BAD_REQUEST);
+        }
+
         BoardGame target = boardGameMapper.boardGameUpdateMapper(foundGame, gamePutDto);
 
         gameProfilePicService.deleteImages(target.getGameProfilePics(), foundGame.getGameId());
@@ -235,7 +239,6 @@ public class BoardGameService {
         return foundGames;
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public ClickLikeResponseDto clickLike(Long gameId, User user) {
 
         BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
@@ -260,7 +263,6 @@ public class BoardGameService {
         return clickLikeResponseDto;
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public GameRateResponseDto clickGameRate(Long gameId, GameRatePostDto gameRatePostDto, User user) {
 
         BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
@@ -282,11 +284,6 @@ public class BoardGameService {
         return new GameRateResponseDto(GameRateResponseMessages.REGISTERED.getMessage());
     }
 
-    /*public Page<GameResponseDto> findAll(Pageable pageable, Enums.GameListSortOption sortBy) {
-
-        return boardGameRepository.findAllByDeletedDateIsNull(pageable, sortBy);
-    }*/
-
     public Page<GameListResponseDto> findAll(Pageable pageable, Enums.GameListSortOption sortBy, String keyword) {
 
         if (keyword != null && !keyword.isEmpty()) {
@@ -301,12 +298,6 @@ public class BoardGameService {
 
         gameVisitorRepository.insertIgnore(visitorId, gameId);
     }
-
-    /*public List<GameResponseDto> findGamesByGenreAndSort(String genre, Enums.GameListSortOption sort) {
-
-        return boardGameRepository.findByGameGenresGenreGenre(genre, sort);
-
-    }*/
 
     public List<HomeGamesResponseDto> findGamesByGenreAndSort(Enums.GameListSortOption sort, String genre) {
 
@@ -338,5 +329,17 @@ public class BoardGameService {
 
     public List<CommentDto> findComentsByGameId(Long gameId) {
         return boardGameRepository.findComentsByGameId(gameId);
+    }
+
+    public Boolean checkFirstCreatorOrAdmin(Long gameId, User user) {
+
+        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
+        if (user == null) {
+            return false;
+        }
+        if (foundGame.getFirstCreator() == null || user.getId().equals(foundGame.getFirstCreator().getId()) || user.getRole().equals("ROLE_ADMIN") ) {
+            return true;
+        }
+        return false;
     }
 }
