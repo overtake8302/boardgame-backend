@@ -1,12 +1,15 @@
 package com.elice.boardgame.post.dto;
 
 import com.elice.boardgame.common.enums.Enums;
-import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Getter @Setter
 public class PostDto {
+    private Long postId;
     private String title;
     private String content;
     private Enums.Category category;
@@ -15,4 +18,5 @@ public class PostDto {
     private Long userId;
     private String userName;
     private List<CommentDto> comments;
+    private LocalDateTime createdAt;
 }

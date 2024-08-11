@@ -1,6 +1,8 @@
 package com.elice.boardgame.post.service;
 
+import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.post.dto.PostDto;
+import com.elice.boardgame.post.dto.SearchPostResponse;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.post.repository.PostRepository;
@@ -8,6 +10,8 @@ import com.elice.boardgame.post.repository.PostRepository;
 import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -63,5 +67,15 @@ public class PostService {
         }
 
         postRepository.delete(post);
+    }
+
+    public CommonResponse<Page<SearchPostResponse>> searchPostsByKeyword(String keyword, Pageable pageable) {
+        Page<SearchPostResponse> results = postRepository.searchPostsByKeyword(keyword, pageable);
+
+        return CommonResponse.<Page<SearchPostResponse>>builder()
+            .payload(results)
+            .message("검색 성공")
+            .status(200)
+            .build();
     }
 }

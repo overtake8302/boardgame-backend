@@ -1,6 +1,6 @@
 package com.elice.boardgame.category.service;
 
-import com.elice.boardgame.category.DTO.BoardGameFilterDto;
+import com.elice.boardgame.category.dto.BoardGameFilterDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.mapper.BoardGameMapper;

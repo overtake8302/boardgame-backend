@@ -2,6 +2,7 @@ package com.elice.boardgame.game.dto;
 
 
 import com.elice.boardgame.common.enums.Enums;
+import com.elice.boardgame.game.annotation.YouTubeLink;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Min;
@@ -41,11 +42,12 @@ public class GamePostDto {
 
     private String artwork;
 
-    @Enumerated(EnumType.STRING)
+    @NotNull
     private Enums.Difficulty difficulty;
 
     private String publisher;
 
+    @YouTubeLink
     private String youtubeLink;
 
     private List<Long> gameGenreIds = new ArrayList<>();

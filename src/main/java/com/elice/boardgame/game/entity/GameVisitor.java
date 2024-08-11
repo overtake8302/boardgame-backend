@@ -16,10 +16,10 @@ public class GameVisitor {
     @EmbeddedId
     private GameVisitorId id;
 
-    /*@MapsId("gameId")
+    @MapsId("gameId")
     @ManyToOne
     @JoinColumn(name = "gameId")
-    private BoardGame boardGame;*/
+    private BoardGame boardGame;
 
     public GameVisitor(String visitorId, Long gameId) {
         this.id = new GameVisitorId(visitorId, gameId);

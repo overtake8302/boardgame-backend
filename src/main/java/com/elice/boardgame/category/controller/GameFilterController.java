@@ -1,7 +1,8 @@
 package com.elice.boardgame.category.controller;
 
-import com.elice.boardgame.category.DTO.BoardGameFilterDto;
+import com.elice.boardgame.category.dto.BoardGameFilterDto;
 import com.elice.boardgame.category.service.GameFilterService;
+import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,12 @@ public class GameFilterController {
     private final GameFilterService gameFilterService;
 
     @GetMapping("/filter")
-    public List<GameResponseDto> getFilteredBoardGames(BoardGameFilterDto filterDTO) {
-        return gameFilterService.getFilteredBoardGames(filterDTO);
+    public CommonResponse<List<GameResponseDto>> getFilteredBoardGames(BoardGameFilterDto filterDTO) {
+        List<GameResponseDto> gameResponseDtos = gameFilterService.getFilteredBoardGames(filterDTO);
+        return CommonResponse.<List<GameResponseDto>>builder()
+            .payload(gameResponseDtos)
+            .message("")
+            .status(200)
+            .build();
     }
 }
