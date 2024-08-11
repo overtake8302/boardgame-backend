@@ -1,9 +1,8 @@
 package com.elice.boardgame.post.controller;
 
 import com.elice.boardgame.common.dto.CommonResponse;
+import com.elice.boardgame.common.dto.SearchRequest;
 import com.elice.boardgame.game.dto.ClickLikeResponseDto;
-import com.elice.boardgame.post.dto.CommentDto;
-import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.post.dto.PostDto;
 import com.elice.boardgame.post.dto.SearchPostResponse;
 import com.elice.boardgame.post.entity.Post;
@@ -19,8 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequestMapping("/posts")
@@ -61,10 +58,10 @@ public class PostController {
     }
 
     //  카테고리별로 게시글 상세 조회
-    @GetMapping("/{category}/{post_id}")
-    public ResponseEntity<PostDto> getPostByCategoryAndId(@PathVariable String category, @PathVariable("post_id") Long id) {
+    @GetMapping("/{post_id}")
+    public ResponseEntity<PostDto> getPostByCategoryAndId(@PathVariable("post_id") Long id) {
         try {
-            PostDto postDto = postService.getPostDtoByCategoryAndId(category, id);
+            PostDto postDto = postService.getPostDtoById(id);
             if (postDto == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
@@ -76,10 +73,10 @@ public class PostController {
     }
 
     //  조회수 증가
-    @PostMapping("/{category}/{post_id}/increment-view")
-    public ResponseEntity<PostDto> incrementViewAndGetPost(@PathVariable String category, @PathVariable("post_id") Long id) {
+    @PostMapping("/{post_id}/increment-view")
+    public ResponseEntity<PostDto> incrementViewAndGetPost(@PathVariable("post_id") Long id) {
         try {
-            PostDto postDto = postService.incrementViewAndGetPost(category, id);
+            PostDto postDto = postService.incrementViewAndGetPost(id);
             if (postDto == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
@@ -91,23 +88,22 @@ public class PostController {
     }
 
     //  좋아요~
-    @PostMapping("/{category}/{post_id}/like")
-    public ResponseEntity<CommonResponse<PostDto>> clickLike(@PathVariable("post_id") Long postId) {//@RequestParam @Min(1) Long postId) {
-
-        PostDto postDto = postService.clickLike(postId);
-        CommonResponse<PostDto> response = CommonResponse.<PostDto>builder()
-            .payload(postDto)
-            .build();
+    @PostMapping("/like")
+    public ResponseEntity<CommonResponse<ClickLikeResponseDto>> clickLike(@RequestParam @Min(1) Long postId) {
+        ClickLikeResponseDto clickLikeResponseDto = postService.clickLike(postId);
+        CommonResponse<ClickLikeResponseDto> response = CommonResponse.<ClickLikeResponseDto>builder()
+                .payload(clickLikeResponseDto)
+                .build();
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
     //  수정을 위해 수정전 게시글 불러오기
-    @GetMapping("/edit/{category}/{post_id}")
-    public ResponseEntity<PostDto> getPostForEdit(@PathVariable String category, @PathVariable("post_id") Long id) {
+    @GetMapping("/{post_id}/edit")
+    public ResponseEntity<PostDto> getPostForEdit(@PathVariable("post_id") Long id) {
         try {
-            PostDto postDto = postService.getPostDtoByCategoryAndId(category, id);
+            PostDto postDto = postService.getPostDtoById(id);
             if (postDto == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
@@ -119,20 +115,19 @@ public class PostController {
     }
 
     //  카테고리별로 게시글 수정
-    @PutMapping("/editok/{category}/{post_id}")
+    @PutMapping("/{post_id}/editok")
     public ResponseEntity<Post> updatePostByCategory(
             @PathVariable("post_id") Long id,
-            @PathVariable String category,
             @RequestBody PostDto postDetails) {
         log.info("PostDto {}",postDetails);
-        Post updatedPost = postService.updatePostByCategory(id, category, postDetails);
+        Post updatedPost = postService.updatePost(id, postDetails);
         return ResponseEntity.ok(updatedPost);
     }
 
     //  카테고리별로 게시글 삭제
-    @DeleteMapping("/{category}/{post_id}/delete")  //  경로를 어떻게할지 고민
-    public ResponseEntity<Void> deletePostByCategory(@PathVariable("post_id") Long id, @PathVariable String category) {
-        postService.deletePostByCategory(id, category);
+    @DeleteMapping("/{post_id}/delete")
+    public ResponseEntity<Void> deletePostByCategory(@PathVariable("post_id") Long id) {
+        postService.deletePost(id);
         return ResponseEntity.noContent().build();
     }
 

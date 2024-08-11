@@ -16,8 +16,7 @@ public class AuthService {
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserName = authentication.getName();
-        User currentUser = userRepository.findByUsername(currentUserName)
-            .orElseThrow(() -> new RuntimeException("User not found"));;
+        User currentUser = userRepository.findByUsername(currentUserName);
         return currentUser;
     }
 }
