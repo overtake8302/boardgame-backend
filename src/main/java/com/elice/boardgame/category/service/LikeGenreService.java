@@ -1,5 +1,7 @@
 package com.elice.boardgame.category.service;
 
+import com.elice.boardgame.category.dto.PostListResponseDto;
+import com.elice.boardgame.category.dto.RecentlyViewGameDto;
 import com.elice.boardgame.common.exceptions.BoardGameNotFoundException;
 import com.elice.boardgame.common.exceptions.GenreNotFoundException;
 import com.elice.boardgame.common.exceptions.MemberNotFoundException;
@@ -15,11 +17,14 @@ import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameLike;
 import com.elice.boardgame.game.entity.GameLikePK;
+import com.elice.boardgame.game.entity.GameProfilePic;
 import com.elice.boardgame.game.entity.GameRate;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
 import com.elice.boardgame.game.repository.GameRateRepository;
+import com.elice.boardgame.game.repository.GameVisitorRepository;
+import com.elice.boardgame.post.entity.Post;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,8 +58,10 @@ public class LikeGenreService {
 
     private final BoardGameMapper boardGameMapper;
 
+    private final GameVisitorRepository gameVisitorRepository;
+
     @Transactional
-    public void likeGenreScore(Long userId, Long gameId) {
+    public Boolean likeGenreScore(Long userId, Long gameId) {
         GameLikePK gameLikePK = new GameLikePK();
         gameLikePK.setUserId(userId);
         gameLikePK.setGameId(gameId);
@@ -82,12 +89,15 @@ public class LikeGenreService {
         else {
             gameLikeRepository.deleteByGameLikePK(gameLikePK);
             updateLikeGenre(user, genres, -2L);
+            return false;
         }
+
+        return true;
     }
 
 
     @Transactional
-    public void genreRatingScore(Long userId, Long gameId, Double rating) {
+    public Boolean genreRatingScore(Long userId, Long gameId, Double rating) {
         Long updateCount = 0L;
         if (rating == 5) {
             updateCount = 2L;
@@ -119,6 +129,10 @@ public class LikeGenreService {
         }
         // gameRate에 존재한다면 취소
         else {
+            if (Objects.equals(optionalEntity.orElseThrow().getRate(), rating)){
+                gameRateRepository.deleteByUserAndBoardGame(user, boardGame);
+                return false;
+            }
             GameRate gameRate = optionalEntity.orElseThrow();
             gameRateRepository.deleteByUserAndBoardGame(user, boardGame);
             Double originRate = gameRate.getRate();
@@ -130,6 +144,7 @@ public class LikeGenreService {
             }
             updateLikeGenre(user, genres, updateCount);
         }
+        return true;
     }
 
     public void updateLikeGenre(User user, List<Genre> genres, Long updateCount) {
@@ -207,5 +222,22 @@ public class LikeGenreService {
         Page<BoardGame> boardGames = boardGameRepository.findByGenres(topLikeGenreIds, userId, pageable);
 
         return boardGames.map(boardGameMapper::boardGameToGameResponseDto);
+    }
+
+    public List<RecentlyViewGameDto> recentlyViewPosts(String userId) {
+        List<BoardGame> boardGames = gameVisitorRepository.recentlyViewPosts(userId);
+        System.out.println(boardGames);
+
+        return boardGames.stream().map(boardGame -> {
+            RecentlyViewGameDto dto = new RecentlyViewGameDto();
+            dto.setGameId(boardGame.getGameId());
+
+            List<String> picAddresses = boardGame.getGameProfilePics().stream()
+                .map(GameProfilePic::getPicAddress)
+                .collect(Collectors.toList());
+            dto.setGameProfilePics(picAddresses);
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 }

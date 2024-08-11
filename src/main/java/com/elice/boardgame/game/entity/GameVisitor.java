@@ -1,5 +1,6 @@
 package com.elice.boardgame.game.entity;
 
+import com.elice.boardgame.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameVisitor {
+public class GameVisitor extends BaseEntity {
 
     @EmbeddedId
     private GameVisitorId id;
