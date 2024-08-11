@@ -45,4 +45,12 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, gameRootException.getHttpStatus());
     }
+
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<UserErrorResponse> handleUserException(UserException userException) {
+
+        UserErrorResponse errorResponse = new UserErrorResponse(userException.getUserErrorMessages().getErrorCode(), userException.getUserErrorMessages().getErrorMessage());
+
+        return new ResponseEntity<>(errorResponse, userException.getHttpStatus());
+    }
 }

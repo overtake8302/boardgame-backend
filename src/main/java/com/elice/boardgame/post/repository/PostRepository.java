@@ -11,4 +11,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRep
     Optional<Post> findByCategoryAndId(Enums.Category category, Long id);
 
     List<Post> findTop10ByBoardGameGameIdAndCategoryOrderByIdDesc(Long gameId, Enums.Category category);
+
+    List<Post> findAllByUser_Id(Long id);
 }
