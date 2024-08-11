@@ -5,6 +5,7 @@ import com.elice.boardgame.category.dto.PostPageDto;
 import com.elice.boardgame.category.mapper.PostListMapper;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.repository.PostRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

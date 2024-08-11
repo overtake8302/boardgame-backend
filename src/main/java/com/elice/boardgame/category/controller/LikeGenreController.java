@@ -2,6 +2,7 @@ package com.elice.boardgame.category.controller;
 
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.category.dto.GenreDto;
+import com.elice.boardgame.category.dto.RecentlyViewGameDto;
 import com.elice.boardgame.category.service.LikeGenreService;
 import com.elice.boardgame.common.annotation.CurrentUser;
 import com.elice.boardgame.common.dto.CommonResponse;
@@ -23,15 +24,15 @@ public class LikeGenreController {
 
     // 유저 좋아요 처리
     @PutMapping("/like/{gameId}")
-    public void handleLike(@CurrentUser User user, @PathVariable Long gameId) {
-        likeGenreService.likeGenreScore(user.getId(), gameId);
+    public Boolean handleLike(@CurrentUser User user, @PathVariable Long gameId) {
+        return likeGenreService.likeGenreScore(user.getId(), gameId);
     }
 
     // 유저 평점 처리
     @PutMapping("/rate/{gameId}/{rating}")
-    public void handleRateScore(@CurrentUser User user, @PathVariable Long gameId,
+    public Boolean handleRateScore(@CurrentUser User user, @PathVariable Long gameId,
         @PathVariable Double rating) {
-        likeGenreService.genreRatingScore(user.getId(), gameId, rating);
+        return likeGenreService.genreRatingScore(user.getId(), gameId, rating);
     }
 
     //유저별 좋아하는 장르 가져오기
@@ -83,6 +84,21 @@ public class LikeGenreController {
             .cacheControl(CacheControl.maxAge(60, TimeUnit.SECONDS))
             .body(CommonResponse.<Page<GameResponseDto>>builder()
                 .payload(games)
+                .message("")
+                .status(200)
+                .build());
+    }
+
+    @GetMapping("/recently")
+    public ResponseEntity<CommonResponse<List<RecentlyViewGameDto>>> recentlyViewGames(@RequestHeader("visitorId") String visitorId) {
+        System.out.println(visitorId);
+        List<RecentlyViewGameDto> dtos = likeGenreService.recentlyViewPosts(visitorId);
+        System.out.println(dtos);
+
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.maxAge(60, TimeUnit.SECONDS))
+            .body(CommonResponse.<List<RecentlyViewGameDto>>builder()
+                .payload(dtos)
                 .message("")
                 .status(200)
                 .build());
