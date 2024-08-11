@@ -2,6 +2,7 @@ package com.elice.boardgame.auth.jwt;
 
 import com.elice.boardgame.auth.dto.CustomUserDetails;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -54,6 +55,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String token = jwtUtil.createJwt(username, role, 60*60*10L * 10000);
 
         response.addHeader("Authorization", "Bearer " + token);
+
+        Cookie cookie = new Cookie("JWT", token);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60 * 10); // 10시간
+
+        response.addCookie(cookie);
     }
 
     //로그인 실패시 실행하는 메소드

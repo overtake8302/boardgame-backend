@@ -1,13 +1,18 @@
 package com.elice.boardgame.category.controller;
 
+import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.category.dto.GenreDto;
-import com.elice.boardgame.category.entity.Genre;
+import com.elice.boardgame.category.dto.RecentlyViewGameDto;
 import com.elice.boardgame.category.service.LikeGenreService;
+import com.elice.boardgame.common.annotation.CurrentUser;
 import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,31 +23,33 @@ public class LikeGenreController {
     private final LikeGenreService likeGenreService;
 
     // 유저 좋아요 처리
-    @PutMapping("/like/{gameId}/{userId}")
-    public void handleLike(@PathVariable Long userId, @PathVariable Long gameId) {
-        likeGenreService.likeGenreScore(userId, gameId);
+    @PutMapping("/like/{gameId}")
+    public Boolean handleLike(@CurrentUser User user, @PathVariable Long gameId) {
+        return likeGenreService.likeGenreScore(user.getId(), gameId);
     }
 
     // 유저 평점 처리
-    @PutMapping("/rate/{gameId}/{userId}/{rating}")
-    public void addRateGenreScore(@PathVariable Long userId, @PathVariable Long gameId,
+    @PutMapping("/rate/{gameId}/{rating}")
+    public Boolean handleRateScore(@CurrentUser User user, @PathVariable Long gameId,
         @PathVariable Double rating) {
-        likeGenreService.genreRatingScore(userId, gameId, rating);
+        return likeGenreService.genreRatingScore(user.getId(), gameId, rating);
     }
 
     //유저별 좋아하는 장르 가져오기
     @GetMapping("/user/genre/{userId}")
-    public CommonResponse<List<GenreDto>> getGenres(@PathVariable Long userId) {
+    public ResponseEntity<CommonResponse<List<GenreDto>>> getGenres(@PathVariable Long userId) {
         List<GenreDto> genreDtos = likeGenreService.getGenres(userId);
-        return CommonResponse.<List<GenreDto>>builder()
-            .payload(genreDtos)
-            .message("")
-            .status(200)
-            .build();
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.maxAge(60, TimeUnit.SECONDS))
+            .body(CommonResponse.<List<GenreDto>>builder()
+                .payload(genreDtos)
+                .message("")
+                .status(200)
+                .build());
     }
 
     @GetMapping("/game")
-    public CommonResponse<Page<GameResponseDto>> getGames(
+    public ResponseEntity<CommonResponse<Page<GameResponseDto>>> getGames(
         @RequestParam String type,
         @RequestParam Long userId,
         @RequestParam int page,
@@ -64,17 +71,37 @@ public class LikeGenreController {
                 games = likeGenreService.getGamesFromLikeGenre(userId, page, size);
                 break;
             default:
-                return CommonResponse.<Page<GameResponseDto>>builder()
-                    .payload(Page.empty())
-                    .message("")
-                    .status(400)
-                    .build();
+                return ResponseEntity.badRequest().body(
+                    CommonResponse.<Page<GameResponseDto>>builder()
+                        .payload(Page.empty())
+                        .message("Invalid type parameter")
+                        .status(400)
+                        .build()
+                );
         }
 
-        return CommonResponse.<Page<GameResponseDto>>builder()
-            .payload(games)
-            .message("")
-            .status(200)
-            .build();
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.maxAge(60, TimeUnit.SECONDS))
+            .body(CommonResponse.<Page<GameResponseDto>>builder()
+                .payload(games)
+                .message("")
+                .status(200)
+                .build());
     }
+
+    @GetMapping("/recently")
+    public ResponseEntity<CommonResponse<List<RecentlyViewGameDto>>> recentlyViewGames(@RequestHeader("visitorId") String visitorId) {
+        System.out.println(visitorId);
+        List<RecentlyViewGameDto> dtos = likeGenreService.recentlyViewPosts(visitorId);
+        System.out.println(dtos);
+
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.maxAge(60, TimeUnit.SECONDS))
+            .body(CommonResponse.<List<RecentlyViewGameDto>>builder()
+                .payload(dtos)
+                .message("")
+                .status(200)
+                .build());
+    }
+
 }

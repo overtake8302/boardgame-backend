@@ -95,7 +95,8 @@ public class Enums {
         GAME_ID("gameId"),
         DIFFICULTY("difficulty"),
         AVERAGE_RATE("averageRate"),
-        VIEWS("views");
+        VIEWS("views"),
+        LIKES("likes");
 
         private final String sortBy;
 

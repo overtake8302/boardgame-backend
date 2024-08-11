@@ -4,7 +4,6 @@ import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.post.dto.CommentDto;
 import com.elice.boardgame.post.dto.PostDto;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -12,32 +11,13 @@ import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
-public class GameResponseDto {
+public class GameListResponseDto {
 
     private Long gameId;
 
     private String name;
 
-    private String playTime;
-
-    private String playNum;
-
-    private String ageLimit;
-
-    private int price;
-
-    private String designer;
-
-    private String artwork;
-
-    private String releaseDate;
-
     private String difficulty;
-
-    private String publisher;
-
-    private String youtubeLink;
 
     private int likeCount;
 
@@ -45,12 +25,5 @@ public class GameResponseDto {
 
     private List<String> gameProfilePics;
 
-    private List<GameGenre> gameGenres = new ArrayList<>();
-
     private Long views;
-
-    private List<PostDto> posts;
-
-    private List<CommentDto> comments = new ArrayList<>();
-
 }

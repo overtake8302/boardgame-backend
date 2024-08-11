@@ -1,9 +1,12 @@
 package com.elice.boardgame.category.controller;
 
+import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.category.dto.PostListResponseDto;
 import com.elice.boardgame.category.dto.PostPageDto;
 import com.elice.boardgame.category.service.PostFilterService;
+import com.elice.boardgame.common.annotation.CurrentUser;
 import com.elice.boardgame.common.dto.CommonResponse;
+import com.elice.boardgame.game.dto.GameResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
