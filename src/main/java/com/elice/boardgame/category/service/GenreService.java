@@ -2,7 +2,7 @@ package com.elice.boardgame.category.service;
 
 import com.elice.boardgame.common.exceptions.GenreAlreadyExistsException;
 import com.elice.boardgame.common.exceptions.GenreNotFoundException;
-import com.elice.boardgame.category.DTO.GenreDto;
+import com.elice.boardgame.category.dto.GenreDto;
 import com.elice.boardgame.category.entity.Genre;
 import com.elice.boardgame.category.mapper.GenreMapper;
 import com.elice.boardgame.category.repository.GenreRepository;

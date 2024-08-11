@@ -1,37 +1,40 @@
 package com.elice.boardgame.game.repository;
 
+import com.elice.boardgame.auth.entity.QUser;
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.QGameGenre;
-import com.elice.boardgame.game.dto.GameProfilePicResponseDto;
+import com.elice.boardgame.common.dto.SearchResponse;
+import com.elice.boardgame.common.enums.Enums;
+import com.elice.boardgame.game.dto.GameListResponseDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
+import com.elice.boardgame.game.dto.HomeGamesResponseDto;
 import com.elice.boardgame.game.entity.*;
+import com.elice.boardgame.post.dto.CommentDto;
+import com.elice.boardgame.post.entity.QComment;
+import com.elice.boardgame.post.entity.QPost;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.QueryResults;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.ExpressionUtils;
-import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.PathBuilder;
-import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
 public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository {
 
     private final JPAQueryFactory queryFactory;
+    private final EntityManager entityManager;
 
     @Override
     public List<BoardGame> findBoardGamesWithFilters(List<String> playTimes, List<String> playNums,
@@ -86,21 +89,18 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
     }
 
     @Override
-    public List<BoardGame> findByGenres(List<Long> genreIds, Long userId) {
+    public Page<BoardGame> findByGenres(List<Long> genreIds, Long userId, Pageable pageable) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameGenre gameGenre = QGameGenre.gameGenre;
         QGameLike gameLike = QGameLike.gameLike;
 
-        // 각 genreId를 확인하는 조건 추가
         BooleanExpression predicate = gameGenre.genre.genreId.in(genreIds);
 
-        // 좋아요를 누른 게임 ID 가져오기
         List<Long> likedGameIds = queryFactory.select(gameLike.boardGame.gameId)
             .from(gameLike)
             .where(gameLike.user.id.eq(userId))
             .fetch();
 
-        // game_id를 그룹화하고 count(genre_id)로 정렬
         List<Long> boardGameIds = queryFactory
             .select(gameGenre.boardGame.gameId)
             .from(gameGenre)
@@ -109,85 +109,23 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
             .orderBy(gameGenre.genre.genreId.count().desc())
             .fetch();
 
-        // 보드게임 ID로 보드게임을 조회하며 좋아요를 누른 게임은 제외
-        return queryFactory
+        List<BoardGame> boardGames = queryFactory
             .selectFrom(boardGame)
-            .where(boardGame.gameId.in(boardGameIds) //서브쿼리 사용해서 좋아요 누른 게임 제외
+            .where(boardGame.gameId.in(boardGameIds)
                 .and(boardGame.gameId.notIn(likedGameIds)))
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
             .fetch();
+
+        long total = queryFactory
+            .select(boardGame.count())
+            .from(boardGame)
+            .where(boardGame.gameId.in(boardGameIds)
+                .and(boardGame.gameId.notIn(likedGameIds)))
+            .fetchOne();
+
+        return new PageImpl<>(boardGames, pageable, total);
     }
-    
-     public Page<GameResponseDto> findAllOrderByAverageRateDesc(Pageable pageable) {
-        QBoardGame boardGame = QBoardGame.boardGame;
-        QGameRate gameRate = QGameRate.gameRate;
-        QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
-        QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
-        QGameGenre gameGenre = QGameGenre.gameGenre;
-
-        List<Tuple> results = queryFactory
-                .select(boardGame, gameRate.rate.avg(), gameVisitor.id.count())
-                .from(boardGame)
-                .leftJoin(boardGame.gameRates, gameRate)
-                .leftJoin(boardGame.gameVisitors, gameVisitor)
-                .leftJoin(boardGame.gameGenres, gameGenre) // 장르 조인
-                .where(boardGame.deletedDate.isNull())
-                .groupBy(boardGame)
-                .orderBy(gameRate.rate.avg().desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        List<GameResponseDto> gameResponseDtos = new ArrayList<>();
-        for (Tuple tuple : results) {
-            BoardGame boardGameEntity = tuple.get(boardGame);
-            Double averageRate = tuple.get(gameRate.rate.avg());
-            Long views = tuple.get(gameVisitor.id.count());
-
-            // 프로필 사진 수집
-            List<String> picAddresses = boardGameEntity.getGameProfilePics().stream()
-                    .map(GameProfilePic::getPicAddress)
-                    .collect(Collectors.toList());
-
-            // 장르 수집
-            List<GameGenre> genres = queryFactory
-                    .select(gameGenre)
-                    .from(gameGenre)
-                    .where(gameGenre.boardGame.eq(boardGameEntity))
-                    .fetch();
-
-            GameResponseDto dto = new GameResponseDto();
-            dto.setGameId(boardGameEntity.getGameId());
-            dto.setName(boardGameEntity.getName());
-            dto.setPlayTime(boardGameEntity.getPlayTime().getLabel());
-            dto.setPlayNum(boardGameEntity.getPlayNum().getLabel());
-            dto.setAgeLimit(boardGameEntity.getAgeLimit().getLabel());
-            dto.setPrice(boardGameEntity.getPrice());
-            dto.setDesigner(boardGameEntity.getDesigner());
-            dto.setArtwork(boardGameEntity.getArtwork());
-            dto.setReleaseDate(boardGameEntity.getReleaseDate());
-            dto.setDifficulty(boardGameEntity.getDifficulty().getLabel());
-            dto.setPublisher(boardGameEntity.getPublisher());
-            dto.setYoutubeLink(boardGameEntity.getYoutubeLink());
-            dto.setLikeCount(boardGameEntity.getGameLikes().size());
-            dto.setGameGenres(genres);
-            dto.setAverageRate(averageRate);
-            dto.setViews(views);
-
-            GameProfilePicResponseDto gameProfilePicResponseDto = new GameProfilePicResponseDto(picAddresses);
-            dto.setGameProfilePics(gameProfilePicResponseDto);
-
-            gameResponseDtos.add(dto);
-        }
-
-        return new PageImpl<>(gameResponseDtos, pageable, gameResponseDtos.size());
-    }
-
-
-
-
-
-
-
 
     @Override
     public GameResponseDto getGameResponseDtoByGameIdAndDeletedDateIsNull(Long gameId) {
@@ -196,267 +134,534 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
         QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
         QGameGenre gameGenre = QGameGenre.gameGenre;
+        QGameLike gameLike = QGameLike.gameLike;
 
-        Tuple result = queryFactory
-                .select(boardGame, gameRate.rate.avg(), gameVisitor.id.count())
-                .from(boardGame)
-                .leftJoin(boardGame.gameRates, gameRate)
-                .leftJoin(boardGame.gameVisitors, gameVisitor)
-                .leftJoin(boardGame.gameProfilePics, gameProfilePic) // 프로필 사진 조인
-                .leftJoin(boardGame.gameGenres, gameGenre) // 장르 조인
-                .where(boardGame.deletedDate.isNull()
-                        .and(boardGame.gameId.eq(gameId)))
-                .groupBy(boardGame)
-                .orderBy(gameRate.rate.avg().desc())
-                .fetchOne();
+        List<String> profilePics = queryFactory
+                .select(gameProfilePic.picAddress)
+                .from(gameProfilePic)
+                .where(gameProfilePic.boardGame.gameId.eq(gameId))
+                .fetch();
 
-        if (result == null) {
-            return null;
-        }
-
-        BoardGame boardGameEntity = result.get(boardGame);
-        Double averageRate = result.get(gameRate.rate.avg());
-        Long views = result.get(gameVisitor.id.count());
-
-        // 프로필 사진 수집
-        List<String> picAddresses = boardGameEntity.getGameProfilePics().stream()
-                .map(GameProfilePic::getPicAddress)
-                .collect(Collectors.toList());
-
-        // 장르 수집
         List<GameGenre> genres = queryFactory
                 .select(gameGenre)
                 .from(gameGenre)
-                .where(gameGenre.boardGame.eq(boardGameEntity))
+                .where(gameGenre.boardGame.gameId.eq(gameId))
                 .fetch();
 
-        GameResponseDto dto = new GameResponseDto();
-        dto.setGameId(boardGameEntity.getGameId());
-        dto.setName(boardGameEntity.getName());
-        dto.setPlayTime(boardGameEntity.getPlayTime().getLabel());
-        dto.setPlayNum(boardGameEntity.getPlayNum().getLabel());
-        dto.setAgeLimit(boardGameEntity.getAgeLimit().getLabel());
-        dto.setPrice(boardGameEntity.getPrice());
-        dto.setDesigner(boardGameEntity.getDesigner());
-        dto.setArtwork(boardGameEntity.getArtwork());
-        dto.setReleaseDate(boardGameEntity.getReleaseDate());
-        dto.setDifficulty(boardGameEntity.getDifficulty().getLabel());
-        dto.setPublisher(boardGameEntity.getPublisher());
-        dto.setYoutubeLink(boardGameEntity.getYoutubeLink());
-        dto.setLikeCount(boardGameEntity.getGameLikes().size());
-        dto.setGameGenres(genres);
-        dto.setAverageRate(averageRate);
-        dto.setViews(views);
+        GameResponseDto result = queryFactory
+                .select(Projections.bean(GameResponseDto.class,
+                        boardGame.gameId.as("gameId"),
+                        boardGame.name.as("name"),
+                        new CaseBuilder()
+                                .when(boardGame.playTime.eq(Enums.PlayTime.SHORT)).then("30분 이하")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.MEDIUM)).then("30분 ~ 1시간")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.LONG)).then("1시간 이상")
+                                .otherwise(boardGame.playTime.stringValue()).as("playTime"),
+                        new CaseBuilder()
+                                .when(boardGame.playNum.eq(Enums.PlayNum.ONE_PLAYER)).then("1인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.TWO_PLAYERS)).then("2인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.THREE_PLAYERS)).then("3인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FOUR_PLAYERS)).then("4인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FIVE_PLUS_PLAYERS)).then("5인 이상")
+                                .otherwise(boardGame.playNum.stringValue()).as("playNum"),
+                        new CaseBuilder()
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_ALL)).then("전체 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_12_PLUS)).then("12세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_15_PLUS)).then("15세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_18_PLUS)).then("청소년 이용 불가")
+                                .otherwise(boardGame.ageLimit.stringValue()).as("ageLimit"),
+                        new CaseBuilder()
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then("쉬움")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then("보통")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then("어려움")
+                                .otherwise(boardGame.difficulty.stringValue()).as("difficulty"),
+                        boardGame.price.as("price"),
+                        boardGame.designer.as("designer"),
+                        boardGame.artwork.as("artwork"),
+                        boardGame.releaseDate.as("releaseDate"),
+                        boardGame.publisher.as("publisher"),
+                        boardGame.youtubeLink.as("youtubeLink"),
+                        gameLike.countDistinct().intValue().as("likeCount"),
+                        gameRate.rate.avg().as("averageRate"),
+                        gameVisitor.countDistinct().as("views")
+                ))
+                .from(boardGame)
+                .leftJoin(boardGame.gameRates, gameRate)
+                .leftJoin(boardGame.gameVisitors, gameVisitor)
+                .leftJoin(boardGame.gameProfilePics, gameProfilePic) // 프로필 사진 조인
+                .leftJoin(boardGame.gameGenres, gameGenre)// 장르 조인
+                .leftJoin(boardGame.gameLikes, gameLike)
+                .where(boardGame.deletedDate.isNull()
+                        .and(boardGame.gameId.eq(gameId)))
+                .fetchOne();
 
-        GameProfilePicResponseDto gameProfilePicResponseDto = new GameProfilePicResponseDto(picAddresses);
-        dto.setGameProfilePics(gameProfilePicResponseDto);
+        if (result != null) {
+            result.setGameProfilePics(profilePics);
+            result.setGameGenres(genres);
+        }
 
-        return dto;
+        return result;
     }
 
-
     @Override
-    public List<GameResponseDto> findByNameContainingAndDeletedDateIsNull(String keyword) {
+    public Page<GameResponseDto> findByNameContainingAndDeletedDateIsNull(String keyword, Pageable pageable) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
         QGameRate gameRate = QGameRate.gameRate;
         QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
         QGameGenre gameGenre = QGameGenre.gameGenre;
+        QGameLike gameLike = QGameLike.gameLike;
 
-        List<Tuple> results = queryFactory
-                .select(boardGame, gameRate.rate.avg(), gameVisitor.id.count())
+        List<GameResponseDto> results = queryFactory
+                .select(Projections.bean(GameResponseDto.class,
+                        boardGame.gameId.as("gameId"),
+                        boardGame.name.as("name"),
+                        new CaseBuilder()
+                                .when(boardGame.playTime.eq(Enums.PlayTime.SHORT)).then("30분 이하")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.MEDIUM)).then("30분 ~ 1시간")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.LONG)).then("1시간 이상")
+                                .otherwise(boardGame.playTime.stringValue()).as("playTime"),
+                        new CaseBuilder()
+                                .when(boardGame.playNum.eq(Enums.PlayNum.ONE_PLAYER)).then("1인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.TWO_PLAYERS)).then("2인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.THREE_PLAYERS)).then("3인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FOUR_PLAYERS)).then("4인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FIVE_PLUS_PLAYERS)).then("5인 이상")
+                                .otherwise(boardGame.playNum.stringValue()).as("playNum"),
+                        new CaseBuilder()
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_ALL)).then("전체 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_12_PLUS)).then("12세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_15_PLUS)).then("15세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_18_PLUS)).then("청소년 이용 불가")
+                                .otherwise(boardGame.ageLimit.stringValue()).as("ageLimit"),
+                        new CaseBuilder()
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then("쉬움")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then("보통")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then("어려움")
+                                .otherwise(boardGame.difficulty.stringValue()).as("difficulty"),
+                        boardGame.price.as("price"),
+                        boardGame.designer.as("designer"),
+                        boardGame.artwork.as("artwork"),
+                        boardGame.releaseDate.as("releaseDate"),
+                        boardGame.publisher.as("publisher"),
+                        boardGame.youtubeLink.as("youtubeLink"),
+                        gameLike.countDistinct().intValue().as("likeCount"),
+                        gameRate.rate.avg().as("averageRate"),
+                        gameVisitor.countDistinct().as("views")
+                ))
                 .from(boardGame)
                 .leftJoin(boardGame.gameRates, gameRate)
                 .leftJoin(boardGame.gameVisitors, gameVisitor)
-                .leftJoin(boardGame.gameGenres, gameGenre) // 장르 조인
+                .leftJoin(boardGame.gameProfilePics, gameProfilePic) // 프로필 사진 조인
+                .leftJoin(boardGame.gameGenres, gameGenre)
+                .leftJoin(boardGame.gameLikes, gameLike)
                 .where(boardGame.name.contains(keyword).and(boardGame.deletedDate.isNull()))
-                .groupBy(boardGame)
+                .groupBy(
+                        boardGame.gameId,
+                        gameRate.boardGame.gameId,
+                        gameVisitor.id.gameId
+                )
                 .fetch();
 
-        List<GameResponseDto> gameResponseDtos = new ArrayList<>();
-        for (Tuple tuple : results) {
-            BoardGame boardGameEntity = tuple.get(boardGame);
-            Double averageRate = tuple.get(gameRate.rate.avg());
-            Long views = tuple.get(gameVisitor.id.count());
+        for (GameResponseDto result : results) {
+            List<String> profilePics = queryFactory
+                    .select(gameProfilePic.picAddress)
+                    .from(gameProfilePic)
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .fetch();
+            result.setGameProfilePics(profilePics);
 
-            // 프로필 사진 수집
-            List<String> picAddresses = boardGameEntity.getGameProfilePics().stream()
-                    .map(GameProfilePic::getPicAddress)
-                    .collect(Collectors.toList());
-
-            // 장르 수집
             List<GameGenre> genres = queryFactory
                     .select(gameGenre)
                     .from(gameGenre)
-                    .where(gameGenre.boardGame.eq(boardGameEntity))
+                    .where(gameGenre.boardGame.gameId.eq(result.getGameId()))
                     .fetch();
-
-            GameResponseDto dto = new GameResponseDto();
-            dto.setGameId(boardGameEntity.getGameId());
-            dto.setName(boardGameEntity.getName());
-            dto.setPlayTime(boardGameEntity.getPlayTime().getLabel());
-            dto.setPlayNum(boardGameEntity.getPlayNum().getLabel());
-            dto.setAgeLimit(boardGameEntity.getAgeLimit().getLabel());
-            dto.setPrice(boardGameEntity.getPrice());
-            dto.setDesigner(boardGameEntity.getDesigner());
-            dto.setArtwork(boardGameEntity.getArtwork());
-            dto.setReleaseDate(boardGameEntity.getReleaseDate());
-            dto.setDifficulty(boardGameEntity.getDifficulty().getLabel());
-            dto.setPublisher(boardGameEntity.getPublisher());
-            dto.setYoutubeLink(boardGameEntity.getYoutubeLink());
-            dto.setLikeCount(boardGameEntity.getGameLikes().size());
-            dto.setGameGenres(genres);
-            dto.setAverageRate(averageRate);
-            dto.setViews(views);
-
-            GameProfilePicResponseDto gameProfilePicResponseDto = new GameProfilePicResponseDto(picAddresses);
-            dto.setGameProfilePics(gameProfilePicResponseDto);
-
-            gameResponseDtos.add(dto);
+            result.setGameGenres(genres);
         }
 
-        return gameResponseDtos;
+        long total = queryFactory
+                .select(boardGame.count())
+                .from(boardGame)
+                .where(boardGame.deletedDate.isNull())
+                .fetchOne();
+
+        return new PageImpl<>(results, pageable, total);
     }
 
-
-
-    public Page<GameResponseDto> findAllByDeletedDateIsNull(Pageable pageable) {
+    public Page<GameListResponseDto> findAllByDeletedDateIsNull(Pageable pageable, Enums.GameListSortOption sortBy) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
         QGameRate gameRate = QGameRate.gameRate;
         QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
-        QGameGenre gameGenre = QGameGenre.gameGenre;
+        QGameLike gameLike = QGameLike.gameLike;
 
-        List<Tuple> results = queryFactory
-                .select(boardGame, gameRate.rate.avg(), gameVisitor.id.count())
+        JPAQuery<GameListResponseDto> query = queryFactory
+                .select(Projections.bean(GameListResponseDto.class,
+                        boardGame.gameId.as("gameId"),
+                        boardGame.name.as("name"),
+                        new CaseBuilder()
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then("쉬움")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then("보통")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then("어려움")
+                                .otherwise(boardGame.difficulty.stringValue()).as("difficulty"),
+                        gameLike.countDistinct().intValue().as("likeCount"),
+                        gameRate.rate.avg().as("averageRate"),
+                        gameVisitor.id.countDistinct().as("views")
+                ))
                 .from(boardGame)
                 .leftJoin(boardGame.gameRates, gameRate)
                 .leftJoin(boardGame.gameVisitors, gameVisitor)
-                .leftJoin(boardGame.gameProfilePics, gameProfilePic) // 프로필 사진 조인
-                .leftJoin(boardGame.gameGenres, gameGenre) // 장르 조인
+                .leftJoin(boardGame.gameProfilePics, gameProfilePic)
+                .leftJoin(boardGame.gameLikes, gameLike)
                 .where(boardGame.deletedDate.isNull())
-                .groupBy(boardGame)
-                .orderBy(gameRate.rate.avg().desc())
+                .groupBy(
+                        boardGame.gameId,
+                        gameRate.boardGame.gameId,
+                        gameVisitor.id.gameId,
+                        gameLike.gameLikePK.gameId
+                );
+
+        if (sortBy.equals(Enums.GameListSortOption.GAME_ID)) {
+            query.orderBy(boardGame.gameId.desc());
+        } else if (sortBy.equals(Enums.GameListSortOption.AVERAGE_RATE)) {
+            OrderSpecifier<Double> orderSpecifier = new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, gameRate.rate.avg());
+            query.orderBy(orderSpecifier);
+        } else if (sortBy.equals(Enums.GameListSortOption.DIFFICULTY)) {
+            NumberExpression<Integer> difficultyOrder = new CaseBuilder()
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then(0)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then(1)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then(2)
+                    .otherwise(3);
+            query.orderBy(new OrderSpecifier<>(com.querydsl.core.types.Order.ASC, difficultyOrder));
+        } else if (sortBy.equals(Enums.GameListSortOption.VIEWS)) {
+            query.orderBy(gameVisitor.countDistinct().desc());
+        } else if (sortBy.equals(Enums.GameListSortOption.LIKES)) {
+            query.orderBy(gameLike.countDistinct().desc());
+        }
+
+        List<GameListResponseDto> results = query
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        List<GameResponseDto> gameResponseDtos = new ArrayList<>();
-        for (Tuple tuple : results) {
-            BoardGame boardGameEntity = tuple.get(boardGame);
-            Double averageRate = tuple.get(gameRate.rate.avg());
-            Long views = tuple.get(gameVisitor.id.count());
-
-            // 프로필 사진 수집
-            List<String> picAddresses = boardGameEntity.getGameProfilePics().stream()
-                    .map(GameProfilePic::getPicAddress)
-                    .collect(Collectors.toList());
-
-            // 장르 수집
-            List<GameGenre> genres = queryFactory
-                    .select(gameGenre)
-                    .from(gameGenre)
-                    .where(gameGenre.boardGame.eq(boardGameEntity))
+        for (GameListResponseDto result : results) {
+            List<String> profilePics = queryFactory
+                    .select(gameProfilePic.picAddress)
+                    .from(gameProfilePic)
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
                     .fetch();
-
-            GameResponseDto dto = new GameResponseDto();
-            dto.setGameId(boardGameEntity.getGameId());
-            dto.setName(boardGameEntity.getName());
-            dto.setPlayTime(boardGameEntity.getPlayTime().getLabel());
-            dto.setPlayNum(boardGameEntity.getPlayNum().getLabel());
-            dto.setAgeLimit(boardGameEntity.getAgeLimit().getLabel());
-            dto.setPrice(boardGameEntity.getPrice());
-            dto.setDesigner(boardGameEntity.getDesigner());
-            dto.setArtwork(boardGameEntity.getArtwork());
-            dto.setReleaseDate(boardGameEntity.getReleaseDate());
-            dto.setDifficulty(boardGameEntity.getDifficulty().getLabel());
-            dto.setPublisher(boardGameEntity.getPublisher());
-            dto.setYoutubeLink(boardGameEntity.getYoutubeLink());
-            dto.setLikeCount(boardGameEntity.getGameLikes().size());
-            dto.setGameGenres(genres);
-            dto.setAverageRate(averageRate);
-            dto.setViews(views);
-
-            GameProfilePicResponseDto gameProfilePicResponseDto = new GameProfilePicResponseDto(picAddresses);
-            dto.setGameProfilePics(gameProfilePicResponseDto);
-
-            gameResponseDtos.add(dto);
+            result.setGameProfilePics(profilePics);
         }
 
-        return new PageImpl<>(gameResponseDtos, pageable, gameResponseDtos.size());
+        long total = queryFactory
+                .select(boardGame.count())
+                .from(boardGame)
+                .where(boardGame.deletedDate.isNull())
+                .fetchOne();
+
+        return new PageImpl<>(results, pageable, total);
     }
-
-
-
-
-
-
-
 
     @Override
-    public List<GameResponseDto> findByGameGenresGenreGenre(String genre, Pageable pageable) {
+    public List<HomeGamesResponseDto> findByGameGenresGenreGenre(Enums.GameListSortOption sortBy, String genre) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameGenre gameGenre = QGameGenre.gameGenre;
         QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
         QGameRate gameRate = QGameRate.gameRate;
         QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
+        QGameLike gameLike = QGameLike.gameLike;
 
-        List<Tuple> results = queryFactory
-                .select(boardGame, gameRate.rate.avg(), gameVisitor.id.count())
+        JPAQuery<HomeGamesResponseDto> query = queryFactory
+                .select(Projections.bean(HomeGamesResponseDto.class,
+                        boardGame.gameId.as("gameId"),
+                        boardGame.name.as("name"),
+                        new CaseBuilder()
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then("쉬움")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then("보통")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then("어려움")
+                                .otherwise(boardGame.difficulty.stringValue()).as("difficulty"),
+                        gameLike.countDistinct().intValue().as("likeCount"),
+                        gameRate.rate.avg().as("averageRate"),
+                        gameVisitor.countDistinct().as("views")
+                ))
                 .from(boardGame)
                 .leftJoin(boardGame.gameRates, gameRate)
                 .leftJoin(boardGame.gameVisitors, gameVisitor)
                 .leftJoin(boardGame.gameProfilePics, gameProfilePic) // 프로필 사진 조인
                 .leftJoin(boardGame.gameGenres, gameGenre) // 장르 조인
-                .where(gameGenre.genre.genre.eq(genre).and(boardGame.deletedDate.isNull()))
-                .groupBy(boardGame)
-                .orderBy(gameRate.rate.avg().desc())
+                .leftJoin(boardGame.gameLikes, gameLike)
+                .groupBy(
+                        boardGame.gameId,
+                        gameRate.boardGame.gameId,
+                        gameVisitor.id.gameId
+                );
+
+        if (genre == null || genre.isEmpty()) {
+            query.where(boardGame.deletedDate.isNull());
+        } else {
+            query.where(gameGenre.genre.genre.eq(genre).and(boardGame.deletedDate.isNull()));
+        }
+
+        if (sortBy.equals(Enums.GameListSortOption.GAME_ID)) {
+            query.orderBy(boardGame.gameId.desc());
+        } else if (sortBy.equals(Enums.GameListSortOption.AVERAGE_RATE)) {
+            NumberExpression<Double> averageRate = gameRate.rate.avg();
+            OrderSpecifier<Double> orderSpecifier = new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, gameRate.rate.avg());
+            query.orderBy(orderSpecifier);
+        } else if (sortBy.equals(Enums.GameListSortOption.DIFFICULTY)) {
+            NumberExpression<Integer> difficultyOrder = new CaseBuilder()
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then(0)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then(1)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then(2)
+                    .otherwise(3);
+            query.orderBy(new OrderSpecifier<>(com.querydsl.core.types.Order.ASC, difficultyOrder));
+        } else if (sortBy.equals(Enums.GameListSortOption.VIEWS)) {
+            query.orderBy(gameVisitor.countDistinct().desc());
+        } else if (sortBy.equals(Enums.GameListSortOption.LIKES)) {
+            query.orderBy(gameLike.countDistinct().desc());
+        }
+
+        List<HomeGamesResponseDto> results = query
+                .limit(5)
+                .fetch();
+
+
+        for (HomeGamesResponseDto result : results) {
+            List<String> profilePics = queryFactory
+                    .select(gameProfilePic.picAddress)
+                    .from(gameProfilePic)
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .fetch();
+            result.setGameProfilePics(profilePics);
+
+            List<GameGenre> genres = queryFactory
+                    .select(gameGenre)
+                    .from(gameGenre)
+                    .where(gameGenre.boardGame.gameId.eq(result.getGameId()))
+                    .fetch();
+            result.setGameGenres(genres);
+        }
+
+        return results;
+    }
+
+    @Override
+    public Page<SearchResponse> searchByKeyword(String keyword, Pageable pageable) {
+        QBoardGame boardGame = QBoardGame.boardGame;
+
+        List<SearchResponse> results = queryFactory
+            .select(Projections.constructor(SearchResponse.class,
+                boardGame.gameId,
+                boardGame.name))
+            .from(boardGame)
+            .where(boardGame.name.containsIgnoreCase(keyword)
+                .and(boardGame.deletedDate.isNull()))
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        long total = queryFactory
+            .select(boardGame.count())
+            .from(boardGame)
+            .where(boardGame.name.containsIgnoreCase(keyword)
+                .and(boardGame.deletedDate.isNull()))
+            .fetchOne();
+		return new PageImpl<>(results, pageable, total);
+    }
+    
+    @Override
+    public Page<GameResponseDto> findGamesLikedByUserId(Long userId, Pageable pageable) {
+
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
+        QGameRate gameRate = QGameRate.gameRate;
+        QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
+        QGameGenre gameGenre = QGameGenre.gameGenre;
+        QGameLike gameLike = QGameLike.gameLike;
+
+        JPAQuery<GameResponseDto> query = queryFactory
+                .select(Projections.bean(GameResponseDto.class,
+                        boardGame.gameId.as("gameId"),
+                        boardGame.name.as("name"),
+                        new CaseBuilder()
+                                .when(boardGame.playTime.eq(Enums.PlayTime.SHORT)).then("30분 이하")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.MEDIUM)).then("30분 ~ 1시간")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.LONG)).then("1시간 이상")
+                                .otherwise(boardGame.playTime.stringValue()).as("playTime"),
+                        new CaseBuilder()
+                                .when(boardGame.playNum.eq(Enums.PlayNum.ONE_PLAYER)).then("1인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.TWO_PLAYERS)).then("2인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.THREE_PLAYERS)).then("3인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FOUR_PLAYERS)).then("4인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FIVE_PLUS_PLAYERS)).then("5인 이상")
+                                .otherwise(boardGame.playNum.stringValue()).as("playNum"),
+                        new CaseBuilder()
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_ALL)).then("전체 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_12_PLUS)).then("12세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_15_PLUS)).then("15세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_18_PLUS)).then("청소년 이용 불가")
+                                .otherwise(boardGame.ageLimit.stringValue()).as("ageLimit"),
+                        new CaseBuilder()
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then("쉬움")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then("보통")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then("어려움")
+                                .otherwise(boardGame.difficulty.stringValue()).as("difficulty"),
+                        boardGame.price.as("price"),
+                        boardGame.designer.as("designer"),
+                        boardGame.artwork.as("artwork"),
+                        boardGame.releaseDate.as("releaseDate"),
+                        boardGame.publisher.as("publisher"),
+                        boardGame.youtubeLink.as("youtubeLink"),
+                        gameLike.countDistinct().intValue().as("likeCount"),
+                        gameRate.rate.avg().as("averageRate"),
+                        gameVisitor.countDistinct().as("views")
+                ))
+                .from(boardGame)
+                .leftJoin(boardGame.gameRates, gameRate)
+                .leftJoin(boardGame.gameVisitors, gameVisitor)
+                .leftJoin(boardGame.gameProfilePics, gameProfilePic)
+                .leftJoin(boardGame.gameGenres, gameGenre)
+                .leftJoin(boardGame.gameLikes, gameLike)
+                .where(gameLike.user.id.eq(userId).and(boardGame.deletedDate.isNull()))
+                .groupBy(
+                        boardGame.gameId,
+                        gameRate.boardGame.gameId,
+                        gameVisitor.id.gameId
+                )
+                .orderBy(gameLike.createdDate.desc());
+
+
+
+        List<GameResponseDto> results = query
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        List<GameResponseDto> gameResponseDtos = new ArrayList<>();
-        for (Tuple tuple : results) {
-            BoardGame boardGameEntity = tuple.get(boardGame);
-            Double averageRate = tuple.get(gameRate.rate.avg());
-            Long views = tuple.get(gameVisitor.id.count());
+        for (GameResponseDto result : results) {
+            List<String> profilePics = queryFactory
+                    .select(gameProfilePic.picAddress)
+                    .from(gameProfilePic)
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .fetch();
+            result.setGameProfilePics(profilePics);
 
-            // 프로필 사진 수집
-            List<String> picAddresses = boardGameEntity.getGameProfilePics().stream()
-                    .map(GameProfilePic::getPicAddress)
-                    .collect(Collectors.toList());
-
-            // 장르 수집
             List<GameGenre> genres = queryFactory
                     .select(gameGenre)
                     .from(gameGenre)
-                    .where(gameGenre.boardGame.eq(boardGameEntity))
+                    .where(gameGenre.boardGame.gameId.eq(result.getGameId()))
                     .fetch();
-
-            GameResponseDto dto = new GameResponseDto();
-            dto.setGameId(boardGameEntity.getGameId());
-            dto.setName(boardGameEntity.getName());
-            dto.setPlayTime(boardGameEntity.getPlayTime().getLabel());
-            dto.setPlayNum(boardGameEntity.getPlayNum().getLabel());
-            dto.setAgeLimit(boardGameEntity.getAgeLimit().getLabel());
-            dto.setPrice(boardGameEntity.getPrice());
-            dto.setDesigner(boardGameEntity.getDesigner());
-            dto.setArtwork(boardGameEntity.getArtwork());
-            dto.setReleaseDate(boardGameEntity.getReleaseDate());
-            dto.setDifficulty(boardGameEntity.getDifficulty().getLabel());
-            dto.setPublisher(boardGameEntity.getPublisher());
-            dto.setYoutubeLink(boardGameEntity.getYoutubeLink());
-            dto.setLikeCount(boardGameEntity.getGameLikes().size());
-            dto.setGameGenres(genres);
-            dto.setAverageRate(averageRate);
-            dto.setViews(views);
-
-            GameProfilePicResponseDto gameProfilePicResponseDto = new GameProfilePicResponseDto(picAddresses);
-            dto.setGameProfilePics(gameProfilePicResponseDto);
-
-            gameResponseDtos.add(dto);
+            result.setGameGenres(genres);
         }
 
-        return gameResponseDtos;
+        long total = queryFactory
+                .select(boardGame.count())
+                .from(boardGame)
+                .leftJoin(boardGame.gameLikes, gameLike)
+                .where(gameLike.user.id.eq(userId).and(boardGame.deletedDate.isNull()))
+                .fetchOne();
+
+        return new PageImpl<>(results, pageable, total);
+    }
+
+    @Override
+    public List<CommentDto> findComentsByGameId(Long gameId) {
+
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QPost post = QPost.post;
+        QComment comment = QComment.comment;
+        QUser user = QUser.user;
+
+        List<CommentDto> commentDtos = queryFactory
+                .select(Projections.fields(CommentDto.class,
+                        comment.id.as("id"),
+                        user.id.as("userId"),
+                        comment.content.as("content"),
+                        user.username.as("userName"))
+                )
+                .from(comment)
+                .leftJoin(comment.user, user)
+                .leftJoin(comment.post, post)
+                .leftJoin(post.boardGame, boardGame)
+                .where(comment.post.boardGame.gameId.eq(gameId))
+                .limit(10)
+                .fetch();
+
+        return commentDtos;
+    }
+
+    @Override
+    public Page<GameListResponseDto> findByNameContainingAndDeletedDateIsNull(Pageable pageable, Enums.GameListSortOption sortBy, String keyword) {
+
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
+        QGameRate gameRate = QGameRate.gameRate;
+        QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
+        QGameLike gameLike = QGameLike.gameLike;
+
+        JPAQuery<GameListResponseDto> query = queryFactory
+                .select(Projections.bean(GameListResponseDto.class,
+                        boardGame.gameId.as("gameId"),
+                        boardGame.name.as("name"),
+                        new CaseBuilder()
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then("쉬움")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then("보통")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then("어려움")
+                                .otherwise(boardGame.difficulty.stringValue()).as("difficulty"),
+                        gameLike.countDistinct().intValue().as("likeCount"),
+                        gameRate.rate.avg().as("averageRate"),
+                        gameVisitor.id.countDistinct().as("views")
+                ))
+                .from(boardGame)
+                .leftJoin(boardGame.gameRates, gameRate)
+                .leftJoin(boardGame.gameVisitors, gameVisitor)
+                .leftJoin(boardGame.gameProfilePics, gameProfilePic)
+                .leftJoin(boardGame.gameLikes, gameLike)
+                .where(boardGame.deletedDate.isNull().and(boardGame.name.contains(keyword)))
+                .groupBy(
+                        boardGame.gameId,
+                        gameRate.boardGame.gameId,
+                        gameVisitor.id.gameId
+                );
+
+        if (sortBy.equals(Enums.GameListSortOption.GAME_ID)) {
+            query.orderBy(boardGame.gameId.desc());
+        } else if (sortBy.equals(Enums.GameListSortOption.AVERAGE_RATE)) {
+            NumberExpression<Double> averageRate = gameRate.rate.avg();
+            OrderSpecifier<Double> orderSpecifier = new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, gameRate.rate.avg());
+            query.orderBy(orderSpecifier);
+        } else if (sortBy.equals(Enums.GameListSortOption.DIFFICULTY)) {
+            NumberExpression<Integer> difficultyOrder = new CaseBuilder()
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then(0)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then(1)
+                    .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then(2)
+                    .otherwise(3);
+            query.orderBy(new OrderSpecifier<>(com.querydsl.core.types.Order.ASC, difficultyOrder));
+        } else if (sortBy.equals(Enums.GameListSortOption.VIEWS)) {
+            query.orderBy(gameVisitor.countDistinct().desc());
+        } else if (sortBy.equals(Enums.GameListSortOption.LIKES)) {
+            query.orderBy(gameLike.countDistinct().desc());
+        }
+
+        List<GameListResponseDto> results = query
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        for (GameListResponseDto result : results) {
+            List<String> profilePics = queryFactory
+                    .select(gameProfilePic.picAddress)
+                    .from(gameProfilePic)
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .fetch();
+            result.setGameProfilePics(profilePics);
+        }
+
+        long total = queryFactory
+                .select(boardGame.count())
+                .from(boardGame)
+                .where(boardGame.deletedDate.isNull())
+                .fetchOne();
+
+        return new PageImpl<>(results, pageable, total);
     }
 }

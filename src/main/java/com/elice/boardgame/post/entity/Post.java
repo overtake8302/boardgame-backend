@@ -1,6 +1,7 @@
 package com.elice.boardgame.post.entity;
 
 import com.elice.boardgame.auth.entity.User;
+import com.elice.boardgame.common.entity.BaseEntity;
 import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.game.entity.BoardGame;
 
@@ -42,6 +43,8 @@ public class Post extends BaseEntity {
     private String content;
     private String imageUrl;
     private String imageName;
+
+    private Long likes;
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private View view;

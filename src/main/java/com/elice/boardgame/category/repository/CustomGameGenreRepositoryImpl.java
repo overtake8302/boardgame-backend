@@ -11,6 +11,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class CustomGameGenreRepositoryImpl implements CustomGameGenreRepository{
@@ -18,13 +21,12 @@ public class CustomGameGenreRepositoryImpl implements CustomGameGenreRepository{
 
 
     @Override
-    public Optional<List<BoardGame>> findBoardGamesByGenresOrderByRatingDesc(List<Genre> genres, Long userId) {
+    public Page<BoardGame> findBoardGamesByGenresOrderByRatingDesc(List<Genre> genres, Long userId, Pageable pageable) {
         QGameGenre gameGenre = QGameGenre.gameGenre;
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameRate gameRate = QGameRate.gameRate;
         QGameLike gameLike = QGameLike.gameLike;
 
-        // 좋아요를 누른 게임 ID 가져오기
         List<Long> likedGameIds = jpaQueryFactory.select(gameLike.boardGame.gameId)
             .from(gameLike)
             .where(gameLike.user.id.eq(userId))
@@ -38,9 +40,19 @@ public class CustomGameGenreRepositoryImpl implements CustomGameGenreRepository{
                 .and(boardGame.gameId.notIn(likedGameIds)))
             .groupBy(boardGame)
             .orderBy(gameRate.rate.avg().desc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
             .fetch();
 
-        return Optional.ofNullable(boardGames);
+        long total = jpaQueryFactory
+            .select(boardGame.countDistinct())
+            .from(gameGenre)
+            .join(gameGenre.boardGame, boardGame)
+            .where(gameGenre.genre.in(genres)
+                .and(boardGame.gameId.notIn(likedGameIds)))
+            .fetchOne();
+
+        return new PageImpl<>(boardGames, pageable, total);
     }
 
     @Override

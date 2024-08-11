@@ -1,8 +1,7 @@
 package com.elice.boardgame.category.service;
 
-import com.elice.boardgame.category.DTO.BoardGameRateDto;
-import com.elice.boardgame.category.DTO.RatingCountDto;
-import com.elice.boardgame.game.dto.GameProfilePicResponseDto;
+import com.elice.boardgame.category.dto.BoardGameRateDto;
+import com.elice.boardgame.category.dto.RatingCountDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.entity.GameProfilePic;
@@ -25,12 +24,10 @@ public class RatingService {
         return gameRateRepository.countRatingsByUserId(userId);
     }
 
-    public List<GameResponseDto> getGamesByRating(Long userId, Double rate) {
-        List<BoardGameRateDto> dtoList = gameRateRepository.findByUserIdAndRate(userId, rate);
-        return dtoList.stream()
-            .map(this::convertToGameResponseDto)
-            .collect(Collectors.toList());
+    public RatingCountDto getGamesByRating(Long userId, Double rate) {
+        return gameRateRepository.findRatingCountByUserIdAndRate(userId, rate);
     }
+
 
     //dto 변환 로직
     private GameResponseDto convertToGameResponseDto(BoardGameRateDto boardGameRateDTO) {
@@ -59,8 +56,8 @@ public class RatingService {
         List<String> picAddresses = gameProfilePics.stream()
             .map(GameProfilePic::getPicAddress)
             .collect(Collectors.toList());
-        GameProfilePicResponseDto gameProfilePicResponseDto = new GameProfilePicResponseDto(picAddresses);
-        gameResponseDto.setGameProfilePics(gameProfilePicResponseDto);
+//        GameProfilePicResponseDto gameProfilePicResponseDto = new GameProfilePicResponseDto(picAddresses);
+        gameResponseDto.setGameProfilePics(picAddresses);
 
         return gameResponseDto;
     }

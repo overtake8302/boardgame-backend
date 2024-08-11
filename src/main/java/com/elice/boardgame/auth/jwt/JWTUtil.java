@@ -1,5 +1,6 @@
 package com.elice.boardgame.auth.jwt;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -30,13 +31,16 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
+
+
     public String createJwt(String username, String role, Long expiredMs) {
         return Jwts.builder()
                 .claim("username", username)
                 .claim("role", role)
-                .issuedAt(new Date(System.currentTimeMillis()))                 //발행시간
-                .expiration(new Date(System.currentTimeMillis() + expiredMs))   //만료시간
+                .setIssuedAt(new Date(System.currentTimeMillis()))                 // 발행시간
+                .setExpiration(new Date(System.currentTimeMillis() + expiredMs))   // 만료시간
                 .signWith(secretKey)
                 .compact();
     }
+
 }

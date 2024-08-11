@@ -1,4 +1,4 @@
-package com.elice.boardgame.post.entity;
+package com.elice.boardgame.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
@@ -14,11 +14,13 @@ import org.springframework.data.annotation.LastModifiedDate;
 @MappedSuperclass
 public class BaseEntity {
     @CreatedDate
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 }
