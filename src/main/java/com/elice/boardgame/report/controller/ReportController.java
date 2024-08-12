@@ -2,6 +2,7 @@ package com.elice.boardgame.report.controller;
 
 import com.elice.boardgame.category.dto.PostPageDto;
 import com.elice.boardgame.common.dto.CommonResponse;
+import com.elice.boardgame.common.dto.PaginationRequest;
 import com.elice.boardgame.report.dto.ReportCreateRequestDto;
 import com.elice.boardgame.report.dto.ReportDto;
 import com.elice.boardgame.report.dto.ReportUpdateRequestDto;
@@ -26,15 +27,9 @@ public class ReportController {
     private final ReportService reportService;
 
     @GetMapping
-    public CommonResponse<PostPageDto<ReportDto>> findReports(@RequestParam String status, @RequestParam int page, @RequestParam int size) {
-        PostPageDto<ReportDto> reportDtos;
-
-        System.out.println(status);
-        if ("완료".equals(status)) {
-            reportDtos = reportService.findCompletedReports(page, size);
-        } else {
-            reportDtos = reportService.findWaitingReports(page, size);
-        }
+    public CommonResponse<PostPageDto<ReportDto>> findReports(@RequestParam String status, @RequestParam
+        PaginationRequest paginationRequest) {
+        PostPageDto<ReportDto> reportDtos = reportService.find(status, paginationRequest);
 
         return CommonResponse.<PostPageDto<ReportDto>>builder()
             .payload(reportDtos)

@@ -3,6 +3,7 @@ package com.elice.boardgame.category.service;
 import com.elice.boardgame.category.dto.PostListResponseDto;
 import com.elice.boardgame.category.dto.RecentlyViewGameDto;
 import com.elice.boardgame.common.dto.CommonResponse;
+import com.elice.boardgame.common.dto.PaginationRequest;
 import com.elice.boardgame.common.exceptions.BoardGameNotFoundException;
 import com.elice.boardgame.common.exceptions.GenreNotFoundException;
 import com.elice.boardgame.common.exceptions.MemberNotFoundException;
@@ -61,7 +62,11 @@ public class LikeGenreService {
 
     private final GameVisitorRepository gameVisitorRepository;
 
-    public Page<GameResponseDto> gameGet(String type, User user, int page, int size) {
+    public Page<GameResponseDto> gameGet(String type, User user, PaginationRequest paginationRequest) {
+
+        int page = paginationRequest.getPage();
+        int size = paginationRequest.getSize();
+
         Page<GameResponseDto> games;
         switch (type) {
             case "like":
