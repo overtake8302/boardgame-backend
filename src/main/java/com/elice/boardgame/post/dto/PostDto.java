@@ -1,22 +1,26 @@
 package com.elice.boardgame.post.dto;
 
-import com.elice.boardgame.common.enums.Enums;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter @Setter
 public class PostDto {
     private Long postId;
-    private String title;
     private String content;
-    private Enums.Category category;
-    private String imageUrl;
-    private String imageName;
+    private String title;
+    private String category;
+    private int viewCount;
+    private List<String> imageUrls = new ArrayList<>();
+    private List<String> imageNames = new ArrayList<>();
     private Long userId;
     private String userName;
     private List<CommentDto> comments;
-    private LocalDateTime createdAt;
+    private String gameName;
+    private Long gameId;
+    private List<String> gameImageUrls = new ArrayList<>();
+    private String createdAt;
+    private Long likeCount;
 }

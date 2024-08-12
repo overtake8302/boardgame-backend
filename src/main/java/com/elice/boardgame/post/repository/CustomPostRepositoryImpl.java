@@ -46,7 +46,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         List<Post> posts = queryFactory
             .selectFrom(post)
-            .where(post.category.eq(Category.valueOf(boardType)))
+            .where(post.category.eq(boardType))
             .orderBy(getSortOrder(sortBy))
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
@@ -54,7 +54,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         long total = queryFactory
             .selectFrom(post)
-            .where(post.category.eq(Category.valueOf(boardType)))
+            .where(post.category.eq(boardType))
             .fetchCount();
 
         return new PageImpl<>(posts, pageable, total);
@@ -89,7 +89,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         List<Post> posts = queryFactory
             .selectFrom(post)
-            .where(post.category.eq(Category.valueOf(boardType))
+            .where(post.category.eq(boardType)
                 .and(post.title.containsIgnoreCase(query)
                     .or(post.content.containsIgnoreCase(query)
                         .or(post.user.username.containsIgnoreCase(query)))))
@@ -100,7 +100,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         long total = queryFactory
             .selectFrom(post)
-            .where(post.category.eq(Category.valueOf(boardType))
+            .where(post.category.eq(boardType)
                 .and(post.title.containsIgnoreCase(query)
                     .or(post.content.containsIgnoreCase(query))))
             .fetchCount();
@@ -113,7 +113,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         switch (sortBy) {
             case "추천순":
-                return post.likes.desc();
+                return post.likeCount.desc();
             case "조회순":
                 return post.view.viewCount.desc();
             case "최신순":

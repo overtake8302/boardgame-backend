@@ -11,14 +11,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@ResponseBody
 public class AuthController {
     private final JoinService joinService;
     private final UserRepository userRepository;
@@ -46,18 +45,6 @@ public class AuthController {
         return "User not authenticated";
     }
 
-//    @PostMapping("/test/logout")
-//    public void logout(HttpServletRequest request, HttpServletResponse response) {
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        if (auth != null) {
-//            new SecurityContextLogoutHandler().logout(request, response, auth);
-//        }
-//    }
-
-
-
-    //react navigating
-
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         // JWT 쿠키 삭제
@@ -80,4 +67,22 @@ public class AuthController {
 
         return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
     }
+
+    @GetMapping("/admin-check")
+    public ResponseEntity<Boolean> adminCheck(@CurrentUser User user) {
+
+        if (user == null) {
+            return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
+        } else if (user != null && user.getId() != null) {
+            if (user.getRole().equals("ROLE_ADMIN")) {
+                return new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK);
+            } else if (user.getRole().equals("ROLE_USER")) {
+                return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
+            }
+        }
+
+        return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
+    }
+
+
 }
