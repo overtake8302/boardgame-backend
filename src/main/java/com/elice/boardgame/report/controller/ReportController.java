@@ -1,5 +1,6 @@
 package com.elice.boardgame.report.controller;
 
+import com.elice.boardgame.category.dto.PostPageDto;
 import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.report.dto.ReportCreateRequestDto;
 import com.elice.boardgame.report.dto.ReportDto;
@@ -9,8 +10,10 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,10 +25,18 @@ public class ReportController {
 
     private final ReportService reportService;
 
-    @GetMapping()
-    public CommonResponse<List<ReportDto>> findAll() {
-        List<ReportDto> reportDtos = reportService.findAll();
-        return CommonResponse.<List<ReportDto>>builder()
+    @GetMapping
+    public CommonResponse<PostPageDto<ReportDto>> findReports(@RequestParam String status, @RequestParam int page, @RequestParam int size) {
+        PostPageDto<ReportDto> reportDtos;
+
+        System.out.println(status);
+        if ("완료".equals(status)) {
+            reportDtos = reportService.findCompletedReports(page, size);
+        } else {
+            reportDtos = reportService.findWaitingReports(page, size);
+        }
+
+        return CommonResponse.<PostPageDto<ReportDto>>builder()
             .payload(reportDtos)
             .message("")
             .status(200)
@@ -39,7 +50,7 @@ public class ReportController {
         reportService.sendReport(requestDto, attachments);
     }
 
-    @PostMapping("/update")
+    @PutMapping
     public void updateReport(@RequestBody ReportUpdateRequestDto requestDto) {
         reportService.updateReport(requestDto);
     }

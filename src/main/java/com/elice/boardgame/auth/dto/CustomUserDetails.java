@@ -33,6 +33,7 @@ public class CustomUserDetails implements UserDetails {
         return collection;
     }
 
+
     @Override
     public String getPassword() {
         return user.getPassword();
@@ -61,6 +62,10 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public User getUser() {
+        return user;
     }
 
 //    public Integer getAge(){ return user.getAge(); }

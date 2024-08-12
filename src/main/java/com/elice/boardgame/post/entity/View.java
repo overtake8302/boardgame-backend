@@ -14,10 +14,14 @@ public class View {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long postId;
     private int viewCount;
 
     @ManyToOne
-    @JoinColumn(name = "post_id", insertable = false, updatable = false)
+    @JoinColumn(name = "post_id", nullable = false, insertable = true, updatable = true)
     private Post post;
+
+    public View(Post post, int viewCount) {
+        this.post = post;
+        this.viewCount = viewCount;
+    }
 }

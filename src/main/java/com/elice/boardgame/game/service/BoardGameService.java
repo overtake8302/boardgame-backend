@@ -2,8 +2,8 @@ package com.elice.boardgame.game.service;
 
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
-import com.elice.boardgame.category.dto.GenreDto;
 import com.elice.boardgame.auth.service.AuthService;
+import com.elice.boardgame.category.dto.GenreDto;
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.GameGenreId;
 import com.elice.boardgame.category.entity.Genre;
@@ -22,25 +22,22 @@ import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.game.repository.GameLikeRepository;
 import com.elice.boardgame.game.repository.GameRateRepository;
 import com.elice.boardgame.game.repository.GameVisitorRepository;
+import com.elice.boardgame.post.dto.CommentDto;
 import com.elice.boardgame.post.dto.PostDto;
-import com.elice.boardgame.post.entity.Comment;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.repository.CommentRepository;
 import com.elice.boardgame.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -64,13 +61,17 @@ public class BoardGameService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
 
-    @Transactional
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public GameResponseDto create(GamePostDto gamePostDto, List<MultipartFile> files) throws IOException {
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        User currentUser = authService.getCurrentUser();
+    @Transactional
+    public GameResponseDto create(GamePostDto gamePostDto, List<MultipartFile> files, User user) throws IOException {
+
+        if (user == null) {
+            throw new GameRootException(GameErrorMessages.UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
+        }
+
         BoardGame newBoardGame = boardGameMapper.gamePostDtoToBoardGame(gamePostDto);
-        newBoardGame.setFirstCreator(currentUser);
+        newBoardGame.setFirstCreator(user);
         BoardGame savedBoardGame = boardGameRepository.save(newBoardGame);
 
         if (files != null && !files.isEmpty()) {
@@ -108,10 +109,10 @@ public class BoardGameService {
         savedBoardGame.setGameGenres(genres);
         savedBoardGame = boardGameRepository.save(savedBoardGame);
 
-        return findGameByGameId(savedBoardGame.getGameId());
+        return findGameByGameId(savedBoardGame.getGameId(), false, false, null);
     }
 
-    public GameResponseDto findGameByGameId(Long gameId) {
+    public GameResponseDto findGameByGameId(Long gameId, boolean wantComments, boolean wantPosts, Enums.Category category) {
 
         GameResponseDto foundGame = boardGameRepository.getGameResponseDtoByGameIdAndDeletedDateIsNull(gameId);
 
@@ -119,11 +120,20 @@ public class BoardGameService {
             throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
 
+        if (wantComments) {
+            List<CommentDto> comments = findComentsByGameId(gameId);
+            foundGame.setComments(comments);
+        }
+
+        if (wantPosts && category != null) {
+            List<PostDto> posts = getTop10Posts(gameId,category);
+            foundGame.setPosts(posts);
+        }
+
         return foundGame;
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public void deleteGameByGameId(Long gameId) {
 
         User currentUser = authService.getCurrentUser();
@@ -133,7 +143,7 @@ public class BoardGameService {
             throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND,HttpStatus.NOT_FOUND);
         }
 
-        if (currentUser != null && targetGame.getFirstCreator() != null) {
+        if (targetGame.getFirstCreator() != null) {
             if (!currentUser.getRole().equals("ROLE_ADMIN") && !(targetGame.getFirstCreator().getId().equals(currentUser.getId()))) {
                 throw new GameRootException(GameErrorMessages.ACCESS_DENIED, HttpStatus.FORBIDDEN);
             }
@@ -162,10 +172,14 @@ public class BoardGameService {
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public GameResponseDto editGame(GamePutDto gamePutDto, List<MultipartFile> files) throws IOException {
 
-        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gamePutDto.getGameId());;
+        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gamePutDto.getGameId());
+
+        if (foundGame == null) {
+            throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.BAD_REQUEST);
+        }
+
         BoardGame target = boardGameMapper.boardGameUpdateMapper(foundGame, gamePutDto);
 
         gameProfilePicService.deleteImages(target.getGameProfilePics(), foundGame.getGameId());
@@ -228,12 +242,10 @@ public class BoardGameService {
         return foundGames;
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public ClickLikeResponseDto clickLike(Long gameId) {
+    public ClickLikeResponseDto clickLike(Long gameId, User user) {
 
         BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
-        User currentUser = authService.getCurrentUser();
-        GameLikePK gameLikePK = new GameLikePK(currentUser.getId(), gameId);
+        GameLikePK gameLikePK = new GameLikePK(user.getId(), gameId);
 
         Optional<GameLike> target = gameLikeRepository.findById(gameLikePK);
 
@@ -243,7 +255,7 @@ public class BoardGameService {
             gameLikeRepository.delete(target.get());
             clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_REMOVED.getMessage());
         } else {
-            GameLike gameLike = new GameLike(gameLikePK, targetGame, currentUser);
+            GameLike gameLike = new GameLike(gameLikePK, targetGame, user);
             gameLikeRepository.save(gameLike);
             clickLikeResponseDto.setMessages(ClickLikeResponseDto.ClickLikeResponseMessages.LIKE_ADDED.getMessage());
         }
@@ -254,12 +266,10 @@ public class BoardGameService {
         return clickLikeResponseDto;
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public GameRateResponseDto clickGameRate(Long gameId, GameRatePostDto gameRatePostDto) {
+    public GameRateResponseDto clickGameRate(Long gameId, GameRatePostDto gameRatePostDto, User user) {
 
         BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
-        User currentUser = authService.getCurrentUser();
-        GameRate foundGameRate = gameRateRepository.findByUserIdAndBoardGameGameId(currentUser.getId(), gameId);
+        GameRate foundGameRate = gameRateRepository.findByUserIdAndBoardGameGameId(user.getId(), gameId);
 
         if (foundGameRate != null) {
             foundGameRate.setRate(gameRatePostDto.getRate());
@@ -270,14 +280,18 @@ public class BoardGameService {
 
         GameRate newGameRate = new GameRate();
         newGameRate.setBoardGame(foundGame);
-        newGameRate.setUser(currentUser);
+        newGameRate.setUser(user);
         newGameRate.setRate(gameRatePostDto.getRate());
         gameRateRepository.save(newGameRate);
 
         return new GameRateResponseDto(GameRateResponseMessages.REGISTERED.getMessage());
     }
 
-    public Page<GameResponseDto> findAll(Pageable pageable, Enums.GameListSortOption sortBy) {
+    public Page<GameListResponseDto> findAll(Pageable pageable, Enums.GameListSortOption sortBy, String keyword) {
+
+        if (keyword != null && !keyword.isEmpty()) {
+            return boardGameRepository.findByNameContainingAndDeletedDateIsNull(pageable, sortBy, keyword);
+        }
 
         return boardGameRepository.findAllByDeletedDateIsNull(pageable, sortBy);
     }
@@ -288,9 +302,9 @@ public class BoardGameService {
         gameVisitorRepository.insertIgnore(visitorId, gameId);
     }
 
-    public List<GameResponseDto> findGamesByGenreAndSort(String genre, Enums.GameListSortOption sort) {
+    public List<HomeGamesResponseDto> findGamesByGenreAndSort(Enums.GameListSortOption sort, String genre) {
 
-        return boardGameRepository.findByGameGenresGenreGenre(genre, sort);
+        return boardGameRepository.findByGameGenresGenreGenre(sort, genre);
 
     }
 
@@ -299,9 +313,11 @@ public class BoardGameService {
         List<PostDto> postDtos = new ArrayList<>();
         for (Post post : posts) {
             PostDto postDto = new PostDto();
+            postDto.setPostId(post.getId());
             postDto.setCategory(post.getCategory());
             postDto.setTitle(post.getTitle());
             postDto.setContent(post.getContent());
+            postDto.setCreatedAt(post.getCreatedAt().format(formatter));
             postDtos.add(postDto);
         }
         return postDtos;
@@ -314,4 +330,19 @@ public class BoardGameService {
         return boardGameRepository.findGamesLikedByUserId(userId, pageable);
     }
 
+    public List<CommentDto> findComentsByGameId(Long gameId) {
+        return boardGameRepository.findComentsByGameId(gameId);
+    }
+
+    public Boolean checkFirstCreatorOrAdmin(Long gameId, User user) {
+
+        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
+        if (user == null) {
+            return false;
+        }
+        if (foundGame.getFirstCreator() == null || user.getId().equals(foundGame.getFirstCreator().getId()) || user.getRole().equals("ROLE_ADMIN") ) {
+            return true;
+        }
+        return false;
+    }
 }

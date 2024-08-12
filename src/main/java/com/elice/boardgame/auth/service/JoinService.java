@@ -25,6 +25,7 @@ public class JoinService {
         String phonenumber = joinDTO.getPhonenumber();
         String location = joinDTO.getLocation();
         String detailLocation = joinDTO.getDetailLocation();
+
         Integer post_code = joinDTO.getPost_code();
         String name = joinDTO.getName();
 
@@ -38,7 +39,7 @@ public class JoinService {
         User user = new User();
         user.setUsername(username);
         user.setPassword(bCryptPasswordEncoder.encode(password));
-        user.setRole("ROLE_ADMIN");
+        user.setRole("ROLE_USER");
 
         if (age != null) {
             user.setAge(age);
