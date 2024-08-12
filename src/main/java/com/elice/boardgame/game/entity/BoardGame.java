@@ -3,6 +3,7 @@ package com.elice.boardgame.game.entity;
 
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.category.entity.GameGenre;
+import com.elice.boardgame.common.entity.BaseEntity;
 import com.elice.boardgame.common.enums.Enums;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -14,15 +15,16 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
+@Entity(name = "board_game")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BoardGame extends BaseEntity{
+public class BoardGame extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "game_id")
     private Long gameId;
 
     private String name;

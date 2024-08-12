@@ -1,6 +1,6 @@
 package com.elice.boardgame.category.entity;
 
-import com.elice.boardgame.game.entity.BaseEntity;
+import com.elice.boardgame.common.entity.BaseEntity;
 import com.elice.boardgame.game.entity.BoardGame;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
