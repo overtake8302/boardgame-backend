@@ -22,12 +22,6 @@ public class UserInfoResponseDto {
 
     private String phonenumber;
 
-    private String location;
-
-    private String detail_location;
-
-    private Integer post_code;
-
     private String name;
 
     List<CommentDto> commentDtos = new ArrayList<>();

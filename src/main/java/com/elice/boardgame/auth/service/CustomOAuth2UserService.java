@@ -23,6 +23,7 @@
 //        this.userEntityRepository = userEntityRepository;
 //    }
 //
+//    //리소스 서버에서 유저 정보를 받아오는 함수
 //    @Override
 //    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 //

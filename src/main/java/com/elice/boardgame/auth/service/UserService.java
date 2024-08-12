@@ -36,9 +36,6 @@ public class UserService {
         userInfoResponseDto.setName(user.getName());
         userInfoResponseDto.setAge(user.getAge());
         userInfoResponseDto.setPhonenumber(user.getPhonenumber());
-        userInfoResponseDto.setLocation(user.getLocation());
-        userInfoResponseDto.setDetail_location(user.getDetail_location());
-        userInfoResponseDto.setPost_code(user.getPost_code());
         userInfoResponseDto.setRole(user.getRole());
 
         if (wantPosts) {
@@ -53,6 +50,7 @@ public class UserService {
                 postDto.setTitle(post.getTitle());
                 postDto.setContent(post.getContent());
                 postDto.setCategory(post.getCategory());
+
                 postDto.setCreatedAt(post.getCreatedAt().toString());
                 postDto.setGameId(post.getId());
                 postDto.setGameName(post.getGameName());
@@ -60,6 +58,7 @@ public class UserService {
                 postDto.setImageUrls(post.getImageUrls());
                 postDto.setImageNames(post.getImageNames());
                 postDto.setLikeCount(post.getLikeCount());
+
                 postDtos.add(postDto);
             }
             userInfoResponseDto.setPostDtos(postDtos);
