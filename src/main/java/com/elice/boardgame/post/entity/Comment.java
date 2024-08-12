@@ -32,7 +32,7 @@ public class Comment extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "post_id")
-    @JsonBackReference("comments")
+    @JsonBackReference("post")
     private Post post;
 
     private String content;
