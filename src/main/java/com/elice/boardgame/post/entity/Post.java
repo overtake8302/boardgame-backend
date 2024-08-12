@@ -2,12 +2,12 @@ package com.elice.boardgame.post.entity;
 
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.common.entity.BaseEntity;
-import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.game.entity.BoardGame;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +20,7 @@ import org.hibernate.annotations.Where;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@SQLDelete(sql = "UPDATE post SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE post SET deleted_at = CURRENT_TIMESTAMP WHERE post_id = ?")
 @Where(clause = "deleted_at IS NULL")
 public class Post extends BaseEntity {
     @Id
@@ -33,30 +33,38 @@ public class Post extends BaseEntity {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "game_id", nullable = false)
+    @JoinColumn(name = "gameId", nullable = false)
     private BoardGame boardGame;
 
-    @Enumerated(EnumType.STRING)
-    private Enums.Category category;
-
-    private String title;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String content;
-    private String imageUrl;
-    private String imageName;
 
-    private Long likes;
+    private String category;
+    private String title;
+    private List<String> imageUrls = new ArrayList<>();
+    private List<String> imageNames = new ArrayList<>();
+    private String gameName;
+    private List<String> gameImageUrls = new ArrayList<>();
+
+    private Long likeCount;
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private View view;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonManagedReference
     private List<Comment> comments = new ArrayList<>();
 
     public Long getUserId() {
-        return user.getId();
+        return user != null ? user.getId() : null;
     }
 
-    public Long getGameId() {
-        return boardGame.getGameId();
+    public void addImageUrl(String imageUrl) {
+        this.imageUrls.add(imageUrl);
+    }
+
+    public void addImageName(String imageName) {
+        this.imageNames.add(imageName);
     }
 }

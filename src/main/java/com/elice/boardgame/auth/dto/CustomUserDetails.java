@@ -33,6 +33,7 @@ public class CustomUserDetails implements UserDetails {
         return collection;
     }
 
+
     @Override
     public String getPassword() {
         return user.getPassword();
