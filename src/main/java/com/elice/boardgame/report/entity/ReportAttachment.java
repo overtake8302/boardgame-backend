@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@Entity
+@Entity(name = "report_attachment")
 public class ReportAttachment extends BaseEntity {
 
     @Id

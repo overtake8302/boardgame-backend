@@ -2,7 +2,6 @@ package com.elice.boardgame.post.repository;
 
 import static com.elice.boardgame.post.entity.QPost.post;
 
-import com.elice.boardgame.common.enums.Enums.Category;
 import com.elice.boardgame.post.dto.SearchPostResponse;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.entity.QPost;
@@ -35,7 +34,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         long total = queryFactory
             .selectFrom(post)
-            .fetchCount();
+            .fetch().size();
 
         return new PageImpl<>(posts, pageable, total);
     }
@@ -55,7 +54,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         long total = queryFactory
             .selectFrom(post)
             .where(post.category.eq(boardType))
-            .fetchCount();
+            .fetch().size();
 
         return new PageImpl<>(posts, pageable, total);
     }
@@ -78,7 +77,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
             .selectFrom(post)
             .where(post.title.containsIgnoreCase(query)
                 .or(post.content.containsIgnoreCase(query)))
-            .fetchCount();
+            .fetch().size();
 
         return new PageImpl<>(posts, pageable, total);
     }
@@ -103,7 +102,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
             .where(post.category.eq(boardType)
                 .and(post.title.containsIgnoreCase(query)
                     .or(post.content.containsIgnoreCase(query))))
-            .fetchCount();
+            .fetch().size();
 
         return new PageImpl<>(posts, pageable, total);
     }

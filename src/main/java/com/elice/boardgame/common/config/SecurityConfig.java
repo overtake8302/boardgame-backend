@@ -102,18 +102,17 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
-    private final UserRepository userRepository;
+    private final UserRepository userRepository;  // 필드로 추가
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration,
-                          JWTUtil jwtUtil,
-                          CustomOAuth2UserService customOAuth2UserService,
-                          CustomSuccessHandler customSuccessHandler,
+    // 생성자
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil,
+                          CustomOAuth2UserService customOAuth2UserService, CustomSuccessHandler customSuccessHandler,
                           UserRepository userRepository) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
         this.customOAuth2UserService = customOAuth2UserService;
         this.customSuccessHandler = customSuccessHandler;
-        this.userRepository = userRepository;
+        this.userRepository = userRepository;  // 필드 초기화
     }
 
     @Bean
@@ -129,18 +128,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        // Disable CSRF and other default configurations
+        // CSRF 및 기본 설정 비활성화
         http
                 .csrf((auth) -> auth.disable())
                 .formLogin((auth) -> auth.disable())
                 .httpBasic((auth) -> auth.disable());
 
-        // Add JWT filter
+        // JWT 필터 추가
         http
                 .addFilterBefore(new JWTFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(new LoginFilter(authenticationManager(), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
-        // Configure OAuth2 login
+        // OAuth2 로그인 구성
         http
                 .oauth2Login((oauth2) -> oauth2
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
@@ -148,7 +147,7 @@ public class SecurityConfig {
                         .successHandler(customSuccessHandler)
                 );
 
-        // Authorization rules
+        // 권한 규칙 설정
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login", "/", "/join").permitAll()
@@ -156,7 +155,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 );
 
-        // Session management configuration
+        // 세션 관리 설정
         http
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

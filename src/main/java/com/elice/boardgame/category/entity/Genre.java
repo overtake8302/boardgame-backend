@@ -14,7 +14,7 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 @Entity
-@Table(name = "Genres")
+@Table(name = "genres")
 public class Genre {
 
     @Id

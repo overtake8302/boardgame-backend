@@ -66,16 +66,9 @@ public class PostService {
         post.setBoardGame(boardGame);
         post.setUser(currentUser);
 
-        post.setGameImageUrl(boardGame.getGameProfilePics().get(0).getPicAddress());
-
-
-
-        if (files != null && files.length > 0) {
-            for (MultipartFile file : files) {
-                String imageUrl = s3Uploader.uploadFile(file);
-                post.addImageUrl(imageUrl);
-                post.addImageName(file.getOriginalFilename());
-            }
+        List<GameProfilePic> pics = boardGame.getGameProfilePics();
+        if (pics != null && pics.contains(0)) {
+            post.setGameImageUrl(boardGame.getGameProfilePics().get(0).getPicAddress());
         }
 
         return postRepository.save(post);
@@ -102,8 +95,6 @@ public class PostService {
         postDto.setTitle(post.getTitle());
         postDto.setContent(post.getContent());
         postDto.setCategory(post.getCategory());
-        postDto.setImageUrls(post.getImageUrls());
-        postDto.setImageNames(post.getImageNames());
         postDto.setGameName(post.getGameName());
         postDto.setUserId(post.getUserId());
 
@@ -152,6 +143,7 @@ public class PostService {
         } else {
             view.setViewCount(view.getViewCount() + 1);
         }
+
         postRepository.save(post);
 
         return getPostDtoById(id);
@@ -200,8 +192,6 @@ public class PostService {
         post.setTitle(postDetails.getTitle());
         post.setContent(postDetails.getContent());
         post.setCategory(postDetails.getCategory());
-        post.setImageUrls(postDetails.getImageUrls());
-        post.setImageNames(postDetails.getImageNames());
 
         return postRepository.save(post);
     }

@@ -28,11 +28,11 @@ public class CustomGameVisitorRepositoryImpl implements CustomGameVisitorReposit
     public void insertIgnore(String visitorId, Long gameId) {
         LocalDateTime createdAt = LocalDateTime.now();
 
-        String sql = "INSERT IGNORE INTO GameVisitor (visitorId, gameId, created_at) VALUES (:visitorId, :gameId, :createdAt)";
+        String sql = "INSERT IGNORE INTO game_visitor (visitor_id, game_id, created_at) VALUES (:visitor_id, :game_id, :created_at)";
         Query query = entityManager.createNativeQuery(sql);
-        query.setParameter("visitorId", visitorId);
-        query.setParameter("gameId", gameId);
-        query.setParameter("createdAt", createdAt); //native쿼리 작성시에는 create_at 자동 저장이 안되어서 변경했습니다.
+        query.setParameter("visitor_id", visitorId);
+        query.setParameter("game_id", gameId);
+        query.setParameter("created_at", createdAt); //native쿼리 작성시에는 create_at 자동 저장이 안되어서 변경했습니다.
         query.executeUpdate();
     }
 

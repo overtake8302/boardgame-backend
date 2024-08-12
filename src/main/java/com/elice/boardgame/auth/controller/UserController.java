@@ -1,5 +1,6 @@
 package com.elice.boardgame.auth.controller;
 
+import com.elice.boardgame.auth.dto.UpdateUserDTO;
 import com.elice.boardgame.auth.dto.UserInfoResponseDto;
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.service.UserService;
@@ -8,9 +9,7 @@ import com.elice.boardgame.common.dto.CommonResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,5 +30,22 @@ public class UserController {
                 .build();
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PutMapping("/my")
+    public ResponseEntity<CommonResponse<String>> updateUser(
+            @CurrentUser User user,
+            @RequestBody UpdateUserDTO updateUserDTO) {
+
+        try {
+            userService.updateUser(user, updateUserDTO);
+            return new ResponseEntity<>(CommonResponse.<String>builder()
+                    .payload("User information updated successfully")
+                    .build(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(CommonResponse.<String>builder()
+                    .payload("Failed to update user information")
+                    .build(), HttpStatus.BAD_REQUEST);
+        }
     }
 }

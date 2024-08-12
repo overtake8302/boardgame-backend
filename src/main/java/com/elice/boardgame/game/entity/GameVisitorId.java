@@ -16,9 +16,9 @@ import java.io.Serializable;
 @EqualsAndHashCode
 public class GameVisitorId implements Serializable {
 
-    @Column(name = "visitorId")
+    @Column(name = "visitor_id")
     private String visitorId;
 
-    @Column(name = "gameId")
+    @Column(name = "game_id")
     private Long gameId;
 }

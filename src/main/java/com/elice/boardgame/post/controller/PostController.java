@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
-@RequestMapping("/posts")
+@RequestMapping("/post")
 @RestController
 public class PostController {
     private final PostService postService;
@@ -38,7 +38,7 @@ public class PostController {
             @RequestParam("content") String content,
             @RequestParam("category") String category,
             @RequestParam("gameName") String gameName,
-            @RequestParam("gameId") Long gameId,
+            @RequestParam("game_id") Long gameId,
             @RequestParam(value = "file", required = false) MultipartFile[] file
     ) {
         try {

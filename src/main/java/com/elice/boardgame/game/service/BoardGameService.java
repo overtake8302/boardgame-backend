@@ -114,7 +114,7 @@ public class BoardGameService {
 
     public GameResponseDto findGameByGameId(Long gameId, boolean wantComments, boolean wantPosts, Enums.Category category) {
 
-        GameResponseDto foundGame = boardGameRepository.getGameResponseDtoByGameIdAndDeletedDateIsNull(gameId);
+        GameResponseDto foundGame = boardGameRepository.getGameResponseDtoByGameIdAndDeletedAtIsNull(gameId);
 
         if (foundGame == null) {
             throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -137,7 +137,7 @@ public class BoardGameService {
     public void deleteGameByGameId(Long gameId) {
 
         User currentUser = authService.getCurrentUser();
-        BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
+        BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedAtIsNull(gameId);
 
         if (targetGame == null) {
             throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND,HttpStatus.NOT_FOUND);
@@ -163,7 +163,7 @@ public class BoardGameService {
             }
 
             targetGame.setGameProfilePics(Collections.emptyList());
-            targetGame.setDeletedDate(LocalDateTime.now());
+            targetGame.setDeletedAt(LocalDateTime.now());
             boardGameRepository.save(targetGame);
 
         } catch (Exception e) {
@@ -174,7 +174,7 @@ public class BoardGameService {
     @Transactional
     public GameResponseDto editGame(GamePutDto gamePutDto, List<MultipartFile> files) throws IOException {
 
-        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gamePutDto.getGameId());
+        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedAtIsNull(gamePutDto.getGameId());
 
         if (foundGame == null) {
             throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.BAD_REQUEST);
@@ -233,7 +233,7 @@ public class BoardGameService {
 
     public Page<GameResponseDto> findGameByName(String keyword, Pageable pageable) {
 
-        Page<GameResponseDto> foundGames = boardGameRepository.findByNameContainingAndDeletedDateIsNull(keyword, pageable);
+        Page<GameResponseDto> foundGames = boardGameRepository.findByNameContainingAndDeletedAtIsNull(keyword, pageable);
 
         if (foundGames == null || foundGames.isEmpty()) {
             throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -244,7 +244,7 @@ public class BoardGameService {
 
     public ClickLikeResponseDto clickLike(Long gameId, User user) {
 
-        BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
+        BoardGame targetGame = boardGameRepository.findByGameIdAndDeletedAtIsNull(gameId);
         GameLikePK gameLikePK = new GameLikePK(user.getId(), gameId);
 
         Optional<GameLike> target = gameLikeRepository.findById(gameLikePK);
@@ -268,7 +268,7 @@ public class BoardGameService {
 
     public GameRateResponseDto clickGameRate(Long gameId, GameRatePostDto gameRatePostDto, User user) {
 
-        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
+        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedAtIsNull(gameId);
         GameRate foundGameRate = gameRateRepository.findByUserIdAndBoardGameGameId(user.getId(), gameId);
 
         if (foundGameRate != null) {
@@ -290,10 +290,10 @@ public class BoardGameService {
     public Page<GameListResponseDto> findAll(Pageable pageable, Enums.GameListSortOption sortBy, String keyword) {
 
         if (keyword != null && !keyword.isEmpty()) {
-            return boardGameRepository.findByNameContainingAndDeletedDateIsNull(pageable, sortBy, keyword);
+            return boardGameRepository.findByNameContainingAndDeletedAtIsNull(pageable, sortBy, keyword);
         }
 
-        return boardGameRepository.findAllByDeletedDateIsNull(pageable, sortBy);
+        return boardGameRepository.findAllByDeletedAtIsNull(pageable, sortBy);
     }
 
     @Transactional
@@ -336,7 +336,7 @@ public class BoardGameService {
 
     public Boolean checkFirstCreatorOrAdmin(Long gameId, User user) {
 
-        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedDateIsNull(gameId);
+        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedAtIsNull(gameId);
         if (user == null) {
             return false;
         }
