@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
-@RequestMapping("/posts")
+@RequestMapping("/post")
 @RestController
 public class PostController {
     private final PostService postService;

@@ -17,7 +17,7 @@ import org.hibernate.annotations.Where;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@Entity (name = "comment")
 @SQLDelete(sql = "UPDATE comment SET deleted_at = CURRENT_TIMESTAMP WHERE comment_id = ?")
 @Where(clause = "deleted_at IS NULL")
 public class Comment extends BaseEntity {
@@ -32,7 +32,7 @@ public class Comment extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "post_id")
-    @JsonBackReference
+    @JsonBackReference("comments")
     private Post post;
 
     private String content;

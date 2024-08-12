@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@Entity (name = "view")
 public class View {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
