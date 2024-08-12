@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
+@Entity(name = "game_visitor")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,7 +19,7 @@ public class GameVisitor extends BaseEntity {
 
     @MapsId("gameId")
     @ManyToOne
-    @JoinColumn(name = "gameId")
+    @JoinColumn(name = "game_id")
     private BoardGame boardGame;
 
     public GameVisitor(String visitorId, Long gameId) {
