@@ -1,7 +1,9 @@
 package com.elice.boardgame.auth.service;
 
+import com.elice.boardgame.auth.dto.UpdateUserDTO;
 import com.elice.boardgame.auth.dto.UserInfoResponseDto;
 import com.elice.boardgame.auth.entity.User;
+import com.elice.boardgame.auth.repository.UserRepository;
 import com.elice.boardgame.common.exceptions.UserErrorMessages;
 import com.elice.boardgame.common.exceptions.UserException;
 import com.elice.boardgame.post.dto.CommentDto;
@@ -21,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
+    private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
 
@@ -80,5 +83,25 @@ public class UserService {
         }
 
         return userInfoResponseDto;
+    }
+
+    public void updateUser(User user, UpdateUserDTO updateUserDTO) {
+        if (user == null) {
+            throw new UserException(UserErrorMessages.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+
+        if (updateUserDTO.getAge() != null) {
+            user.setAge(updateUserDTO.getAge());
+        }
+
+        if (updateUserDTO.getPhonenumber() != null) {
+            user.setPhonenumber(updateUserDTO.getPhonenumber());
+        }
+
+        if (updateUserDTO.getName() != null) {
+            user.setName(updateUserDTO.getName());
+        }
+
+        userRepository.save(user);
     }
 }
