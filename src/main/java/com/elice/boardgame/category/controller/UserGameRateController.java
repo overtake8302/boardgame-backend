@@ -1,7 +1,9 @@
 package com.elice.boardgame.category.controller;
 
+import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.category.dto.RatingCountDto;
 import com.elice.boardgame.category.service.RatingService;
+import com.elice.boardgame.common.annotation.CurrentUser;
 import com.elice.boardgame.common.dto.CommonResponse;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -22,11 +24,11 @@ public class UserGameRateController {
     private final RatingService userGameRateService;
 
     // 평점 n점을 준 게임 찾기
-    @GetMapping("/ratings/games/{userId}")
-    public ResponseEntity<CommonResponse<RatingCountDto>> getGamesByRating(@RequestParam Double rate, @PathVariable Long userId) {
-        RatingCountDto gamesByRating = userGameRateService.getGamesByRating(userId, rate);
+    @GetMapping("/ratings/games")
+    public ResponseEntity<CommonResponse<RatingCountDto>> getGamesByRating(@RequestParam Double rate, @CurrentUser User user) {
+        RatingCountDto gamesByRating = userGameRateService.getGamesByRating(user.getId(), rate);
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.maxAge(60, TimeUnit.SECONDS))
+            .cacheControl(CacheControl.maxAge(30, TimeUnit.SECONDS))
             .body(CommonResponse.<RatingCountDto>builder()
                 .payload(gamesByRating)
                 .message("")

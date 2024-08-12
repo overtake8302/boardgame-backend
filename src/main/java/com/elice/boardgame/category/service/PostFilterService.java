@@ -10,12 +10,25 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value.Str;
 
 @Service
 @RequiredArgsConstructor
 public class PostFilterService {
 
     private final PostRepository postRepository;
+
+    public PostPageDto<PostListResponseDto> find(Pageable pageable, String sortBy, String boardType) {
+        PostPageDto<PostListResponseDto> postPageDto;
+        if (boardType.equals("ALL")) {
+            postPageDto = findAll(pageable, sortBy);
+        }
+        else {
+            postPageDto = findAllByType(pageable, sortBy, boardType);
+        }
+
+        return postPageDto;
+    }
 
     public PostPageDto<PostListResponseDto> findAllByType(Pageable pageable, String sortBy, String boardType) {
         Page<Post> posts = postRepository.findAllByType(pageable, sortBy, boardType);
@@ -41,6 +54,17 @@ public class PostFilterService {
             dtoPage.getTotalElements(),
             dtoPage.getTotalPages()
         );
+    }
+
+    public PostPageDto<PostListResponseDto> search(Pageable pageable, String query, String boardType) {
+        PostPageDto<PostListResponseDto> postPageDto;
+        if (boardType.equals("ALL")) {
+            postPageDto = searchByQuery(pageable, query);
+        }
+        else {
+            postPageDto = searchByQuery(pageable, query, boardType);
+        }
+        return postPageDto;
     }
 
     public PostPageDto<PostListResponseDto> searchByQuery(Pageable pageable, String query, String boardType) {
