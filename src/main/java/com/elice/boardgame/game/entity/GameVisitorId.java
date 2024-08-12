@@ -19,6 +19,6 @@ public class GameVisitorId implements Serializable {
     @Column(name = "visitorId")
     private String visitorId;
 
-    @Column(name = "gameId")
+    @Column(name = "game_id")
     private Long gameId;
 }

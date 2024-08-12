@@ -128,7 +128,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
     }
 
     @Override
-    public GameResponseDto getGameResponseDtoByGameIdAndDeletedDateIsNull(Long gameId) {
+    public GameResponseDto getGameResponseDtoByGameIdAndDeletedAtIsNull(Long gameId) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameRate gameRate = QGameRate.gameRate;
         QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
@@ -178,7 +178,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                         boardGame.price.as("price"),
                         boardGame.designer.as("designer"),
                         boardGame.artwork.as("artwork"),
-                        boardGame.releaseDate.as("releaseDate"),
+                        boardGame.releaseDate.as("release_date"),
                         boardGame.publisher.as("publisher"),
                         boardGame.youtubeLink.as("youtubeLink"),
                         gameLike.countDistinct().intValue().as("likeCount"),
@@ -191,7 +191,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .leftJoin(boardGame.gameProfilePics, gameProfilePic) // 프로필 사진 조인
                 .leftJoin(boardGame.gameGenres, gameGenre)// 장르 조인
                 .leftJoin(boardGame.gameLikes, gameLike)
-                .where(boardGame.deletedDate.isNull()
+                .where(boardGame.deletedAt.isNull()
                         .and(boardGame.gameId.eq(gameId)))
                 .fetchOne();
 
@@ -204,7 +204,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
     }
 
     @Override
-    public Page<GameResponseDto> findByNameContainingAndDeletedDateIsNull(String keyword, Pageable pageable) {
+    public Page<GameResponseDto> findByNameContainingAndDeletedAtIsNull(String keyword, Pageable pageable) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
         QGameRate gameRate = QGameRate.gameRate;
@@ -242,7 +242,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                         boardGame.price.as("price"),
                         boardGame.designer.as("designer"),
                         boardGame.artwork.as("artwork"),
-                        boardGame.releaseDate.as("releaseDate"),
+                        boardGame.releaseDate.as("release_date"),
                         boardGame.publisher.as("publisher"),
                         boardGame.youtubeLink.as("youtubeLink"),
                         gameLike.countDistinct().intValue().as("likeCount"),
@@ -255,7 +255,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .leftJoin(boardGame.gameProfilePics, gameProfilePic) // 프로필 사진 조인
                 .leftJoin(boardGame.gameGenres, gameGenre)
                 .leftJoin(boardGame.gameLikes, gameLike)
-                .where(boardGame.name.contains(keyword).and(boardGame.deletedDate.isNull()))
+                .where(boardGame.name.contains(keyword).and(boardGame.deletedAt.isNull()))
                 .groupBy(
                         boardGame.gameId,
                         gameRate.boardGame.gameId,
@@ -282,13 +282,13 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         long total = queryFactory
                 .select(boardGame.count())
                 .from(boardGame)
-                .where(boardGame.deletedDate.isNull())
+                .where(boardGame.deletedAt.isNull())
                 .fetchOne();
 
         return new PageImpl<>(results, pageable, total);
     }
 
-    public Page<GameListResponseDto> findAllByDeletedDateIsNull(Pageable pageable, Enums.GameListSortOption sortBy) {
+    public Page<GameListResponseDto> findAllByDeletedAtIsNull(Pageable pageable, Enums.GameListSortOption sortBy) {
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
         QGameRate gameRate = QGameRate.gameRate;
@@ -313,7 +313,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .leftJoin(boardGame.gameVisitors, gameVisitor)
                 .leftJoin(boardGame.gameProfilePics, gameProfilePic)
                 .leftJoin(boardGame.gameLikes, gameLike)
-                .where(boardGame.deletedDate.isNull())
+                .where(boardGame.deletedAt.isNull())
                 .groupBy(
                         boardGame.gameId,
                         gameRate.boardGame.gameId,
@@ -356,7 +356,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         long total = queryFactory
                 .select(boardGame.count())
                 .from(boardGame)
-                .where(boardGame.deletedDate.isNull())
+                .where(boardGame.deletedAt.isNull())
                 .fetchOne();
 
         return new PageImpl<>(results, pageable, total);
@@ -397,9 +397,9 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 );
 
         if (genre == null || genre.isEmpty()) {
-            query.where(boardGame.deletedDate.isNull());
+            query.where(boardGame.deletedAt.isNull());
         } else {
-            query.where(gameGenre.genre.genre.eq(genre).and(boardGame.deletedDate.isNull()));
+            query.where(gameGenre.genre.genre.eq(genre).and(boardGame.deletedAt.isNull()));
         }
 
         if (sortBy.equals(Enums.GameListSortOption.GAME_ID)) {
@@ -455,7 +455,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 boardGame.name))
             .from(boardGame)
             .where(boardGame.name.containsIgnoreCase(keyword)
-                .and(boardGame.deletedDate.isNull()))
+                .and(boardGame.deletedAt.isNull()))
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
@@ -464,7 +464,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
             .select(boardGame.count())
             .from(boardGame)
             .where(boardGame.name.containsIgnoreCase(keyword)
-                .and(boardGame.deletedDate.isNull()))
+                .and(boardGame.deletedAt.isNull()))
             .fetchOne();
 		return new PageImpl<>(results, pageable, total);
     }
@@ -509,7 +509,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                         boardGame.price.as("price"),
                         boardGame.designer.as("designer"),
                         boardGame.artwork.as("artwork"),
-                        boardGame.releaseDate.as("releaseDate"),
+                        boardGame.deletedAt.as("release_date"),
                         boardGame.publisher.as("publisher"),
                         boardGame.youtubeLink.as("youtubeLink"),
                         gameLike.countDistinct().intValue().as("likeCount"),
@@ -522,13 +522,13 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .leftJoin(boardGame.gameProfilePics, gameProfilePic)
                 .leftJoin(boardGame.gameGenres, gameGenre)
                 .leftJoin(boardGame.gameLikes, gameLike)
-                .where(gameLike.user.id.eq(userId).and(boardGame.deletedDate.isNull()))
+                .where(gameLike.user.id.eq(userId).and(boardGame.deletedAt.isNull()))
                 .groupBy(
                         boardGame.gameId,
                         gameRate.boardGame.gameId,
                         gameVisitor.id.gameId
                 )
-                .orderBy(gameLike.createdDate.desc());
+                .orderBy(gameLike.createdAt.desc());
 
 
 
@@ -557,7 +557,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .select(boardGame.count())
                 .from(boardGame)
                 .leftJoin(boardGame.gameLikes, gameLike)
-                .where(gameLike.user.id.eq(userId).and(boardGame.deletedDate.isNull()))
+                .where(gameLike.user.id.eq(userId).and(boardGame.deletedAt.isNull()))
                 .fetchOne();
 
         return new PageImpl<>(results, pageable, total);
@@ -590,7 +590,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
     }
 
     @Override
-    public Page<GameListResponseDto> findByNameContainingAndDeletedDateIsNull(Pageable pageable, Enums.GameListSortOption sortBy, String keyword) {
+    public Page<GameListResponseDto> findByNameContainingAndDeletedAtIsNull(Pageable pageable, Enums.GameListSortOption sortBy, String keyword) {
 
         QBoardGame boardGame = QBoardGame.boardGame;
         QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
@@ -616,7 +616,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .leftJoin(boardGame.gameVisitors, gameVisitor)
                 .leftJoin(boardGame.gameProfilePics, gameProfilePic)
                 .leftJoin(boardGame.gameLikes, gameLike)
-                .where(boardGame.deletedDate.isNull().and(boardGame.name.contains(keyword)))
+                .where(boardGame.deletedAt.isNull().and(boardGame.name.contains(keyword)))
                 .groupBy(
                         boardGame.gameId,
                         gameRate.boardGame.gameId,
@@ -659,7 +659,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         long total = queryFactory
                 .select(boardGame.count())
                 .from(boardGame)
-                .where(boardGame.deletedDate.isNull())
+                .where(boardGame.deletedAt.isNull())
                 .fetchOne();
 
         return new PageImpl<>(results, pageable, total);

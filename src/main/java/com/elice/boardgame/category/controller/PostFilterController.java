@@ -1,16 +1,11 @@
 package com.elice.boardgame.category.controller;
 
-import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.category.dto.PostListResponseDto;
 import com.elice.boardgame.category.dto.PostPageDto;
-import com.elice.boardgame.category.dto.RatingCountDto;
 import com.elice.boardgame.category.service.PostFilterService;
-import com.elice.boardgame.common.annotation.CurrentUser;
 import com.elice.boardgame.common.dto.CommonResponse;
-import com.elice.boardgame.game.dto.GameResponseDto;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +23,8 @@ public class PostFilterController {
 
     @GetMapping
     public ResponseEntity<CommonResponse<PostPageDto<PostListResponseDto>>> findAllByBoardType(Pageable pageable,
-        @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
-        @RequestParam String boardType) {
+        @RequestParam(name = "sortBy", required = false, defaultValue = "createdAt") String sortBy,
+        @RequestParam(name = "boardType") String boardType) {
 
         PostPageDto<PostListResponseDto> postPageDto = postFilterService.find(pageable, sortBy, boardType);
 
@@ -47,8 +42,8 @@ public class PostFilterController {
     @GetMapping("/search")
     public CommonResponse<PostPageDto<PostListResponseDto>> searchPosts(
         Pageable pageable,
-        @RequestParam String query,
-        @RequestParam String boardType) {
+        @RequestParam(name = "query") String query,
+        @RequestParam(name = "boardType") String boardType) {
 
         PostPageDto<PostListResponseDto> postPageDto = postFilterService.search(pageable, query, boardType);
 

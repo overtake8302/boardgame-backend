@@ -45,6 +45,7 @@ public class PostFilterService {
 
     public PostPageDto<PostListResponseDto> findAll(Pageable pageable, String sortBy) {
         Page<Post> posts = postRepository.findAll(pageable, sortBy);
+        System.out.println(posts);
         Page<PostListResponseDto> dtoPage = PostListMapper.toDtoPage(posts);
 
         return new PostPageDto<>(

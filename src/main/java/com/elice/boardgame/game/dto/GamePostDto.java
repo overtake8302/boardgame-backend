@@ -5,6 +5,7 @@ import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.game.annotation.YouTubeLink;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -27,6 +28,7 @@ public class GamePostDto {
 
     private Enums.PlayTime playTime;
 
+    @JoinColumn(name = "release_date")
     private String releaseDate;
 
     @NotNull

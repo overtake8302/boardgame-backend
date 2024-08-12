@@ -1,12 +1,13 @@
 package com.elice.boardgame.game.entity;
 
+import com.elice.boardgame.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
+@Entity(name = "game_profile_pic")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -18,7 +19,7 @@ public class GameProfilePic extends BaseEntity {
     private Long picId;
 
     @ManyToOne
-    @JoinColumn(name = "gameId")
+    @JoinColumn(name = "game_id")
     private BoardGame boardGame;
 
     private String picAddress;
