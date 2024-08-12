@@ -6,7 +6,7 @@ import jakarta.validation.ConstraintValidatorContext;
 public class YouTubeLinkValidator implements ConstraintValidator<YouTubeLink, String> {
 
     private static final String YOUTUBE_EMBED_URL_PATTERN =
-            "^(https?://)?(www\\.)?(youtube\\.com|youtu\\.?be)/.+$";
+            "^(https?://)?(www\\.)?(youtube\\.com/embed/|youtu\\.be/).+$";
 
     @Override
     public void initialize(YouTubeLink constraintAnnotation) {

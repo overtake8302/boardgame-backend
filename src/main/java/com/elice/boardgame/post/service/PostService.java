@@ -19,6 +19,7 @@ import com.elice.boardgame.game.entity.GameProfilePic;
 import com.elice.boardgame.auth.service.AuthService;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -65,10 +66,9 @@ public class PostService {
         post.setBoardGame(boardGame);
         post.setUser(currentUser);
 
-        List<String> gameImageUrls = boardGame.getGameProfilePics().stream()
-            .map(GameProfilePic::getPicAddress)
-            .collect(Collectors.toList());
-        post.setGameImageUrl(post.getGameImageUrl());
+        post.setGameImageUrl(boardGame.getGameProfilePics().get(0).getPicAddress());
+
+
 
         if (files != null && files.length > 0) {
             for (MultipartFile file : files) {
@@ -128,10 +128,7 @@ public class PostService {
         }).collect(Collectors.toList()));
         postDto.setGameId(post.getBoardGame().getGameId());
 
-        List<String> gameImageUrls = post.getBoardGame().getGameProfilePics().stream()
-            .map(GameProfilePic::getPicAddress)
-            .collect(Collectors.toList());
-        postDto.setGameImageUrls(gameImageUrls);
+        postDto.setGameImageUrl(post.getGameImageUrl());
 
         postDto.setViewCount(post.getView().getViewCount()+1);
         postDto.setCreatedAt(post.getCreatedAt().format(formatter));

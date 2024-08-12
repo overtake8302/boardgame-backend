@@ -12,8 +12,5 @@ public class JoinDTO {
     private String password;
     private Integer age;
     private String phonenumber;
-    private String location;
-    private String detailLocation;
-    private Integer post_code;
     private String name;
 }

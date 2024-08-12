@@ -10,7 +10,6 @@ import com.elice.boardgame.post.entity.Comment;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.repository.CommentRepository;
 import com.elice.boardgame.post.repository.PostRepository;
-import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,8 +24,6 @@ public class UserService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
     public UserInfoResponseDto getMyInfo(User user, boolean wantPosts, boolean wantComments) {
 
         if (user == null) {
@@ -39,9 +36,6 @@ public class UserService {
         userInfoResponseDto.setName(user.getName());
         userInfoResponseDto.setAge(user.getAge());
         userInfoResponseDto.setPhonenumber(user.getPhonenumber());
-        userInfoResponseDto.setLocation(user.getLocation());
-        userInfoResponseDto.setDetail_location(user.getDetail_location());
-        userInfoResponseDto.setPost_code(user.getPost_code());
         userInfoResponseDto.setRole(user.getRole());
 
         if (wantPosts) {
@@ -56,9 +50,15 @@ public class UserService {
                 postDto.setTitle(post.getTitle());
                 postDto.setContent(post.getContent());
                 postDto.setCategory(post.getCategory());
-                postDto.setImageNames(post.getImageNames());
+
+                postDto.setCreatedAt(post.getCreatedAt().toString());
+                postDto.setGameId(post.getId());
+                postDto.setGameName(post.getGameName());
+                postDto.setGameImageUrl(post.getGameImageUrl());
                 postDto.setImageUrls(post.getImageUrls());
-                postDto.setCreatedAt(post.getCreatedAt().format(formatter));
+                postDto.setImageNames(post.getImageNames());
+                postDto.setLikeCount(post.getLikeCount());
+
                 postDtos.add(postDto);
             }
             userInfoResponseDto.setPostDtos(postDtos);
