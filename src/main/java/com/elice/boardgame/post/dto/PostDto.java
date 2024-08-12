@@ -1,5 +1,6 @@
 package com.elice.boardgame.post.dto;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.Setter;
 
 @Getter @Setter
 public class PostDto {
+    private Long postId;
     private String content;
     private String title;
     private String category;

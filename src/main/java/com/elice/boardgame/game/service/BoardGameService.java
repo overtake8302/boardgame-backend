@@ -37,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,6 +60,8 @@ public class BoardGameService {
     private final AuthService authService;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Transactional
     public GameResponseDto create(GamePostDto gamePostDto, List<MultipartFile> files, User user) throws IOException {
@@ -314,7 +317,7 @@ public class BoardGameService {
             postDto.setCategory(post.getCategory());
             postDto.setTitle(post.getTitle());
             postDto.setContent(post.getContent());
-            postDto.setCreatedAt(post.getCreatedAt());
+            postDto.setCreatedAt(post.getCreatedAt().format(formatter));
             postDtos.add(postDto);
         }
         return postDtos;
