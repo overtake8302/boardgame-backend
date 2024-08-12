@@ -66,7 +66,11 @@ public class PostService {
         post.setBoardGame(boardGame);
         post.setUser(currentUser);
 
-        post.setGameImageUrl(boardGame.getGameProfilePics().get(0).getPicAddress());
+        List<GameProfilePic> pics = boardGame.getGameProfilePics();
+        if (pics != null && pics.contains(0)) {
+            post.setGameImageUrl(boardGame.getGameProfilePics().get(0).getPicAddress());
+        }
+
 
 
 

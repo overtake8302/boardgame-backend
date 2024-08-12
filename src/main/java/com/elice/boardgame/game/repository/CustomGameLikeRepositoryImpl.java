@@ -26,7 +26,7 @@ public class CustomGameLikeRepositoryImpl implements CustomGameLikeRepository{
             .from(gameLike)
             .join(gameLike.boardGame, boardGame)
             .where(gameLike.gameLikePK.userId.eq(userId))
-            .orderBy(gameLike.createdDate.desc())
+            .orderBy(gameLike.createdAt.desc())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();

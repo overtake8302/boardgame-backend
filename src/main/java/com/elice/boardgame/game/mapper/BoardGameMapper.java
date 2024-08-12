@@ -43,7 +43,7 @@ public class BoardGameMapper {
 
     public GameResponseDto boardGameToGameResponseDto(BoardGame boardGame) {
 
-        return boardGameRepository.getGameResponseDtoByGameIdAndDeletedDateIsNull(boardGame.getGameId());
+        return boardGameRepository.getGameResponseDtoByGameIdAndDeletedAtIsNull(boardGame.getGameId());
 
     }
 
