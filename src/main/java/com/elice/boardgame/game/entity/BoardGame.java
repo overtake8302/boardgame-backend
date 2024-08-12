@@ -30,12 +30,15 @@ public class BoardGame extends BaseEntity {
     private String name;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "play_time")
     private Enums.PlayTime playTime;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "play_num")
     private Enums.PlayNum playNum;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "age_limit")
     private Enums.AgeLimit ageLimit;
 
     private int price;
@@ -44,6 +47,7 @@ public class BoardGame extends BaseEntity {
 
     private String artwork;
 
+    @Column(name = "release_date")
     private String releaseDate;
 
     @Enumerated(EnumType.STRING)
@@ -51,7 +55,7 @@ public class BoardGame extends BaseEntity {
 
     private String publisher;
 
-    @Column(length = 500)
+    @Column(length = 500, name = "youtube_link")
     private String youtubeLink;
 
     @OneToMany(mappedBy = "boardGame", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -70,7 +74,7 @@ public class BoardGame extends BaseEntity {
     private List<GameGenre> gameGenres;
 
     @OneToMany
-    @JoinColumn(name = "gameId")
+    @JoinColumn(name = "game_id")
     private List<GameVisitor> gameVisitors;
 
     private Long views;
