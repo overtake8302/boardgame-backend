@@ -17,7 +17,6 @@ public class User {
     @Column(unique = true)
     private String username;
     private String password;
-
     private String role;
 
     @Column(nullable = true)
@@ -25,15 +24,6 @@ public class User {
 
     @Column(nullable = true)
     private String phonenumber;
-
-    @Column(nullable = true)
-    private String location;
-
-    @Column(nullable = true)
-    private String detailLocation;
-
-    @Column(nullable = true)
-    private Integer post_code;
 
     @Column(nullable = true)
     private String name;

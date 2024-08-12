@@ -36,9 +36,6 @@ public class UserService {
         userInfoResponseDto.setName(user.getName());
         userInfoResponseDto.setAge(user.getAge());
         userInfoResponseDto.setPhonenumber(user.getPhonenumber());
-        userInfoResponseDto.setLocation(user.getLocation());
-        userInfoResponseDto.setDetailLocation(user.getDetailLocation());
-        userInfoResponseDto.setPost_code(user.getPost_code());
         userInfoResponseDto.setRole(user.getRole());
 
         if (wantPosts) {
