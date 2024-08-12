@@ -9,5 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRepository {
     List<Post> findTop10ByBoardGameGameIdAndCategoryOrderByIdDesc(Long gameId, Enums.Category category);
 
+    List<Post> findAllByUser_Id(Long id);
+
     Post findByIdAndDeletedAtIsNull(Long postId);
 }
