@@ -2,6 +2,7 @@ package com.elice.boardgame.post.repository;
 
 import static com.elice.boardgame.post.entity.QPost.post;
 
+import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.post.dto.SearchPostResponse;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.entity.QPost;
@@ -70,12 +71,11 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
 
     @Override
-    public Page<SearchPostResponse> searchPostsByKeyword(String keyword, Pageable pageable) {
-        List<SearchPostResponse> results = queryFactory
+    public Page<SearchResponse> searchPostsByKeyword(String keyword, Pageable pageable) {
+        List<SearchResponse> results = queryFactory
             .select(
-                Projections.constructor(SearchPostResponse.class,
+                Projections.constructor(SearchResponse.class,
                     post.id,
-                    post.category,
                     post.title
                 ))
             .from(post)

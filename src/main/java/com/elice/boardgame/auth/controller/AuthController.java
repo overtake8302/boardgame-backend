@@ -30,7 +30,6 @@ public class AuthController {
     @PostMapping("/join")
     public String joinProcess(@RequestBody JoinDTO joinDTO) {
         joinService.joinProcess(joinDTO);
-
         return "register ok";
     }
 

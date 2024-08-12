@@ -2,6 +2,7 @@ package com.elice.boardgame.post.controller;
 
 import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.common.dto.SearchRequest;
+import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.game.dto.ClickLikeResponseDto;
 import com.elice.boardgame.post.dto.PostDto;
 import com.elice.boardgame.post.dto.SearchPostResponse;
@@ -132,10 +133,10 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<CommonResponse<Page<SearchPostResponse>>> searchPosts(@ModelAttribute SearchRequest searchRequest) {
+    public ResponseEntity<CommonResponse<Page<SearchResponse>>> searchPosts(@ModelAttribute SearchRequest searchRequest) {
         Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize());
         String keyword = searchRequest.getKeyword();
-        CommonResponse<Page<SearchPostResponse>> response = postService.searchPostsByKeyword(keyword, pageable);
+        CommonResponse<Page<SearchResponse>> response = postService.searchPostsByKeyword(keyword, pageable);
         return ResponseEntity.ok(response);
     }
 }
