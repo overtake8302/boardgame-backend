@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
-@Entity (name = "comment_like")
+@Entity(name = "comment_like")
 @Getter
 @Setter
 @NoArgsConstructor

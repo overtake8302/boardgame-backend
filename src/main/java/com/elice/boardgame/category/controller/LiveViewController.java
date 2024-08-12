@@ -7,7 +7,10 @@ import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -38,12 +41,14 @@ public class LiveViewController {
 
     //뷰 랭킹순 가져오기
     @GetMapping()
-    public CommonResponse<List<GameResponseDto>> getLiveViewRanking() {
+    public ResponseEntity<CommonResponse<List<GameResponseDto>>> getLiveViewRanking() {
         List<GameResponseDto> gameResponseDtos = liveViewService.getLiveViewRanking();
-        return CommonResponse.<List<GameResponseDto>>builder()
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.maxAge(60, TimeUnit.SECONDS))
+            .body(CommonResponse.<List<GameResponseDto>>builder()
             .payload(gameResponseDtos)
             .message("")
             .status(200)
-            .build();
+            .build());
     }
 }

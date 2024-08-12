@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity (name = "post_like")
+@Entity(name = "post_like")
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor

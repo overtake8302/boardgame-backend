@@ -17,7 +17,7 @@ import org.hibernate.annotations.Where;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity (name = "comment")
+@Entity(name = "comment")
 @SQLDelete(sql = "UPDATE comment SET deleted_at = CURRENT_TIMESTAMP WHERE comment_id = ?")
 @Where(clause = "deleted_at IS NULL")
 public class Comment extends BaseEntity {

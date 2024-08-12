@@ -44,6 +44,7 @@ public class BoardGame extends BaseEntity {
 
     private String artwork;
 
+    @Column(name = "release_date")
     private String releaseDate;
 
     @Enumerated(EnumType.STRING)
@@ -70,7 +71,7 @@ public class BoardGame extends BaseEntity {
     private List<GameGenre> gameGenres;
 
     @OneToMany
-    @JoinColumn(name = "gameId")
+    @JoinColumn(name = "game_id")
     private List<GameVisitor> gameVisitors;
 
     private Long views;

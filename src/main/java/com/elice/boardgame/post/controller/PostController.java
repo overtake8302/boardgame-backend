@@ -38,7 +38,7 @@ public class PostController {
             @RequestParam("content") String content,
             @RequestParam("category") String category,
             @RequestParam("gameName") String gameName,
-            @RequestParam("gameId") Long gameId,
+            @RequestParam("game_id") Long gameId,
             @RequestParam(value = "file", required = false) MultipartFile[] file
     ) {
         try {
