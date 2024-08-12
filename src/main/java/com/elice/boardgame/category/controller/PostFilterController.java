@@ -1,5 +1,6 @@
 package com.elice.boardgame.category.controller;
 
+import com.elice.boardgame.category.dto.BoardRequestDto;
 import com.elice.boardgame.category.dto.PostListResponseDto;
 import com.elice.boardgame.category.dto.PostPageDto;
 import com.elice.boardgame.category.service.PostFilterService;
@@ -22,12 +23,10 @@ public class PostFilterController {
     private final PostFilterService postFilterService;
 
     @GetMapping
-    public ResponseEntity<CommonResponse<PostPageDto<PostListResponseDto>>> findAllByBoardType(Pageable pageable,
-        @RequestParam(name = "sortBy", required = false, defaultValue = "createdAt") String sortBy,
-        @RequestParam(name = "boardType") String boardType) {
+    public ResponseEntity<CommonResponse<PostPageDto<PostListResponseDto>>> findAllByBoardType(
+        BoardRequestDto boardRequestDto) {
 
-        PostPageDto<PostListResponseDto> postPageDto = postFilterService.find(pageable, sortBy, boardType);
-
+        PostPageDto<PostListResponseDto> postPageDto = postFilterService.find(boardRequestDto);
 
         return ResponseEntity.ok()
             .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
@@ -36,21 +35,5 @@ public class PostFilterController {
                 .message("")
                 .status(200)
                 .build());
-    }
-
-    // 검색 엔드포인트
-    @GetMapping("/search")
-    public CommonResponse<PostPageDto<PostListResponseDto>> searchPosts(
-        Pageable pageable,
-        @RequestParam(name = "query") String query,
-        @RequestParam(name = "boardType") String boardType) {
-
-        PostPageDto<PostListResponseDto> postPageDto = postFilterService.search(pageable, query, boardType);
-
-        return CommonResponse.<PostPageDto<PostListResponseDto>>builder()
-            .payload(postPageDto)
-            .message("")
-            .status(200)
-            .build();
     }
 }

@@ -42,9 +42,14 @@ public class Post extends BaseEntity {
 
     private String category;
     private String title;
+
+    @Column(name = "game_name")
     private String gameName;
+
+    @Column(name = "game_image_url")
     private String gameImageUrl;
 
+    @Column(name = "like_count")
     private Long likeCount;
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)

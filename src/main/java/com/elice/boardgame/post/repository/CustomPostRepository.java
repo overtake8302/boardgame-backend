@@ -5,9 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface CustomPostRepository {
-    Page<Post> findAll(Pageable pageable, String sortBy);
-    Page<Post> findAllByType(Pageable pageable, String sortBy, String boardType);
-    Page<Post> searchByQuery(Pageable pageable, String query);
-    Page<Post> searchByQuery(Pageable pageable, String query, String boardType);
+    Page<Post> search(Pageable pageable, String query, String boardType, String sortBy);
     Page<SearchPostResponse> searchPostsByKeyword(String keyword, Pageable pageable);
 }
