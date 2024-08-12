@@ -68,7 +68,7 @@ public class PostService {
         List<String> gameImageUrls = boardGame.getGameProfilePics().stream()
             .map(GameProfilePic::getPicAddress)
             .collect(Collectors.toList());
-        post.setGameImageUrls(gameImageUrls);
+        post.setGameImageUrl(post.getGameImageUrl());
 
         if (files != null && files.length > 0) {
             for (MultipartFile file : files) {

@@ -45,7 +45,7 @@ public class Post extends BaseEntity {
     private List<String> imageUrls = new ArrayList<>();
     private List<String> imageNames = new ArrayList<>();
     private String gameName;
-    private List<String> gameImageUrls = new ArrayList<>();
+    private String gameImageUrl;
 
     private Long likeCount;
 
