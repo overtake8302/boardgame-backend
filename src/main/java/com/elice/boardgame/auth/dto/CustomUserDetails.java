@@ -68,17 +68,5 @@ public class CustomUserDetails implements UserDetails {
         return user;
     }
 
-//    public Integer getAge(){ return user.getAge(); }
-//
-//    public String getPhoneNumber() { return user.getPhonenumber(); }
-//
-//    public String getLocation() { return user.getLocation(); }
-//
-//    public String getDetailLocation() { return user.getDetail_location(); }
-//
-//    public Integer getPost_code() { return user.getPost_code(); }
-//
-//    public String getName(){ return user.getName(); }
-
 
 }

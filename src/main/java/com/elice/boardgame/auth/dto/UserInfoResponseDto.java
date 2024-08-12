@@ -24,7 +24,7 @@ public class UserInfoResponseDto {
 
     private String location;
 
-    private String detail_location;
+    private String detailLocation;
 
     private Integer post_code;
 

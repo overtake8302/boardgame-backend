@@ -37,7 +37,7 @@ public class UserService {
         userInfoResponseDto.setAge(user.getAge());
         userInfoResponseDto.setPhonenumber(user.getPhonenumber());
         userInfoResponseDto.setLocation(user.getLocation());
-        userInfoResponseDto.setDetail_location(user.getDetail_location());
+        userInfoResponseDto.setDetailLocation(user.getDetailLocation());
         userInfoResponseDto.setPost_code(user.getPost_code());
         userInfoResponseDto.setRole(user.getRole());
 
@@ -53,9 +53,9 @@ public class UserService {
                 postDto.setTitle(post.getTitle());
                 postDto.setContent(post.getContent());
                 postDto.setCategory(post.getCategory());
-                postDto.setImageName(post.getImageName());
-                postDto.setImageUrl(post.getImageUrl());
-                postDto.setCreatedAt(post.getCreatedAt());
+//                postDto.setImageName(post.getImageName());
+//                postDto.setImageUrl(post.getImageUrl());
+//                postDto.setCreatedAt(post.getCreatedAt());
                 postDtos.add(postDto);
             }
             userInfoResponseDto.setPostDtos(postDtos);
