@@ -30,7 +30,7 @@ public class User {
     private String location;
 
     @Column(nullable = true)
-    private String detail_location;
+    private String detailLocation;
 
     @Column(nullable = true)
     private Integer post_code;

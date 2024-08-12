@@ -13,7 +13,7 @@ public class JoinDTO {
     private Integer age;
     private String phonenumber;
     private String location;
-    private String detail_location;
+    private String detailLocation;
     private Integer post_code;
     private String name;
 }

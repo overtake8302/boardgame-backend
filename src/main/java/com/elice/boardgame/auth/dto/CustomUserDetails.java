@@ -69,7 +69,7 @@ public class CustomUserDetails implements UserDetails {
 //
 //    public String getLocation() { return user.getLocation(); }
 //
-//    public String getDetail_location() { return user.getDetail_location(); }
+//    public String getDetailLocation() { return user.getDetail_location(); }
 //
 //    public Integer getPost_code() { return user.getPost_code(); }
 //
