@@ -54,7 +54,7 @@ public class UserService {
                 postDto.setCreatedAt(post.getCreatedAt().toString());
                 postDto.setGameId(post.getId());
                 postDto.setGameName(post.getGameName());
-                postDto.setGameImageUrls(post.getGameImageUrls());
+                postDto.setGameImageUrl(post.getGameImageUrl());
                 postDto.setImageUrls(post.getImageUrls());
                 postDto.setImageNames(post.getImageNames());
                 postDto.setLikeCount(post.getLikeCount());

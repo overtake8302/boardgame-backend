@@ -20,7 +20,7 @@ public class PostDto {
     private List<CommentDto> comments;
     private String gameName;
     private Long gameId;
-    private List<String> gameImageUrls = new ArrayList<>();
+    private String gameImageUrl;
     private String createdAt;
     private Long likeCount;
 }
