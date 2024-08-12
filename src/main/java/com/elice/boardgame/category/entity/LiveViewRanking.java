@@ -1,6 +1,7 @@
 package com.elice.boardgame.category.entity;
 
 import com.elice.boardgame.game.entity.BoardGame;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,5 +28,6 @@ public class LiveViewRanking {
     @JoinColumn(name = "game_id")
     private BoardGame game;
 
+    @Column(name = "sum_score")
     private Long sumScore;
 }

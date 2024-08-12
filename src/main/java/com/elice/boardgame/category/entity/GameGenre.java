@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "GameGenre")
+@Table(name = "game_genre")
 @Getter
 @Setter
 @RequiredArgsConstructor

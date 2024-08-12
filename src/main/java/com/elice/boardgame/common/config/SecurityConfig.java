@@ -130,7 +130,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/game/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/game/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/game/**").authenticated()
-                .anyRequest().permitAll());
+                .requestMatchers("/recommend/**").authenticated()
+
+            .anyRequest().permitAll());
 
         // 로그아웃 설정
         http.logout(logout -> {

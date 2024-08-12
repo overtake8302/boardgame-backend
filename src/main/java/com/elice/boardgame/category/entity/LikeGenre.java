@@ -18,7 +18,7 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 @Entity
-@Table(name = "Like_Genre")
+@Table(name = "like_genre")
 public class LikeGenre implements Serializable {
 
     @EmbeddedId
