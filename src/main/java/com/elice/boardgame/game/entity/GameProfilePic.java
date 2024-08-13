@@ -28,4 +28,11 @@ public class GameProfilePic extends BaseEntity {
 
     @Column(name = "file_name")
     private String fileName;
+
+    @ManyToOne
+    @JoinColumn(name = "game_history_id")
+    private BoardGameHistory gameHistory;
+
+    @Column(name = "is_active")
+    private Boolean isActive = true;
 }

@@ -16,7 +16,9 @@ public enum GameErrorMessages {
     NO_COMMENTS("E007", "게임과 관련된 댓글이 없어요."),
     UNAUTHORIZED("E008", "로그인이 필요해요."),
     IS_FIRST_CREATOR_FALSE("E009", "최초 작성자나 관리자만 삭제할 수 있어요."),
-    YOUTUBE_LINK_ERROR("E010", "링크를 확인해 주세요.");
+    YOUTUBE_LINK_ERROR("E010", "링크를 확인해 주세요."),
+    NO_HISTORIES("E011", "아직 수정내역이 없어요."),
+    NO_HISTORY("E012", "수정본이 존재하지 않아요.");
 
     private final String errorCode;
     private final String errorMessage;

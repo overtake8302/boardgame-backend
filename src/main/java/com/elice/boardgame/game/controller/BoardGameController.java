@@ -64,7 +64,7 @@ public class    BoardGameController {
             @PathVariable @Min(1) Long gameId,
             @RequestParam(required = false) boolean wantComments,
             @RequestParam(required = false) boolean wantPosts,
-            @RequestParam(required = false) Enums.Category category
+            @RequestParam(required = false) String  category
     ) {
 
         GameResponseDto foundGame = boardGameService.findGameByGameId(gameId, wantComments, wantPosts, category);
@@ -94,14 +94,15 @@ public class    BoardGameController {
             @PathVariable Long gameId,
             @RequestPart("gamePutDto") @Validated GamePutDto gamePutDto,
             @RequestPart(value = "file", required = false) List<MultipartFile> files,
-            BindingResult bindingResult
+            BindingResult bindingResult,
+            @CurrentUser User user
     ) throws  IOException {
 
         if (bindingResult.hasErrors()) {
             throw new GameRootException(GameErrorMessages.MISSING_REQUIRED_INPUT, HttpStatus.BAD_REQUEST);
         }
 
-        GameResponseDto gameResponseDto = boardGameService.editGame(gamePutDto, files);
+        GameResponseDto gameResponseDto = boardGameService.editGameV2(gamePutDto, files, user);
         CommonResponse<GameResponseDto> response = CommonResponse.<GameResponseDto>builder()
                 .payload(gameResponseDto)
                 .build();
@@ -188,12 +189,38 @@ public class    BoardGameController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    //ToDo
+
     @GetMapping("/isFirstCreator")
     public ResponseEntity<Boolean> isFirstCreator(@RequestParam Long gameId, @CurrentUser User user) {
 
         Boolean result = boardGameService.checkFirstCreatorOrAdmin(gameId, user);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    //ToDo
+    @GetMapping("/{gameId}/histories")
+    public ResponseEntity<CommonResponse<Page<GameHistoriesResponseDto>>> getGameHistories(Pageable pageable,@PathVariable Long gameId) {
+
+        Page<GameHistoriesResponseDto> histories = boardGameService.getGameHistoriesByGameId(pageable,gameId);
+
+        CommonResponse<Page<GameHistoriesResponseDto>> response = CommonResponse.<Page<GameHistoriesResponseDto>>builder()
+                .payload(histories)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    //ToDo
+    @GetMapping("/history/{historyId}")
+    public ResponseEntity<CommonResponse<GameHistoryResponseDto>> getGameHistory(@PathVariable Long historyId) {
+
+        GameHistoryResponseDto dto = boardGameService.getGameHistory(historyId);
+
+        CommonResponse<GameHistoryResponseDto> response = CommonResponse.<GameHistoryResponseDto>builder()
+                .payload(dto)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
