@@ -4,6 +4,8 @@ import com.elice.boardgame.auth.dto.UpdateUserDTO;
 import com.elice.boardgame.auth.dto.UserInfoResponseDto;
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
+import com.elice.boardgame.common.dto.CommonResponse;
+import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.common.exceptions.UserErrorMessages;
 import com.elice.boardgame.common.exceptions.UserException;
 import com.elice.boardgame.post.dto.CommentDto;
@@ -13,6 +15,8 @@ import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.repository.CommentRepository;
 import com.elice.boardgame.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -103,5 +107,15 @@ public class UserService {
         }
 
         userRepository.save(user);
+    }
+
+    public CommonResponse<Page<SearchResponse>> searchUsersByKeyword(String keyword, Pageable pageable) {
+        Page<SearchResponse> searchResults = userRepository.searchUsersByKeyword(keyword, pageable);
+
+        return CommonResponse.<Page<SearchResponse>>builder()
+            .payload(searchResults)
+            .message("Search completed successfully")
+            .status(200)
+            .build();
     }
 }
