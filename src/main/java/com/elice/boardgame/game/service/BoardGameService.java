@@ -395,7 +395,7 @@ public class BoardGameService {
     }
 
     public List<PostDto> getTop10Posts(Long gameId, String category) {
-        List<Post> posts = postRepository.findTop10ByBoardGameGameIdAndCategoryOrderByIdDesc(gameId, category);
+        List<Post> posts = postRepository.findTop10ByBoardGameGameIdAndCategoryAndDeletedAtIsNullOrderByIdDesc(gameId, category);
         List<PostDto> postDtos = new ArrayList<>();
         for (Post post : posts) {
             PostDto postDto = new PostDto();
