@@ -107,7 +107,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/search")
+    @GetMapping("/user/search")
     public CommonResponse<Page<SearchResponse>> searchUsers(@ModelAttribute SearchRequest searchRequest) {
         Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize());
         String keyword = searchRequest.getKeyword();
