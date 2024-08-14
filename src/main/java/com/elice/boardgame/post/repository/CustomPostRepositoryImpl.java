@@ -71,10 +71,10 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
 
     @Override
-    public Page<SearchResponse> searchPostsByKeyword(String keyword, Pageable pageable) {
-        List<SearchResponse> results = queryFactory
+    public Page<SearchPostResponse> searchPostsByKeyword(String keyword, Pageable pageable) {
+        List<SearchPostResponse> results = queryFactory
             .select(
-                Projections.constructor(SearchResponse.class,
+                Projections.constructor(SearchPostResponse.class,
                     post.id,
                     post.title
                 ))

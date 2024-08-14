@@ -27,7 +27,7 @@ public class ReportController {
     private final ReportService reportService;
 
     @GetMapping
-    public CommonResponse<PostPageDto<ReportDto>> findReports(@RequestParam String status, @RequestParam
+    public CommonResponse<PostPageDto<ReportDto>> findReports(@RequestParam String status,
         PaginationRequest paginationRequest) {
         PostPageDto<ReportDto> reportDtos = reportService.find(status, paginationRequest);
 

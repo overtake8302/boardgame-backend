@@ -53,7 +53,7 @@ public class LikeGenreController {
     public ResponseEntity<CommonResponse<Page<GameResponseDto>>> getGames(
         @RequestParam String type,
         @CurrentUser User user,
-        @RequestParam PaginationRequest paginationRequest) {
+        PaginationRequest paginationRequest) {
 
         Page<GameResponseDto> games = likeGenreService.gameGet(type, user, paginationRequest);
 
