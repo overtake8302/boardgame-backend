@@ -123,7 +123,7 @@ public class UserController {
     @PutMapping("/me")
     public ResponseEntity<String> updateUser(
             @Valid @RequestBody UpdateUserDTO updateUserDTO,
-            @AuthenticationPrincipal User currentUser) {
+            @CurrentUser User currentUser) {
 
         try {
             userService.updateUser(currentUser, updateUserDTO);
