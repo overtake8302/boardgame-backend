@@ -1,15 +1,14 @@
 package com.elice.boardgame.category.controller;
 
-import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.category.dto.PostListResponseDto;
 import com.elice.boardgame.category.dto.PostPageDto;
 import com.elice.boardgame.category.service.PostFilterService;
-import com.elice.boardgame.common.annotation.CurrentUser;
 import com.elice.boardgame.common.dto.CommonResponse;
-import com.elice.boardgame.game.dto.GameResponseDto;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,40 +22,30 @@ public class PostFilterController {
     private final PostFilterService postFilterService;
 
     @GetMapping
-    public CommonResponse<PostPageDto<PostListResponseDto>> findAllByBoardType(Pageable pageable,
-        @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
-        @RequestParam String boardType) {
+    public ResponseEntity<CommonResponse<PostPageDto<PostListResponseDto>>> findAllByBoardType(Pageable pageable,
+        @RequestParam(name = "sortBy", required = false, defaultValue = "createdAt") String sortBy,
+        @RequestParam(name = "boardType") String boardType) {
 
-        PostPageDto<PostListResponseDto> postPageDto;
-        if (boardType.equals("ALL")) {
-            postPageDto = postFilterService.findAll(pageable, sortBy);
-        }
-        else {
-            postPageDto = postFilterService.findAllByType(pageable, sortBy, boardType);
-        }
+        PostPageDto<PostListResponseDto> postPageDto = postFilterService.find(pageable, sortBy, boardType);
 
-        return CommonResponse.<PostPageDto<PostListResponseDto>>builder()
-            .payload(postPageDto)
-            .message("")
-            .status(200)
-            .build();
+
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
+            .body(CommonResponse.<PostPageDto<PostListResponseDto>>builder()
+                .payload(postPageDto)
+                .message("")
+                .status(200)
+                .build());
     }
 
     // 검색 엔드포인트
     @GetMapping("/search")
     public CommonResponse<PostPageDto<PostListResponseDto>> searchPosts(
         Pageable pageable,
-        @RequestParam String query,
-        @RequestParam String boardType) {
+        @RequestParam(name = "query") String query,
+        @RequestParam(name = "boardType") String boardType) {
 
-        PostPageDto<PostListResponseDto> postPageDto;
-
-        if (boardType.equals("ALL")) {
-            postPageDto = postFilterService.searchByQuery(pageable, query);
-        }
-        else {
-            postPageDto = postFilterService.searchByQuery(pageable, query, boardType);
-        }
+        PostPageDto<PostListResponseDto> postPageDto = postFilterService.search(pageable, query, boardType);
 
         return CommonResponse.<PostPageDto<PostListResponseDto>>builder()
             .payload(postPageDto)

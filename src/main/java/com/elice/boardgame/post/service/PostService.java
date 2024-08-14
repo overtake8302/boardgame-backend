@@ -2,6 +2,7 @@ package com.elice.boardgame.post.service;
 
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
+import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.game.dto.ClickLikeResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.repository.BoardGameRepository;
@@ -71,17 +72,6 @@ public class PostService {
             post.setGameImageUrl(boardGame.getGameProfilePics().get(0).getPicAddress());
         }
 
-
-
-
-        if (files != null && files.length > 0) {
-            for (MultipartFile file : files) {
-                String imageUrl = s3Uploader.uploadFile(file);
-                post.addImageUrl(imageUrl);
-                post.addImageName(file.getOriginalFilename());
-            }
-        }
-
         return postRepository.save(post);
     }
 
@@ -106,8 +96,6 @@ public class PostService {
         postDto.setTitle(post.getTitle());
         postDto.setContent(post.getContent());
         postDto.setCategory(post.getCategory());
-        postDto.setImageUrls(post.getImageUrls());
-        postDto.setImageNames(post.getImageNames());
         postDto.setGameName(post.getGameName());
         postDto.setUserId(post.getUserId());
 
@@ -156,6 +144,7 @@ public class PostService {
         } else {
             view.setViewCount(view.getViewCount() + 1);
         }
+
         postRepository.save(post);
 
         return getPostDtoById(id);
@@ -204,8 +193,6 @@ public class PostService {
         post.setTitle(postDetails.getTitle());
         post.setContent(postDetails.getContent());
         post.setCategory(postDetails.getCategory());
-        post.setImageUrls(postDetails.getImageUrls());
-        post.setImageNames(postDetails.getImageNames());
 
         return postRepository.save(post);
     }
@@ -226,10 +213,10 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public CommonResponse<Page<SearchPostResponse>> searchPostsByKeyword(String keyword, Pageable pageable) {
-        Page<SearchPostResponse> results = postRepository.searchPostsByKeyword(keyword, pageable);
+    public CommonResponse<Page<SearchResponse>> searchPostsByKeyword(String keyword, Pageable pageable) {
+        Page<SearchResponse> results = postRepository.searchPostsByKeyword(keyword, pageable);
 
-        return CommonResponse.<Page<SearchPostResponse>>builder()
+        return CommonResponse.<Page<SearchResponse>>builder()
             .payload(results)
             .message("검색 성공")
             .status(200)

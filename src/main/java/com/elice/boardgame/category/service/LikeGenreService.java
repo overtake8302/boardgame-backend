@@ -2,6 +2,7 @@ package com.elice.boardgame.category.service;
 
 import com.elice.boardgame.category.dto.PostListResponseDto;
 import com.elice.boardgame.category.dto.RecentlyViewGameDto;
+import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.common.exceptions.BoardGameNotFoundException;
 import com.elice.boardgame.common.exceptions.GenreNotFoundException;
 import com.elice.boardgame.common.exceptions.MemberNotFoundException;
@@ -59,6 +60,27 @@ public class LikeGenreService {
     private final BoardGameMapper boardGameMapper;
 
     private final GameVisitorRepository gameVisitorRepository;
+
+    public Page<GameResponseDto> gameGet(String type, User user, int page, int size) {
+        Page<GameResponseDto> games;
+        switch (type) {
+            case "like":
+                games = getLikeGames(user.getId(), page, size);
+                break;
+            case "rate":
+                games = getRateGames(user.getId(), page, size);
+                break;
+            case "genre/rate":
+                games = getGenreGame(user.getId(), page, size);
+                break;
+            case "genre":
+                games = getGamesFromLikeGenre(user.getId(), page, size);
+                break;
+            default:
+                games = null;
+        }
+        return games;
+    }
 
     @Transactional
     public Boolean likeGenreScore(Long userId, Long gameId) {
@@ -226,7 +248,6 @@ public class LikeGenreService {
 
     public List<RecentlyViewGameDto> recentlyViewPosts(String userId) {
         List<BoardGame> boardGames = gameVisitorRepository.recentlyViewPosts(userId);
-        System.out.println(boardGames);
 
         return boardGames.stream().map(boardGame -> {
             RecentlyViewGameDto dto = new RecentlyViewGameDto();

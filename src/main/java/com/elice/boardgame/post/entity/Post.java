@@ -19,7 +19,7 @@ import org.hibernate.annotations.Where;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@Entity(name = "post")
 @SQLDelete(sql = "UPDATE post SET deleted_at = CURRENT_TIMESTAMP WHERE post_id = ?")
 @Where(clause = "deleted_at IS NULL")
 public class Post extends BaseEntity {
@@ -33,7 +33,7 @@ public class Post extends BaseEntity {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "gameId", nullable = false)
+    @JoinColumn(name = "game_id", nullable = false)
     private BoardGame boardGame;
 
     @Lob
@@ -42,29 +42,24 @@ public class Post extends BaseEntity {
 
     private String category;
     private String title;
-    private List<String> imageUrls = new ArrayList<>();
-    private List<String> imageNames = new ArrayList<>();
+
+    @Column(name = "game_name")
     private String gameName;
+
+    @Column(name = "game_image_url")
     private String gameImageUrl;
 
+    @Column(name = "like_count")
     private Long likeCount;
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private View view;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("post")
     private List<Comment> comments = new ArrayList<>();
 
     public Long getUserId() {
         return user != null ? user.getId() : null;
-    }
-
-    public void addImageUrl(String imageUrl) {
-        this.imageUrls.add(imageUrl);
-    }
-
-    public void addImageName(String imageName) {
-        this.imageNames.add(imageName);
     }
 }

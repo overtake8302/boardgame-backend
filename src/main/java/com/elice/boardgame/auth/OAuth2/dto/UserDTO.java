@@ -1,4 +1,4 @@
-//package com.elice.boardgame.auth.dto;
+//package com.elice.boardgame.auth.OAuth2.dto;
 //
 //import lombok.Getter;
 //import lombok.Setter;
