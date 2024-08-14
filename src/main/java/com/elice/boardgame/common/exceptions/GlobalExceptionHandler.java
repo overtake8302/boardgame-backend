@@ -1,4 +1,6 @@
 package com.elice.boardgame.common.exceptions;
+import com.elice.boardgame.common.dto.CommonResponse;
+import com.elice.boardgame.social.exception.SocialAlreadyExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -55,5 +57,15 @@ public class GlobalExceptionHandler {
         UserErrorResponse errorResponse = new UserErrorResponse(userException.getUserErrorMessages().getErrorCode(), userException.getUserErrorMessages().getErrorMessage());
 
         return new ResponseEntity<>(errorResponse, userException.getHttpStatus());
+    }
+
+    @ExceptionHandler(SocialAlreadyExistsException.class)
+    public ResponseEntity<CommonResponse<Void>> handleSocialAlreadyExistsException(SocialAlreadyExistsException ex) {
+        CommonResponse<Void> response = CommonResponse.<Void>builder()
+            .payload(null)
+            .message(ex.getMessage())
+            .status(HttpStatus.BAD_REQUEST.value())
+            .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }
