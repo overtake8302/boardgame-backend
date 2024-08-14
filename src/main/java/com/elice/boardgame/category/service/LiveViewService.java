@@ -86,6 +86,7 @@ public class LiveViewService {
         List<LiveView> liveViews = liveViewRepository.findAll();
 
         Map<BoardGame, Long> viewCounts = liveViews.stream()
+            .filter(liveView -> liveView.getGame().getDeletedAt() == null)
             .collect(Collectors.groupingBy(LiveView::getGame,
                 Collectors.summingLong(LiveView::getViewScore)));
 
@@ -102,7 +103,6 @@ public class LiveViewService {
             ranking.setSumScore(sumScore);
             liveViewRankingRepository.save(ranking);
         });
-
     }
 
     public List<GameResponseDto> getLiveViewRanking() {
