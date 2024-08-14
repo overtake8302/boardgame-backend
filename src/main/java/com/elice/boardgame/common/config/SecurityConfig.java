@@ -1,11 +1,12 @@
 //package com.elice.boardgame.common.config;
-//
+
 //import com.elice.boardgame.auth.jwt.JWTFilter;
 //import com.elice.boardgame.auth.jwt.JWTUtil;
 //import com.elice.boardgame.auth.jwt.LoginFilter;
 //import com.elice.boardgame.auth.repository.UserRepository;
 //import org.springframework.context.annotation.Bean;
 //import org.springframework.context.annotation.Configuration;
+//import org.springframework.http.HttpMethod;
 //import org.springframework.security.authentication.AuthenticationManager;
 //import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 //import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,13 +22,17 @@
 //
 //    private final AuthenticationConfiguration authenticationConfiguration;
 //    private final JWTUtil jwtUtil;
+//    private final UserRepository userRepository; // Add UserRepository
 //
-//    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil){
+//    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, UserRepository userRepository) {
 //        this.authenticationConfiguration = authenticationConfiguration;
 //        this.jwtUtil = jwtUtil;
+//        this.userRepository = userRepository; // Initialize UserRepository
 //    }
-//    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-//        return configuration.getAuthenticationManager();
+//
+//    @Bean
+//    public AuthenticationManager authenticationManager() throws Exception {
+//        return authenticationConfiguration.getAuthenticationManager();
 //    }
 //
 //    @Bean
@@ -38,36 +43,33 @@
 //    @Bean
 //    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 //
-//        //csrf disable
-//        http
-//                .csrf((auth) -> auth.disable());
+//        http.csrf((auth) -> auth.disable());
+//        http.formLogin((auth) -> auth.disable());
+//        http.httpBasic((auth) -> auth.disable());
 //
-//        //Form 로그인 방식 disable
-//        http
-//                .formLogin((auth) -> auth.disable());
+//        http.authorizeHttpRequests((auth) -> auth
+//                .requestMatchers("/login", "/", "/join").permitAll()
+//                .requestMatchers("/admin").hasRole("ADMIN")
+//                .requestMatchers(HttpMethod.GET, "/game/**").permitAll()
+//                .requestMatchers(HttpMethod.POST, "/game/view").permitAll()
+//                .requestMatchers(HttpMethod.POST, "/game/**").authenticated()
+//                .requestMatchers(HttpMethod.PUT, "/game/**").authenticated()
+//                .requestMatchers(HttpMethod.DELETE, "/game/**").authenticated()
+//                .anyRequest().permitAll());
 //
-//        //http basic 인증 방식 disable
-//        http
-//                .httpBasic((auth) -> auth.disable());
+//        // 로그아웃 설정
+//        http.logout(logout -> {
+//            logout.logoutUrl("logout")  // 로그아웃을 위한 URL
+//                    .logoutSuccessUrl("/login") // 로그아웃 성공 후 이동할 URL
+//                    .invalidateHttpSession(true) // 세션 무효화
+//                    .deleteCookies("JSESSIONID"); // 쿠키 삭제
+//        });
 //
-//        //경로별 인가 작업
-//        http
-//                .authorizeHttpRequests((auth) -> auth
-//                        .requestMatchers("/login", "/", "/join").permitAll()
-//                        .requestMatchers("/admin").hasRole("ADMIN")
-////                        .anyRequest().authenticated());
-//                        .anyRequest().permitAll());
+//        http.addFilterBefore(new JWTFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
+//                .addFilterAt(new LoginFilter(authenticationManager(), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 //
-//
-//        http
-//                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
-//                //커스텀 한 필터로 교체
-//                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
-//
-//        //세션 stateless 설정
-//        http
-//                .sessionManagement((session) -> session
-//                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+//        http.sessionManagement((session) -> session
+//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 //
 //        return http.build();
 //    }
@@ -75,13 +77,15 @@
 
 package com.elice.boardgame.common.config;
 
+//import com.elice.boardgame.auth.OAuth2.CustomSuccessHandler;
+//import com.elice.boardgame.auth.OAuth2.service.CustomOAuth2UserService;
 import com.elice.boardgame.auth.jwt.JWTFilter;
 import com.elice.boardgame.auth.jwt.JWTUtil;
 import com.elice.boardgame.auth.jwt.LoginFilter;
 import com.elice.boardgame.auth.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -90,6 +94,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -97,12 +105,19 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
-    private final UserRepository userRepository; // Add UserRepository
+//    private final CustomOAuth2UserService customOAuth2UserService;
+//    private final CustomSuccessHandler customSuccessHandler;
+    private final UserRepository userRepository;  // 필드로 추가
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, UserRepository userRepository) {
+    // 생성자
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil,
+//                          CustomOAuth2UserService customOAuth2UserService, CustomSuccessHandler customSuccessHandler,
+                          UserRepository userRepository) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
-        this.userRepository = userRepository; // Initialize UserRepository
+//        this.customOAuth2UserService = customOAuth2UserService;
+//        this.customSuccessHandler = customSuccessHandler;
+        this.userRepository = userRepository;  // 필드 초기화
     }
 
     @Bean
@@ -118,35 +133,60 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.csrf((auth) -> auth.disable());
-        http.formLogin((auth) -> auth.disable());
-        http.httpBasic((auth) -> auth.disable());
+        // CSRF 및 기본 설정 비활성화
+        http
+                .csrf((auth) -> auth.disable())
+                .formLogin((auth) -> auth.disable())
+                .httpBasic((auth) -> auth.disable());
 
-        http.authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/login", "/", "/join").permitAll()
-                .requestMatchers("/admin").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/game/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/game/view").permitAll()
-                .requestMatchers(HttpMethod.POST, "/game/**").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/game/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/game/**").authenticated()
-                .requestMatchers("/recommend/**").authenticated()
+        //cors설정
+        http
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
 
-            .anyRequest().permitAll());
+                    @Override
+                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 
-        // 로그아웃 설정
-        http.logout(logout -> {
-            logout.logoutUrl("logout")  // 로그아웃을 위한 URL
-                    .logoutSuccessUrl("/login") // 로그아웃 성공 후 이동할 URL
-                    .invalidateHttpSession(true) // 세션 무효화
-                    .deleteCookies("JSESSIONID"); // 쿠키 삭제
-        });
+                        CorsConfiguration configuration = new CorsConfiguration();
 
-        http.addFilterBefore(new JWTFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
+                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        configuration.setAllowedMethods(Collections.singletonList("*"));
+                        configuration.setAllowCredentials(true);
+                        configuration.setAllowedHeaders(Collections.singletonList("*"));
+                        configuration.setMaxAge(3600L);
+
+                        configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
+                        configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+
+                        return configuration;
+                    }
+                }));
+
+        // JWT 필터 추가
+        http
+                .addFilterBefore(new JWTFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(new LoginFilter(authenticationManager(), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
-        http.sessionManagement((session) -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+//        // OAuth2 로그인 구성
+//        http
+//                .oauth2Login((oauth2) -> oauth2
+//                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+//                                .userService(customOAuth2UserService))
+//                        .successHandler(customSuccessHandler)
+//                );
+
+        // 권한 규칙 설정
+        http
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/login", "/", "/join", "/test").permitAll()
+//                        .requestMatchers("/admin").hasRole("ADMIN")
+                        .anyRequest().permitAll()
+                );
+
+        // 세션 관리 설정
+        http
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                );
 
         return http.build();
     }

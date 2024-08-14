@@ -2,6 +2,7 @@ package com.elice.boardgame.post.service;
 
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
+import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.game.dto.ClickLikeResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.repository.BoardGameRepository;
@@ -229,10 +230,10 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public CommonResponse<Page<SearchPostResponse>> searchPostsByKeyword(String keyword, Pageable pageable) {
-        Page<SearchPostResponse> results = postRepository.searchPostsByKeyword(keyword, pageable);
+    public CommonResponse<Page<SearchResponse>> searchPostsByKeyword(String keyword, Pageable pageable) {
+        Page<SearchResponse> results = postRepository.searchPostsByKeyword(keyword, pageable);
 
-        return CommonResponse.<Page<SearchPostResponse>>builder()
+        return CommonResponse.<Page<SearchResponse>>builder()
             .payload(results)
             .message("검색 성공")
             .status(200)
