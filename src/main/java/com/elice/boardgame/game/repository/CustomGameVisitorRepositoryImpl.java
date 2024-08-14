@@ -47,6 +47,7 @@ public class CustomGameVisitorRepositoryImpl implements CustomGameVisitorReposit
             .from(gameVisitor)
             .join(gameVisitor.boardGame, boardGame)
             .where(gameVisitor.id.visitorId.eq(visitorId))
+            .where(boardGame.deletedAt.isNull())
             .orderBy(gameVisitor.createdAt.desc())
             .limit(6)
             .fetch();

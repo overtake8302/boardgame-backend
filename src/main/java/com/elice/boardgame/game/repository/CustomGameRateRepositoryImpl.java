@@ -55,8 +55,10 @@ public class CustomGameRateRepositoryImpl implements CustomGameRateRepository{
         Long totalCount = queryFactory
             .select(gameRate.count())
             .from(gameRate)
+            .join(gameRate.boardGame, boardGame)
             .where(gameRate.user.id.eq(userId)
-                .and(gameRate.rate.eq(rate)))
+                .and(gameRate.rate.eq(rate))
+                .and(boardGame.deletedAt.isNull()))
             .fetchOne();
 
         List<String> gameNames = queryFactory
@@ -64,11 +66,13 @@ public class CustomGameRateRepositoryImpl implements CustomGameRateRepository{
             .from(gameRate)
             .join(gameRate.boardGame, boardGame)
             .where(gameRate.user.id.eq(userId)
-                .and(gameRate.rate.eq(rate)))
+                .and(gameRate.rate.eq(rate))
+                .and(boardGame.deletedAt.isNull()))
             .fetch();
 
         return new RatingCountDto(totalCount, gameNames);
     }
+
 
     @Override
     public Page<BoardGame> findByUserId(Long userId, Pageable pageable) {
@@ -80,6 +84,7 @@ public class CustomGameRateRepositoryImpl implements CustomGameRateRepository{
             .from(gameRate)
             .join(gameRate.boardGame, boardGame)
             .where(gameRate.user.id.eq(userId))
+            .where(boardGame.deletedAt.isNull())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
@@ -87,11 +92,12 @@ public class CustomGameRateRepositoryImpl implements CustomGameRateRepository{
         long total = queryFactory
             .select(boardGame.count())
             .from(gameRate)
+            .join(gameRate.boardGame, boardGame)
             .where(gameRate.user.id.eq(userId))
+            .where(boardGame.deletedAt.isNull())
             .fetchOne();
 
         return new PageImpl<>(boardGames, pageable, total);
-
     }
 
     @Override
