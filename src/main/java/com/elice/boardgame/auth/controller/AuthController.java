@@ -49,16 +49,6 @@ public class AuthController {
         return "User not authenticated";
     }
 
-//    @PostMapping("/logout")
-//    public void logout(HttpServletRequest request, HttpServletResponse response) {
-//        // JWT 쿠키 삭제
-//        Cookie cookie = new Cookie("JWT", null);
-//        cookie.setHttpOnly(true);
-//        cookie.setPath("/");
-//        cookie.setMaxAge(0);
-//
-//        response.addCookie(cookie);
-//    }
     @PostMapping("/user/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         // "JWT" 쿠키 삭제
@@ -78,17 +68,6 @@ public class AuthController {
         response.addCookie(authCookie);
     }
 
-//    @GetMapping("/login-check")
-//    public ResponseEntity<Boolean> loginCheck(@CurrentUser User user) {
-//
-//        if (user == null) {
-//            return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
-//        } else if (user != null && user.getId() != null) {
-//            return new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK);
-//        }
-//
-//        return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
-//    }
 
     @GetMapping("/login-check")
     public ResponseEntity<Boolean> loginCheck(@CurrentUser User user) {

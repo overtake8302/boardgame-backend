@@ -47,47 +47,6 @@ public class UserService {
         userInfoResponseDto.setPhonenumber(user.getPhonenumber());
         userInfoResponseDto.setRole(user.getRole());
 
-        /*if (wantPosts) {
-            List<Post> posts = postRepository.findAllByUser_IdAndDeletedAtIsNull(user.getId());
-            if (posts == null || posts.isEmpty()) {
-                throw new UserException(UserErrorMessages.USER_POSTS_NOT_FOUND, HttpStatus.NOT_FOUND);
-            }
-            List<PostDto> postDtos = new ArrayList<>();
-            for (Post post : posts) {
-                PostDto postDto = new PostDto();
-                postDto.setPostId(post.getId());
-                postDto.setTitle(post.getTitle());
-                postDto.setContent(post.getContent());
-                postDto.setCategory(post.getCategory());
-
-                postDto.setCreatedAt(post.getCreatedAt().toString());
-                postDto.setGameId(post.getId());
-                postDto.setGameName(post.getGameName());
-                postDto.setGameImageUrl(post.getGameImageUrl());
-//                postDto.setImageUrls(post.getImageUrls());
-//                postDto.setImageNames(post.getImageNames());
-                postDto.setLikeCount(post.getLikeCount());
-
-                postDtos.add(postDto);
-            }
-            userInfoResponseDto.setPostDtos(postDtos);
-        }
-
-        if (wantComments) {
-            List<Comment> comments = commentRepository.findAllByUser_IdAndDeletedAtIsNull(user.getId());
-            if (comments == null || comments.isEmpty()) {
-                throw new UserException(UserErrorMessages.USER_COMMENTS_NOT_FOUNT, HttpStatus.NOT_FOUND);
-            }
-            List<CommentDto> commentDtos = new ArrayList<>();
-            for (Comment comment : comments) {
-                CommentDto commentDto = new CommentDto();
-                commentDto.setId(comment.getId());
-                commentDto.setContent(comment.getContent());
-                commentDtos.add(commentDto);
-            }
-            userInfoResponseDto.setCommentDtos(commentDtos);
-        }*/
-
         return userInfoResponseDto;
     }
 
