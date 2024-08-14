@@ -37,6 +37,7 @@ public class CustomGameGenreRepositoryImpl implements CustomGameGenreRepository{
             .join(gameGenre.boardGame, boardGame)
             .join(boardGame.gameRates, gameRate)
             .where(gameGenre.genre.in(genres)
+                .and(boardGame.deletedAt.isNull())
                 .and(boardGame.gameId.notIn(likedGameIds)))
             .groupBy(boardGame)
             .orderBy(gameRate.rate.avg().desc())
@@ -49,6 +50,7 @@ public class CustomGameGenreRepositoryImpl implements CustomGameGenreRepository{
             .from(gameGenre)
             .join(gameGenre.boardGame, boardGame)
             .where(gameGenre.genre.in(genres)
+                .and(boardGame.deletedAt.isNull())
                 .and(boardGame.gameId.notIn(likedGameIds)))
             .fetchOne();
 

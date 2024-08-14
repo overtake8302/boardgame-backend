@@ -26,6 +26,7 @@ public class CustomGameLikeRepositoryImpl implements CustomGameLikeRepository{
             .from(gameLike)
             .join(gameLike.boardGame, boardGame)
             .where(gameLike.gameLikePK.userId.eq(userId))
+            .where(boardGame.deletedAt.isNull())
             .orderBy(gameLike.createdAt.desc())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
@@ -34,7 +35,9 @@ public class CustomGameLikeRepositoryImpl implements CustomGameLikeRepository{
         long total = queryFactory
             .select(boardGame.count())
             .from(gameLike)
+            .join(gameLike.boardGame, boardGame)
             .where(gameLike.gameLikePK.userId.eq(userId))
+            .where(boardGame.deletedAt.isNull())
             .fetchOne();
 
         return new PageImpl<>(boardGames, pageable, total);

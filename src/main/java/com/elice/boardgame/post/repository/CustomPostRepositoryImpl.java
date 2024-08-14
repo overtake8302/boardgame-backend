@@ -29,6 +29,8 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         BooleanBuilder whereClause = new BooleanBuilder();
 
+        whereClause.and(post.deletedAt.isNull());
+
         if (!"FULL".equals(boardType)) {
             whereClause.and(post.category.eq(boardType));
         }
@@ -38,6 +40,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .or(post.user.username.containsIgnoreCase(query))
                 .or(post.content.contains(query)));
         }
+
         List<Post> posts = queryFactory
             .selectFrom(post)
             .where(whereClause)
@@ -54,6 +57,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         return new PageImpl<>(posts, pageable, total);
     }
+
 
     private OrderSpecifier<?> getSortOrder(String sortBy) {
         QPost post = QPost.post;
