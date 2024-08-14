@@ -8,20 +8,29 @@ import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.common.dto.SearchRequest;
 import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.common.dto.PaginationRequest;
+
+import com.elice.boardgame.post.dto.CommentDto;
+import com.elice.boardgame.post.dto.PostDto;
+import com.elice.boardgame.post.entity.Comment;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequiredArgsConstructor
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
 
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
     @GetMapping("/my")
     public ResponseEntity<CommonResponse<UserInfoResponseDto>> getMyInfo(
             @CurrentUser User user
@@ -110,41 +119,18 @@ public class UserController {
         return userService.searchUsersByKeyword(keyword, pageable);
     }
 
-    @GetMapping("/user/{userId}/posts")
-    public ResponseEntity<CommonResponse<Page<MyPostResponseDto>>> getUserPosts(
-            @PathVariable Long userId,
-            @ModelAttribute PaginationRequest paginationRequest) {
 
-        int page = paginationRequest.getPage() == 0 ? 0 : paginationRequest.getPage();
-        int size = paginationRequest.getSize() == 0 ? 12 : paginationRequest.getSize();
+    @PutMapping("/me")
+    public ResponseEntity<String> updateUser(
+            @Valid @RequestBody UpdateUserDTO updateUserDTO,
+            @CurrentUser User currentUser) {
 
-        Pageable pageable = PageRequest.of(page, size);
+        try {
+            userService.updateUser(currentUser, updateUserDTO);
+            return new ResponseEntity<>("회원 정보가 성공적으로 업데이트되었습니다.", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("회원 정보 업데이트 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
-        Page<MyPostResponseDto> myPosts = userService.findUserPosts(userId, pageable);
-
-        CommonResponse<Page<MyPostResponseDto>> response = CommonResponse.<Page<MyPostResponseDto>>builder()
-                .payload(myPosts)
-                .build();
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/user/{userId}/comments")
-    public ResponseEntity<CommonResponse<Page<MyCommentResponseDto>>> getUserComments(
-            @PathVariable Long userId,
-            @ModelAttribute PaginationRequest paginationRequest) {
-
-        int page = paginationRequest.getPage() == 0 ? 0 : paginationRequest.getPage();
-        int size = paginationRequest.getSize() == 0 ? 12 : paginationRequest.getSize();
-
-        Pageable pageable = PageRequest.of(page, size);
-
-        Page<MyCommentResponseDto> myComments = userService.findUserComments(userId, pageable);
-
-        CommonResponse<Page<MyCommentResponseDto>> response = CommonResponse.<Page<MyCommentResponseDto>>builder()
-                .payload(myComments)
-                .build();
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

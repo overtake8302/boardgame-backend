@@ -254,14 +254,16 @@ public class LikeGenreService {
     public List<RecentlyViewGameDto> recentlyViewPosts(String userId) {
         List<BoardGame> boardGames = gameVisitorRepository.recentlyViewPosts(userId);
 
-        return boardGames.stream().map(boardGame -> {
+        return boardGames.stream().map(game -> {
+            GameResponseDto boardGame = boardGameMapper.boardGameToGameResponseDto(game);
             RecentlyViewGameDto dto = new RecentlyViewGameDto();
             dto.setGameId(boardGame.getGameId());
 
-            List<String> picAddresses = boardGame.getGameProfilePics().stream()
+            //이전사진 제외하는 부분이 dto만들때 있어서 dto로 변환을 해야할것 같습니다!
+            /*List<String> picAddresses = boardGame.getGameProfilePics().stream()
                 .map(GameProfilePic::getPicAddress)
-                .collect(Collectors.toList());
-            dto.setGameProfilePics(picAddresses);
+                .collect(Collectors.toList());*/
+            dto.setGameProfilePics(boardGame.getGameProfilePics());
 
             return dto;
         }).collect(Collectors.toList());
