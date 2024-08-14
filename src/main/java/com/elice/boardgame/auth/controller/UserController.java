@@ -1,5 +1,7 @@
 package com.elice.boardgame.auth.controller;
 
+import com.elice.boardgame.auth.dto.MyCommentResponseDto;
+import com.elice.boardgame.auth.dto.MyPostResponseDto;
 import com.elice.boardgame.auth.dto.UpdateUserDTO;
 import com.elice.boardgame.auth.dto.UserInfoResponseDto;
 import com.elice.boardgame.auth.entity.User;
@@ -8,6 +10,10 @@ import com.elice.boardgame.common.annotation.CurrentUser;
 import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.common.dto.SearchRequest;
 import com.elice.boardgame.common.dto.SearchResponse;
+import com.elice.boardgame.common.dto.PaginationRequest;
+import com.elice.boardgame.post.dto.CommentDto;
+import com.elice.boardgame.post.dto.PostDto;
+import com.elice.boardgame.post.entity.Comment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,12 +29,61 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/my")
-    public ResponseEntity<CommonResponse<UserInfoResponseDto>> getUserInfo(
-            @CurrentUser User user,
-            @RequestParam(required = false) boolean wantPosts,
-            @RequestParam(required = false) boolean wantComments) {
+    public ResponseEntity<CommonResponse<UserInfoResponseDto>> getMyInfo(
+            @CurrentUser User user
+            ) {
 
-        UserInfoResponseDto userInfoResponseDto = userService.getMyInfo(user, wantPosts, wantComments);
+        UserInfoResponseDto userInfoResponseDto = userService.getMyInfo(user);
+
+        CommonResponse<UserInfoResponseDto> response = CommonResponse.<UserInfoResponseDto>builder()
+                .payload(userInfoResponseDto)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/my/posts")
+    public ResponseEntity<CommonResponse<Page<MyPostResponseDto>>> getMyPosts(
+            @CurrentUser User user,
+            @ModelAttribute PaginationRequest paginationRequest) {
+
+        int page = paginationRequest.getPage() == 0 ? 0 : paginationRequest.getPage();
+        int size = paginationRequest.getSize() == 0 ? 12 : paginationRequest.getSize();
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<MyPostResponseDto> myPosts = userService.findMyPosts(user, pageable);
+
+        CommonResponse<Page<MyPostResponseDto>> response = CommonResponse.<Page<MyPostResponseDto>>builder()
+                .payload(myPosts)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/my/comments")
+    public ResponseEntity<CommonResponse<Page<MyCommentResponseDto>>> getMyComments(
+            @CurrentUser User user,
+            @ModelAttribute PaginationRequest paginationRequest) {
+
+        int page = paginationRequest.getPage() == 0 ? 0 : paginationRequest.getPage();
+        int size = paginationRequest.getSize() == 0 ? 12 : paginationRequest.getSize();
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<MyCommentResponseDto> myComments = userService.findMyComments(user, pageable);
+
+        CommonResponse<Page<MyCommentResponseDto>> response = CommonResponse.<Page<MyCommentResponseDto>>builder()
+                .payload(myComments)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<CommonResponse<UserInfoResponseDto>> getUserInfo(@PathVariable Long userId) {
+
+        UserInfoResponseDto userInfoResponseDto = userService.findUserByUserId(userId);
 
         CommonResponse<UserInfoResponseDto> response = CommonResponse.<UserInfoResponseDto>builder()
                 .payload(userInfoResponseDto)
@@ -54,7 +109,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/search")
+    @GetMapping("/user/search")
     public CommonResponse<Page<SearchResponse>> searchUsers(@ModelAttribute SearchRequest searchRequest) {
         Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize());
         String keyword = searchRequest.getKeyword();

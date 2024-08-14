@@ -2,11 +2,11 @@ package com.elice.boardgame.game.repository;
 
 import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.common.enums.Enums;
+import com.elice.boardgame.game.dto.GameCommentDto;
 import com.elice.boardgame.game.dto.GameListResponseDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.dto.HomeGamesResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
-import com.elice.boardgame.post.dto.CommentDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -23,7 +23,7 @@ public interface CustomBoardGameRepository {
     Page<SearchResponse> searchByKeyword(String keyword, Pageable pageable);
     Page<GameResponseDto> findGamesLikedByUserId(Long userId, Pageable pageable);
 
-    List<CommentDto> findComentsByGameId(Long gameId);
+    List<GameCommentDto> findComentsByGameId(Long gameId);
 
     Page<GameListResponseDto> findByNameContainingAndDeletedAtIsNull(Pageable pageable, Enums.GameListSortOption sortBy, String keyword);
 }

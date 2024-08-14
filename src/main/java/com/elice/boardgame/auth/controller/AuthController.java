@@ -54,7 +54,7 @@ public class AuthController {
 //
 //        response.addCookie(cookie);
 //    }
-    @PostMapping("/logout")
+    @PostMapping("/user/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         // "JWT" 쿠키 삭제
         Cookie jwtCookie = new Cookie("JWT", null);
