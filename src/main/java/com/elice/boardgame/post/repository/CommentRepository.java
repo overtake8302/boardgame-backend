@@ -8,10 +8,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CommentRepository extends JpaRepository<Comment, Long> {
+public interface CommentRepository extends JpaRepository<Comment, Long>, CustomCommentRepository {
     List<Comment> findAllByParentId(Long parentId);
 
-    Page<Comment> findAllByUser_IdAndDeletedAtIsNull(Long id, Pageable pageable);
+//    Page<Comment> findAllByUser_IdAndDeletedAtIsNull(Long id, Pageable pageable);
 
     List<Comment> findByPost(Post post);
 
