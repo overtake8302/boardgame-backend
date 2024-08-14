@@ -140,7 +140,7 @@ public class SecurityConfig {
                 .httpBasic((auth) -> auth.disable());
 
         //cors설정
-        http
+        /*http
                 .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
 
                     @Override
@@ -159,7 +159,7 @@ public class SecurityConfig {
 
                         return configuration;
                     }
-                }));
+                }));*/
 
         // JWT 필터 추가
         http
@@ -177,7 +177,7 @@ public class SecurityConfig {
         // 권한 규칙 설정
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join", "/test").permitAll()
+                        .requestMatchers("/login", "/", "/join", "/test", "/logout").permitAll()
 //                        .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().permitAll()
                 );
