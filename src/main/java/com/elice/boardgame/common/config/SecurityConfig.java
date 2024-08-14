@@ -77,12 +77,13 @@
 
 package com.elice.boardgame.common.config;
 
-import com.elice.boardgame.auth.OAuth2.CustomSuccessHandler;
-import com.elice.boardgame.auth.OAuth2.service.CustomOAuth2UserService;
+//import com.elice.boardgame.auth.OAuth2.CustomSuccessHandler;
+//import com.elice.boardgame.auth.OAuth2.service.CustomOAuth2UserService;
 import com.elice.boardgame.auth.jwt.JWTFilter;
 import com.elice.boardgame.auth.jwt.JWTUtil;
 import com.elice.boardgame.auth.jwt.LoginFilter;
 import com.elice.boardgame.auth.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -93,6 +94,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -100,18 +105,18 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
-    private final CustomOAuth2UserService customOAuth2UserService;
-    private final CustomSuccessHandler customSuccessHandler;
+//    private final CustomOAuth2UserService customOAuth2UserService;
+//    private final CustomSuccessHandler customSuccessHandler;
     private final UserRepository userRepository;  // 필드로 추가
 
     // 생성자
     public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil,
-                          CustomOAuth2UserService customOAuth2UserService, CustomSuccessHandler customSuccessHandler,
+//                          CustomOAuth2UserService customOAuth2UserService, CustomSuccessHandler customSuccessHandler,
                           UserRepository userRepository) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
-        this.customOAuth2UserService = customOAuth2UserService;
-        this.customSuccessHandler = customSuccessHandler;
+//        this.customOAuth2UserService = customOAuth2UserService;
+//        this.customSuccessHandler = customSuccessHandler;
         this.userRepository = userRepository;  // 필드 초기화
     }
 
@@ -134,25 +139,47 @@ public class SecurityConfig {
                 .formLogin((auth) -> auth.disable())
                 .httpBasic((auth) -> auth.disable());
 
+        //cors설정
+        http
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+
+                    @Override
+                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+
+                        CorsConfiguration configuration = new CorsConfiguration();
+
+                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        configuration.setAllowedMethods(Collections.singletonList("*"));
+                        configuration.setAllowCredentials(true);
+                        configuration.setAllowedHeaders(Collections.singletonList("*"));
+                        configuration.setMaxAge(3600L);
+
+                        configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
+                        configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+
+                        return configuration;
+                    }
+                }));
+
         // JWT 필터 추가
         http
                 .addFilterBefore(new JWTFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(new LoginFilter(authenticationManager(), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
-        // OAuth2 로그인 구성
-        http
-                .oauth2Login((oauth2) -> oauth2
-                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-                                .userService(customOAuth2UserService))
-                        .successHandler(customSuccessHandler)
-                );
+//        // OAuth2 로그인 구성
+//        http
+//                .oauth2Login((oauth2) -> oauth2
+//                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+//                                .userService(customOAuth2UserService))
+//                        .successHandler(customSuccessHandler)
+//                );
 
         // 권한 규칙 설정
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join").permitAll()
-                        .requestMatchers("/admin").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                        .requestMatchers("/login", "/", "/join", "/test").permitAll()
+//                        .requestMatchers("/admin").hasRole("ADMIN")
+                        .anyRequest().permitAll()
                 );
 
         // 세션 관리 설정
