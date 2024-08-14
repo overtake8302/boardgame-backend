@@ -139,7 +139,7 @@ public class UserService {
         for (Comment comment : comments) {
             CommentDto commentDto = new CommentDto();
             commentDto.setContent(comment.getContent());
-
+            commentDto.setId(comment.getId());
             commentDto.setCreatedAt(comment.getCreatedAt().toString());
 
             commentDtos.add(commentDto);
