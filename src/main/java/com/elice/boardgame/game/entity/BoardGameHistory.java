@@ -1,6 +1,5 @@
 package com.elice.boardgame.game.entity;
 
-
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.common.entity.BaseEntity;
@@ -12,20 +11,25 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity(name = "board_game")
+@Entity(name = "board_game_history")
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class BoardGame extends BaseEntity {
+public class BoardGameHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "game_id")
-    private Long gameId;
+    @Column(name = "game_history_id")
+    private Long gameHistoryId;
+
+    @ManyToOne
+    @JoinColumn(name = "game_id")
+    private BoardGame boardGame;
 
     private String name;
 
@@ -58,34 +62,16 @@ public class BoardGame extends BaseEntity {
     @Column(length = 500, name = "youtube_link")
     private String youtubeLink;
 
-    @OneToMany(mappedBy = "boardGame", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<GameLike> gameLikes = new ArrayList<>();
-
-    @OneToMany(mappedBy = "boardGame", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<GameRate> gameRates = new ArrayList<>();
-
-    @OneToMany(mappedBy = "boardGame")
+    @OneToMany(mappedBy = "gameHistory")
     private List<GameProfilePic> gameProfilePics = new ArrayList<>();
 
-    @OneToMany
-    @JoinColumn(name = "game_genre_id")
-    @JsonManagedReference
-    private List<GameGenre> gameGenres;
-
-    @OneToMany
-    @JoinColumn(name = "game_id")
-    private List<GameVisitor> gameVisitors;
-
-    private Long views;
+    @OneToMany(mappedBy = "gameHistory")
+    private List<GameGenreHistory> gameGenres;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User firstCreator;
+    private User creator;
 
-    @ManyToOne
-    @JoinColumn(name = "editor_id")
-    private User editBy;
-
-    @OneToMany(mappedBy = "boardGame")
-    private List<BoardGameHistory> boardGameHistory;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }

@@ -139,7 +139,8 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         List<String> profilePics = queryFactory
                 .select(gameProfilePic.picAddress)
                 .from(gameProfilePic)
-                .where(gameProfilePic.boardGame.gameId.eq(gameId))
+                .where(gameProfilePic.boardGame.gameId.eq(gameId)
+                        .and(gameProfilePic.isActive.eq(true)))
                 .fetch();
 
         List<GameGenre> genres = queryFactory
@@ -178,7 +179,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                         boardGame.price.as("price"),
                         boardGame.designer.as("designer"),
                         boardGame.artwork.as("artwork"),
-                        boardGame.releaseDate.as("release_date"),
+                        boardGame.releaseDate.as("releaseDate"),
                         boardGame.publisher.as("publisher"),
                         boardGame.youtubeLink.as("youtubeLink"),
                         gameLike.countDistinct().intValue().as("likeCount"),
@@ -242,7 +243,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                         boardGame.price.as("price"),
                         boardGame.designer.as("designer"),
                         boardGame.artwork.as("artwork"),
-                        boardGame.releaseDate.as("release_date"),
+                        boardGame.releaseDate.as("releaseDate"),
                         boardGame.publisher.as("publisher"),
                         boardGame.youtubeLink.as("youtubeLink"),
                         gameLike.countDistinct().intValue().as("likeCount"),
@@ -267,7 +268,8 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
             List<String> profilePics = queryFactory
                     .select(gameProfilePic.picAddress)
                     .from(gameProfilePic)
-                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId())
+                            .and(gameProfilePic.isActive.eq(true)))
                     .fetch();
             result.setGameProfilePics(profilePics);
 
@@ -348,7 +350,8 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
             List<String> profilePics = queryFactory
                     .select(gameProfilePic.picAddress)
                     .from(gameProfilePic)
-                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId())
+                            .and(gameProfilePic.isActive.eq(true)))
                     .fetch();
             result.setGameProfilePics(profilePics);
         }
@@ -430,7 +433,8 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
             List<String> profilePics = queryFactory
                     .select(gameProfilePic.picAddress)
                     .from(gameProfilePic)
-                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId())
+                            .and(gameProfilePic.isActive.eq(true)))
                     .fetch();
             result.setGameProfilePics(profilePics);
 
@@ -541,7 +545,8 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
             List<String> profilePics = queryFactory
                     .select(gameProfilePic.picAddress)
                     .from(gameProfilePic)
-                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId())
+                            .and(gameProfilePic.isActive.eq(true)))
                     .fetch();
             result.setGameProfilePics(profilePics);
 
@@ -651,7 +656,8 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
             List<String> profilePics = queryFactory
                     .select(gameProfilePic.picAddress)
                     .from(gameProfilePic)
-                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId()))
+                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId())
+                            .and(gameProfilePic.isActive.eq(true)))
                     .fetch();
             result.setGameProfilePics(profilePics);
         }

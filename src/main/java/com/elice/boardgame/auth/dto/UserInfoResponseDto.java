@@ -24,6 +24,4 @@ public class UserInfoResponseDto {
 
     private String name;
 
-    List<CommentDto> commentDtos = new ArrayList<>();
-    List<PostDto> postDtos = new ArrayList<>();
 }

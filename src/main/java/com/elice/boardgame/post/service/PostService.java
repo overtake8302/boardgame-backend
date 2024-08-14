@@ -60,8 +60,10 @@ public class PostService {
 
         postDto.setUserName(currentUser.getUsername());
 
-        BoardGame boardGame = boardGameRepository.findById(postDto.getGameId())
-            .orElseThrow(() -> new RuntimeException("게임을 찾을 수 없습니다."));
+        BoardGame boardGame = boardGameRepository.findByGameIdAndDeletedAtIsNull(postDto.getGameId());
+        if (boardGame == null) {
+            new RuntimeException("게임을 찾을 수 없습니다.");
+        }
 
         Post post = new Post();
         post.setTitle(postDto.getTitle());

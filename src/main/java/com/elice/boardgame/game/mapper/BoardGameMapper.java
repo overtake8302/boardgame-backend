@@ -12,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
-@Getter
-@Setter
 @Component
 @RequiredArgsConstructor
 public class BoardGameMapper {

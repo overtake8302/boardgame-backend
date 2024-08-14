@@ -15,13 +15,13 @@ import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.common.enums.GameRateResponseMessages;
 import com.elice.boardgame.common.exceptions.GameErrorMessages;
 import com.elice.boardgame.common.exceptions.GameRootException;
+import com.elice.boardgame.common.exceptions.UserErrorMessages;
+import com.elice.boardgame.common.exceptions.UserException;
 import com.elice.boardgame.game.dto.*;
 import com.elice.boardgame.game.entity.*;
+import com.elice.boardgame.game.mapper.BoardGameHistoryMapper;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
-import com.elice.boardgame.game.repository.BoardGameRepository;
-import com.elice.boardgame.game.repository.GameLikeRepository;
-import com.elice.boardgame.game.repository.GameRateRepository;
-import com.elice.boardgame.game.repository.GameVisitorRepository;
+import com.elice.boardgame.game.repository.*;
 import com.elice.boardgame.post.dto.CommentDto;
 import com.elice.boardgame.post.dto.PostDto;
 import com.elice.boardgame.post.entity.Post;
@@ -60,6 +60,10 @@ public class BoardGameService {
     private final AuthService authService;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final BoardGameHistoryRepository boardGameHistoryRepository;
+    private final BoardGameHistoryMapper historyMapper;
+    private final GameProfilePicRepository gameProfilePicRepository;
+    private final GenreHistoryRepository genreHistoryRepository;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -112,11 +116,11 @@ public class BoardGameService {
         return findGameByGameId(savedBoardGame.getGameId(), false, false, null);
     }
 
-    public GameResponseDto findGameByGameId(Long gameId, boolean wantComments, boolean wantPosts, Enums.Category category) {
+    public GameResponseDto findGameByGameId(Long gameId, boolean wantComments, boolean wantPosts, String category) {
 
         GameResponseDto foundGame = boardGameRepository.getGameResponseDtoByGameIdAndDeletedAtIsNull(gameId);
 
-        if (foundGame == null) {
+        if (foundGame == null || foundGame.getGameId() == null) {
             throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
 
@@ -230,6 +234,88 @@ public class BoardGameService {
         return boardGameMapper.boardGameToGameResponseDto(target);
     }
 
+    @Transactional
+    public GameResponseDto editGameV2(GamePutDto gamePutDto, List<MultipartFile> files, User user) throws IOException {
+
+        if (user == null) {
+            throw new UserException(UserErrorMessages.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+
+        BoardGame foundGame = boardGameRepository.findByGameIdAndDeletedAtIsNull(gamePutDto.getGameId());
+
+        if (foundGame == null) {
+            throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.BAD_REQUEST);
+        }
+
+        BoardGameHistory history = historyMapper.BoardGameToBoardGameHistory(foundGame);
+        history = boardGameHistoryRepository.save(history);
+
+        List<GameGenreHistory> genreHistory = history.getGameGenres();
+        for (GameGenreHistory gameGenreHistory : genreHistory) {
+            gameGenreHistory.setGameHistory(history);
+            genreHistoryRepository.save(gameGenreHistory);
+        }
+
+        List<GameGenre> oldGenres = foundGame.getGameGenres();
+
+
+        for (GameGenre oldGenre : oldGenres) {
+            gameGenreRepository.delete(oldGenre);
+        }
+
+        BoardGame target = boardGameMapper.boardGameUpdateMapper(foundGame, gamePutDto);
+        target.setEditBy(user);
+
+        List<GameProfilePic> oldPics = target.getGameProfilePics();
+        for (GameProfilePic pic : oldPics) {
+            if (pic.getIsActive()) {
+                pic.setIsActive(false);
+                pic.setGameHistory(history);
+                gameProfilePicRepository.save(pic);
+            }
+        }
+
+        if (files != null && !files.isEmpty()) {
+
+            List<GameProfilePic> pics = new ArrayList<>();
+
+            for (MultipartFile file : files) {
+                GameProfilePic pic = gameProfilePicService.save(file, target);
+                pics.add(pic);
+            }
+
+            target.setGameProfilePics(pics);
+        }
+        
+        List<GameGenre> genres = new ArrayList<>();
+
+        if (genres != null || !genres.isEmpty()) {
+            for (Long id : gamePutDto.getGameGenreIds()) {
+                GenreDto genreDto = genreService.findById(id);
+                Genre genre = genreMapper.toEntity(genreDto);
+                if (genre != null) {
+                    GameGenre gameGenre = new GameGenre();
+                    gameGenre.setBoardGame(target);
+                    gameGenre.setGenre(genre);
+                    GameGenreId gameGenreId = new GameGenreId();
+                    gameGenreId.setGameId(target.getGameId());
+                    gameGenreId.setGenreId(genre.getGenreId());
+                    gameGenre.setId(gameGenreId);
+                    gameGenre = gameGenreRepository.save(gameGenre);
+                    genres.add(gameGenre);
+                } else {
+                    throw new GameRootException(GameErrorMessages.GAME_POST_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            }
+        }
+
+        target.setGameGenres(genres);
+
+        target = boardGameRepository.save(target);
+
+        return boardGameMapper.boardGameToGameResponseDto(target);
+    }
+
 
     public Page<GameResponseDto> findGameByName(String keyword, Pageable pageable) {
 
@@ -308,8 +394,8 @@ public class BoardGameService {
 
     }
 
-    public List<PostDto> getTop10Posts(Long gameId, Enums.Category category) {
-        List<Post> posts = postRepository.findTop10ByBoardGameGameIdAndCategoryOrderByIdDesc(gameId, category);
+    public List<PostDto> getTop10Posts(Long gameId, String category) {
+        List<Post> posts = postRepository.findTop10ByBoardGameGameIdAndCategoryAndDeletedAtIsNullOrderByIdDesc(gameId, category);
         List<PostDto> postDtos = new ArrayList<>();
         for (Post post : posts) {
             PostDto postDto = new PostDto();
@@ -344,5 +430,37 @@ public class BoardGameService {
             return true;
         }
         return false;
+    }
+
+    public Page<GameHistoriesResponseDto> getGameHistoriesByGameId(Pageable pageable,Long gameId) {
+
+        GameResponseDto game = findGameByGameId(gameId, false, false, null);
+        if (game == null || game.getGameId() == null) {
+            throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+
+        Page<GameHistoriesResponseDto> dtos = boardGameHistoryRepository.findHistoriesByGameId(pageable,gameId);
+
+        if (dtos == null || dtos.isEmpty()) {
+            throw new GameRootException(GameErrorMessages.NO_HISTORIES, HttpStatus.NOT_FOUND);
+        }
+
+        return dtos;
+    }
+
+    public GameHistoryResponseDto getGameHistory(Long historyId) {
+
+
+        GameHistoryResponseDto dto = boardGameHistoryRepository.findHistoryByHistoryId(historyId);
+
+        if (dto == null || dto.getGameHistoryId() == null) {
+            throw new GameRootException(GameErrorMessages.NO_HISTORY, HttpStatus.NOT_FOUND);
+        }
+
+        if (findGameByGameId(dto.getGameId(),false,false, null).getGameId() == null) {
+            throw new GameRootException(GameErrorMessages.GAME_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+
+        return dto;
     }
 }

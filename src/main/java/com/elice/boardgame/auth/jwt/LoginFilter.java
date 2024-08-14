@@ -110,7 +110,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String token = jwtUtil.createJwt(username, role, 60*60*10L * 10000);
 
-        response.addHeader("Authorization", "Bearer " + token);
+//        response.addHeader("Authorization", "Bearer " + token);
 
         Cookie cookie = new Cookie("JWT", token);
         cookie.setHttpOnly(true);
