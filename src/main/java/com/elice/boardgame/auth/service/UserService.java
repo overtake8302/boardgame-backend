@@ -33,7 +33,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
 
     public UserInfoResponseDto getMyInfo(User user) {
 
@@ -115,8 +114,6 @@ public class UserService {
             postDto.setGameId(post.getId());
             postDto.setGameName(post.getGameName());
             postDto.setGameImageUrl(post.getGameImageUrl());
-            postDto.setImageUrls(post.getImageUrls());
-            postDto.setImageNames(post.getImageNames());
             postDto.setLikeCount(post.getLikeCount());
 
             postDtos.add(postDto);
