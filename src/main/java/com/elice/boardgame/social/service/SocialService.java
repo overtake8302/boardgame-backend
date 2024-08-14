@@ -2,6 +2,7 @@ package com.elice.boardgame.social.service;
 
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
+import com.elice.boardgame.common.exceptions.MemberNotFoundException;
 import com.elice.boardgame.social.dto.SocialResponse;
 import com.elice.boardgame.social.entity.Social;
 import com.elice.boardgame.social.entity.SocialId;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.sqs.model.ResourceNotFoundException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -48,12 +50,23 @@ public class SocialService {
             throw new SocialAlreadyExistsException("Friend relationship already exists.");
         }
 
+        // User와 Friend 엔티티를 각각 조회하여 설정
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new MemberNotFoundException("User not found with id: " + userId));
+        User friend = userRepository.findById(friendId)
+            .orElseThrow(() -> new MemberNotFoundException("Friend not found with id: " + friendId));
+
         SocialId socialId = new SocialId(userId, friendId);
         Social social = new Social();
         social.setId(socialId);
 
+        // 엔티티 연관 관계 설정
+        social.setUser(user);
+        social.setFriend(friend);
+
         socialRepository.save(social);
     }
+
 
     public void removeFriend(Long userId, Long friendId) {
         if (!socialRepository.existsByUserIdAndFriendId(userId, friendId)) {
