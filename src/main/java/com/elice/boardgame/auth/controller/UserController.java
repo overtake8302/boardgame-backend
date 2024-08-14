@@ -85,35 +85,6 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<CommonResponse<UserInfoResponseDto>> getUserInfo(@PathVariable Long userId) {
-
-        UserInfoResponseDto userInfoResponseDto = userService.findUserByUserId(userId);
-
-        CommonResponse<UserInfoResponseDto> response = CommonResponse.<UserInfoResponseDto>builder()
-                .payload(userInfoResponseDto)
-                .build();
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @PutMapping("/my")
-    public ResponseEntity<CommonResponse<String>> updateUser(
-            @CurrentUser User user,
-            @RequestBody UpdateUserDTO updateUserDTO) {
-
-        try {
-            userService.updateUser(user, updateUserDTO);
-            return new ResponseEntity<>(CommonResponse.<String>builder()
-                    .payload("User information updated successfully")
-                    .build(), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(CommonResponse.<String>builder()
-                    .payload("Failed to update user information")
-                    .build(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
     @GetMapping("/user/search")
     public CommonResponse<Page<SearchResponse>> searchUsers(@ModelAttribute SearchRequest searchRequest) {
         Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize());
