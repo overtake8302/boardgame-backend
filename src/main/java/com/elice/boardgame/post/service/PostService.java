@@ -215,10 +215,10 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public CommonResponse<Page<SearchResponse>> searchPostsByKeyword(String keyword, Pageable pageable) {
-        Page<SearchResponse> results = postRepository.searchPostsByKeyword(keyword, pageable);
+    public CommonResponse<Page<SearchPostResponse>> searchPostsByKeyword(String keyword, Pageable pageable) {
+        Page<SearchPostResponse> results = postRepository.searchPostsByKeyword(keyword, pageable);
 
-        return CommonResponse.<Page<SearchResponse>>builder()
+        return CommonResponse.<Page<SearchPostResponse>>builder()
             .payload(results)
             .message("검색 성공")
             .status(200)

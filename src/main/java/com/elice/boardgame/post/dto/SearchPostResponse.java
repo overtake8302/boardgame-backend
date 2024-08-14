@@ -8,9 +8,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SearchPostResponse extends SearchResponse {
-    Enums.Category category;
+    String category;
 
-    public SearchPostResponse(Long id, Enums.Category category, String name) {
+    public SearchPostResponse(Long id, String category, String name) {
         super(id, name);
         this.category = category;
     }

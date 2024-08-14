@@ -6,6 +6,7 @@ import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.post.dto.SearchPostResponse;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.entity.QPost;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -23,87 +24,33 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Post> findAll(Pageable pageable, String sortBy) {
+    public Page<Post> search(Pageable pageable, String query, String boardType, String sortBy) {
         QPost post = QPost.post;
 
+        BooleanBuilder whereClause = new BooleanBuilder();
+
+        if (!"FULL".equals(boardType)) {
+            whereClause.and(post.category.eq(boardType));
+        }
+
+        if (query != null && !query.isEmpty()) {
+            whereClause.and(post.title.containsIgnoreCase(query)
+                .or(post.user.username.containsIgnoreCase(query))
+                .or(post.content.contains(query)));
+        }
         List<Post> posts = queryFactory
             .selectFrom(post)
+            .where(whereClause)
             .orderBy(getSortOrder(sortBy))
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
 
         long total = queryFactory
-            .selectFrom(post)
-            .fetch().size();
-
-        return new PageImpl<>(posts, pageable, total);
-    }
-
-    @Override
-    public Page<Post> findAllByType(Pageable pageable, String sortBy, String boardType) {
-        QPost post = QPost.post;
-
-        List<Post> posts = queryFactory
-            .selectFrom(post)
-            .where(post.category.eq(boardType))
-            .orderBy(getSortOrder(sortBy))
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
-            .fetch();
-
-        long total = queryFactory
-            .selectFrom(post)
-            .where(post.category.eq(boardType))
-            .fetch().size();
-
-        return new PageImpl<>(posts, pageable, total);
-    }
-
-    @Override
-    public Page<Post> searchByQuery(Pageable pageable, String query) {
-        QPost post = QPost.post;
-
-        List<Post> posts = queryFactory
-            .selectFrom(post)
-            .where(post.title.containsIgnoreCase(query)
-                .or(post.content.containsIgnoreCase(query)
-                    .or(post.user.username.containsIgnoreCase(query))))
-            .orderBy(post.createdAt.desc())
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
-            .fetch();
-
-        long total = queryFactory
-            .selectFrom(post)
-            .where(post.title.containsIgnoreCase(query)
-                .or(post.content.containsIgnoreCase(query)))
-            .fetch().size();
-
-        return new PageImpl<>(posts, pageable, total);
-    }
-
-    @Override
-    public Page<Post> searchByQuery(Pageable pageable, String query, String boardType) {
-        QPost post = QPost.post;
-
-        List<Post> posts = queryFactory
-            .selectFrom(post)
-            .where(post.category.eq(boardType)
-                .and(post.title.containsIgnoreCase(query)
-                    .or(post.content.containsIgnoreCase(query)
-                        .or(post.user.username.containsIgnoreCase(query)))))
-            .orderBy(post.createdAt.desc())
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
-            .fetch();
-
-        long total = queryFactory
-            .selectFrom(post)
-            .where(post.category.eq(boardType)
-                .and(post.title.containsIgnoreCase(query)
-                    .or(post.content.containsIgnoreCase(query))))
-            .fetch().size();
+            .select(post.count())
+            .from(post)
+            .where(whereClause)
+            .fetchOne();
 
         return new PageImpl<>(posts, pageable, total);
     }
@@ -122,13 +69,15 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         }
     }
 
+
     @Override
-    public Page<SearchResponse> searchPostsByKeyword(String keyword, Pageable pageable) {
-        List<SearchResponse> results = queryFactory
+    public Page<SearchPostResponse> searchPostsByKeyword(String keyword, Pageable pageable) {
+        List<SearchPostResponse> results = queryFactory
             .select(
-                Projections.constructor(SearchResponse.class,
+                Projections.constructor(SearchPostResponse.class,
                     post.id,
-                    post.title
+                    post.category, // category 필드 추가
+                    post.title // name 필드
                 ))
             .from(post)
             .where(post.title.containsIgnoreCase(keyword))
@@ -143,4 +92,5 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         return new PageImpl<>(results, pageable, total);
     }
+
 }

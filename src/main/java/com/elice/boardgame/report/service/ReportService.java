@@ -3,6 +3,7 @@ package com.elice.boardgame.report.service;
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
 import com.elice.boardgame.category.dto.PostPageDto;
+import com.elice.boardgame.common.dto.PaginationRequest;
 import com.elice.boardgame.common.exceptions.ReportNotFoundException;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.post.entity.Post;
@@ -36,6 +37,22 @@ public class ReportService {
 
     private final ReportS3Service reportS3Service;
 
+    public PostPageDto<ReportDto> find(String status, PaginationRequest paginationRequest) {
+        PostPageDto<ReportDto> reportDtos;
+
+        int page = paginationRequest.getPage();
+        int size = paginationRequest.getSize();
+
+        if ("완료".equals(status)) {
+            reportDtos = findCompletedReports(page, size);
+        } else {
+            reportDtos = findWaitingReports(page, size);
+        }
+
+        return reportDtos;
+    }
+
+
     public PostPageDto<ReportDto> findWaitingReports(int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<Report> reports = reportRepository.findWaitingReports(pageRequest);
@@ -52,7 +69,8 @@ public class ReportService {
                 .collect(Collectors.toList())
         )).collect(Collectors.toList());
 
-        return new PostPageDto<>(content, page, size, reports.getTotalElements(), reports.getTotalPages());
+        return PostPageDto.<ReportDto>builder().content(content).pageNumber(page).pageSize(size).totalElements(
+            reports.getTotalElements()).totalPages(reports.getTotalPages()).build();
     }
 
     public PostPageDto<ReportDto> findCompletedReports(int page, int size) {
@@ -71,7 +89,8 @@ public class ReportService {
                 .collect(Collectors.toList())
         )).collect(Collectors.toList());
 
-        return new PostPageDto<>(content, page, size, reports.getTotalElements(), reports.getTotalPages());
+        return PostPageDto.<ReportDto>builder().content(content).pageNumber(page).pageSize(size).totalElements(
+            reports.getTotalElements()).totalPages(reports.getTotalPages()).build();
     }
 
     @Transactional

@@ -40,7 +40,7 @@ public class LiveViewController {
     }
 
     //뷰 랭킹순 가져오기
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<CommonResponse<List<GameResponseDto>>> getLiveViewRanking() {
         List<GameResponseDto> gameResponseDtos = liveViewService.getLiveViewRanking();
         return ResponseEntity.ok()

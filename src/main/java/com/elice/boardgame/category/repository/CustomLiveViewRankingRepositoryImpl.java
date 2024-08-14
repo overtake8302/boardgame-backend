@@ -27,9 +27,12 @@ public class CustomLiveViewRankingRepositoryImpl implements CustomLiveViewRankin
     @Override
     public List<LiveViewRanking> findAllByOrderBySumScoreDesc() {
         QLiveViewRanking liveViewRanking = QLiveViewRanking.liveViewRanking;
-        return jpaQueryFactory.selectFrom(liveViewRanking)
+        List<LiveViewRanking> rankings = jpaQueryFactory.selectFrom(liveViewRanking)
             .orderBy(liveViewRanking.sumScore.desc())
             .limit(10)
             .fetch();
+
+        return rankings;
     }
+
 }
