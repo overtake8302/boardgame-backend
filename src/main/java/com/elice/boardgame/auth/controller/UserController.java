@@ -1,5 +1,7 @@
 package com.elice.boardgame.auth.controller;
 
+import com.elice.boardgame.auth.dto.MyCommentResponseDto;
+import com.elice.boardgame.auth.dto.MyPostResponseDto;
 import com.elice.boardgame.auth.dto.UpdateUserDTO;
 import com.elice.boardgame.auth.dto.UserInfoResponseDto;
 import com.elice.boardgame.auth.entity.User;
@@ -41,7 +43,7 @@ public class UserController {
     }
 
     @GetMapping("/my/posts")
-    public ResponseEntity<CommonResponse<Page<PostDto>>> getMyPosts(
+    public ResponseEntity<CommonResponse<Page<MyPostResponseDto>>> getMyPosts(
             @CurrentUser User user,
             @ModelAttribute PaginationRequest paginationRequest) {
 
@@ -50,9 +52,9 @@ public class UserController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<PostDto> myPosts = userService.findMyPosts(user, pageable);
+        Page<MyPostResponseDto> myPosts = userService.findMyPosts(user, pageable);
 
-        CommonResponse<Page<PostDto>> response = CommonResponse.<Page<PostDto>>builder()
+        CommonResponse<Page<MyPostResponseDto>> response = CommonResponse.<Page<MyPostResponseDto>>builder()
                 .payload(myPosts)
                 .build();
 
@@ -60,7 +62,7 @@ public class UserController {
     }
 
     @GetMapping("/my/comments")
-    public ResponseEntity<CommonResponse<Page<CommentDto>>> getMyComments(
+    public ResponseEntity<CommonResponse<Page<MyCommentResponseDto>>> getMyComments(
             @CurrentUser User user,
             @ModelAttribute PaginationRequest paginationRequest) {
 
@@ -69,9 +71,9 @@ public class UserController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<CommentDto> myComments = userService.findMyComments(user, pageable);
+        Page<MyCommentResponseDto> myComments = userService.findMyComments(user, pageable);
 
-        CommonResponse<Page<CommentDto>> response = CommonResponse.<Page<CommentDto>>builder()
+        CommonResponse<Page<MyCommentResponseDto>> response = CommonResponse.<Page<MyCommentResponseDto>>builder()
                 .payload(myComments)
                 .build();
 

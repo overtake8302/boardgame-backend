@@ -1,5 +1,7 @@
 package com.elice.boardgame.auth.service;
 
+import com.elice.boardgame.auth.dto.MyCommentResponseDto;
+import com.elice.boardgame.auth.dto.MyPostResponseDto;
 import com.elice.boardgame.auth.dto.UpdateUserDTO;
 import com.elice.boardgame.auth.dto.UserInfoResponseDto;
 import com.elice.boardgame.auth.entity.User;
@@ -92,52 +94,49 @@ public class UserService {
         return userInfoResponseDto;
     }
 
-    public Page<PostDto> findMyPosts(User user, Pageable pageable) {
+    public Page<MyPostResponseDto> findMyPosts(User user, Pageable pageable) {
 
         if (user == null) {
             throw new UserException(UserErrorMessages.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
 
-        Page<Post> posts = postRepository.findAllByUser_IdAndDeletedAtIsNull(user.getId(), pageable);
+        Page<Post> posts = postRepository.findAllByUser_IdAndDeletedAtIsNullOrderByIdDesc(user.getId(), pageable);
         if (posts == null || posts.isEmpty()) {
             throw new UserException(UserErrorMessages.USER_POSTS_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
-        List<PostDto> postDtos = new ArrayList<>();
+        List<MyPostResponseDto> postDtos = new ArrayList<>();
         for (Post post : posts) {
-            PostDto postDto = new PostDto();
+            MyPostResponseDto postDto = new MyPostResponseDto();
             postDto.setPostId(post.getId());
             postDto.setTitle(post.getTitle());
             postDto.setContent(post.getContent());
             postDto.setCategory(post.getCategory());
 
             postDto.setCreatedAt(post.getCreatedAt().toString());
-            postDto.setGameId(post.getId());
-            postDto.setGameName(post.getGameName());
-            postDto.setGameImageUrl(post.getGameImageUrl());
             postDto.setLikeCount(post.getLikeCount());
 
             postDtos.add(postDto);
         }
 
         Pageable pageRequest = PageRequest.of(posts.getNumber(), posts.getSize(), posts.getSort());
-        Page<PostDto> postDtoPage = new PageImpl<>(postDtos, pageRequest, posts.getTotalElements());
+        Page<MyPostResponseDto> postDtoPage = new PageImpl<>(postDtos, pageRequest, posts.getTotalElements());
 
         return postDtoPage;
     }
 
-    public Page<CommentDto> findMyComments(User user, Pageable pageable) {
+    public Page<MyCommentResponseDto> findMyComments(User user, Pageable pageable) {
 
         if (user == null) {
             throw new UserException(UserErrorMessages.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
 
-        Page<Comment> comments = commentRepository.findAllByUser_IdAndDeletedAtIsNull(user.getId(), pageable);
+        Page<MyCommentResponseDto> comments = commentRepository.findAllByUser_IdAndDeletedAtIsNull(user.getId(), pageable);
         if (comments == null || comments.isEmpty()) {
             throw new UserException(UserErrorMessages.USER_COMMENTS_NOT_FOUNT, HttpStatus.NOT_FOUND);
         }
-        List<CommentDto> commentDtos = new ArrayList<>();
+        /*List<MyCommentResponseDto> commentDtos = new ArrayList<>();
         for (Comment comment : comments) {
-            CommentDto commentDto = new CommentDto();
+            MyCommentResponseDto commentDto = new MyCommentResponseDto();
             commentDto.setContent(comment.getContent());
             commentDto.setId(comment.getId());
             commentDto.setCreatedAt(comment.getCreatedAt().toString());
@@ -146,9 +145,11 @@ public class UserService {
         }
 
         Pageable pageRequest = PageRequest.of(comments.getNumber(), comments.getSize(), comments.getSort());
-        Page<CommentDto> commentDtostoPage = new PageImpl<>(commentDtos, pageRequest, comments.getTotalElements());
+        Page<MyCommentResponseDto> commentDtostoPage = new PageImpl<>(commentDtos, pageRequest, comments.getTotalElements());
 
-        return commentDtostoPage;
+        return commentDtostoPage;*/
+
+        return comments;
     }
 
     public UserInfoResponseDto findUserByUserId(Long userId) {

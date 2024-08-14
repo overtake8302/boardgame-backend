@@ -22,8 +22,6 @@ import com.elice.boardgame.game.entity.*;
 import com.elice.boardgame.game.mapper.BoardGameHistoryMapper;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
 import com.elice.boardgame.game.repository.*;
-import com.elice.boardgame.post.dto.CommentDto;
-import com.elice.boardgame.post.dto.PostDto;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.repository.CommentRepository;
 import com.elice.boardgame.post.repository.PostRepository;
@@ -125,12 +123,12 @@ public class BoardGameService {
         }
 
         if (wantComments) {
-            List<CommentDto> comments = findComentsByGameId(gameId);
+            List<GameCommentDto> comments = findComentsByGameId(gameId);
             foundGame.setComments(comments);
         }
 
         if (wantPosts && category != null) {
-            List<PostDto> posts = getTop10Posts(gameId,category);
+            List<PostsByGame> posts = getTop10Posts(gameId,category);
             foundGame.setPosts(posts);
         }
 
@@ -394,11 +392,11 @@ public class BoardGameService {
 
     }
 
-    public List<PostDto> getTop10Posts(Long gameId, String category) {
+    public List<PostsByGame> getTop10Posts(Long gameId, String category) {
         List<Post> posts = postRepository.findTop10ByBoardGameGameIdAndCategoryAndDeletedAtIsNullOrderByIdDesc(gameId, category);
-        List<PostDto> postDtos = new ArrayList<>();
+        List<PostsByGame> postDtos = new ArrayList<>();
         for (Post post : posts) {
-            PostDto postDto = new PostDto();
+            PostsByGame postDto = new PostsByGame();
             postDto.setPostId(post.getId());
             postDto.setCategory(post.getCategory());
             postDto.setTitle(post.getTitle());
@@ -416,7 +414,7 @@ public class BoardGameService {
         return boardGameRepository.findGamesLikedByUserId(userId, pageable);
     }
 
-    public List<CommentDto> findComentsByGameId(Long gameId) {
+    public List<GameCommentDto> findComentsByGameId(Long gameId) {
         return boardGameRepository.findComentsByGameId(gameId);
     }
 

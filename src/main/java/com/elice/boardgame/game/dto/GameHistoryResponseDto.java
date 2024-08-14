@@ -1,9 +1,6 @@
 package com.elice.boardgame.game.dto;
 
-import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.game.entity.GameGenreHistory;
-import com.elice.boardgame.post.dto.CommentDto;
-import com.elice.boardgame.post.dto.PostDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
