@@ -76,7 +76,8 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
             .select(
                 Projections.constructor(SearchPostResponse.class,
                     post.id,
-                    post.title
+                    post.category, // category 필드 추가
+                    post.title // name 필드
                 ))
             .from(post)
             .where(post.title.containsIgnoreCase(keyword))
@@ -91,4 +92,5 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         return new PageImpl<>(results, pageable, total);
     }
+
 }
