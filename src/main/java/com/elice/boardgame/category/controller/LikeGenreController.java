@@ -41,7 +41,7 @@ public class LikeGenreController {
     public ResponseEntity<CommonResponse<List<GenreDto>>> getGenres(@CurrentUser User user) {
         List<GenreDto> genreDtos = likeGenreService.getGenres(user.getId());
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.maxAge(30, TimeUnit.SECONDS))
+            .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
             .body(CommonResponse.<List<GenreDto>>builder()
                 .payload(genreDtos)
                 .message("")
@@ -58,7 +58,7 @@ public class LikeGenreController {
         Page<GameResponseDto> games = likeGenreService.gameGet(type, user, paginationRequest);
 
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.maxAge(30, TimeUnit.SECONDS))
+            .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
             .body(CommonResponse.<Page<GameResponseDto>>builder()
                 .payload(games)
                 .message("")
@@ -71,7 +71,7 @@ public class LikeGenreController {
         List<RecentlyViewGameDto> dtos = likeGenreService.recentlyViewPosts(visitorId);
 
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.maxAge(30, TimeUnit.SECONDS))
+            .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
             .body(CommonResponse.<List<RecentlyViewGameDto>>builder()
                 .payload(dtos)
                 .message("")

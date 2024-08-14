@@ -112,6 +112,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         List<BoardGame> boardGames = queryFactory
             .selectFrom(boardGame)
             .where(boardGame.gameId.in(boardGameIds)
+                .and(boardGame.deletedAt.isNull())
                 .and(boardGame.gameId.notIn(likedGameIds)))
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
@@ -121,6 +122,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
             .select(boardGame.count())
             .from(boardGame)
             .where(boardGame.gameId.in(boardGameIds)
+                .and(boardGame.deletedAt.isNull())  // deletedAt이 null인 경우만 필터링
                 .and(boardGame.gameId.notIn(likedGameIds)))
             .fetchOne();
 

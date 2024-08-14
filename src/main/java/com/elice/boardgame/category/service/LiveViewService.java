@@ -8,6 +8,7 @@ import com.elice.boardgame.category.repository.LiveViewRepository;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
+import com.elice.boardgame.game.repository.BoardGameRepository;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -22,13 +23,20 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class LiveViewService {
 
+    private final BoardGameRepository boardGameRepository;
+
     private final LiveViewRepository liveViewRepository;
 
     private final LiveViewRankingRepository liveViewRankingRepository;
 
     private final BoardGameMapper boardGameMapper;
 
-    public void addViewScore(BoardGame game, String ipAddress) {
+    public void addViewScore(Long gameId, String ipAddress) {
+
+        Optional<BoardGame> optionalBoardGame = boardGameRepository.findById(gameId);
+
+        BoardGame game = optionalBoardGame.orElseThrow();
+
         Optional<LiveView> optionalEntity = liveViewRepository.findByGame(game);
 
         LiveView liveView = optionalEntity.orElse(new LiveView());
@@ -78,6 +86,7 @@ public class LiveViewService {
         List<LiveView> liveViews = liveViewRepository.findAll();
 
         Map<BoardGame, Long> viewCounts = liveViews.stream()
+            .filter(liveView -> liveView.getGame().getDeletedAt() == null)
             .collect(Collectors.groupingBy(LiveView::getGame,
                 Collectors.summingLong(LiveView::getViewScore)));
 
@@ -94,7 +103,6 @@ public class LiveViewService {
             ranking.setSumScore(sumScore);
             liveViewRankingRepository.save(ranking);
         });
-
     }
 
     public List<GameResponseDto> getLiveViewRanking() {
