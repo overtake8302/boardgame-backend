@@ -1,9 +1,6 @@
 package com.elice.boardgame.auth.service;
 
-import com.elice.boardgame.auth.dto.MyCommentResponseDto;
-import com.elice.boardgame.auth.dto.MyPostResponseDto;
-import com.elice.boardgame.auth.dto.UpdateUserDTO;
-import com.elice.boardgame.auth.dto.UserInfoResponseDto;
+import com.elice.boardgame.auth.dto.*;
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
 import com.elice.boardgame.common.dto.CommonResponse;
@@ -111,7 +108,7 @@ public class UserService {
         return comments;
     }
 
-    public UserInfoResponseDto findUserByUserId(Long userId) {
+    public FriendInfoResponseDto findUserByUserId(Long userId) {
 
         Optional<User> userOptional = userRepository.findById(userId);
 
@@ -120,13 +117,9 @@ public class UserService {
         }
 
         User user = userOptional.get();
-        UserInfoResponseDto userInfoResponseDto = new UserInfoResponseDto();
+        FriendInfoResponseDto userInfoResponseDto = new FriendInfoResponseDto();
         userInfoResponseDto.setId(user.getId());
         userInfoResponseDto.setUsername(user.getUsername());
-        userInfoResponseDto.setName(user.getName());
-        userInfoResponseDto.setAge(user.getAge());
-        userInfoResponseDto.setPhonenumber(user.getPhonenumber());
-        userInfoResponseDto.setRole(user.getRole());
 
         return userInfoResponseDto;
     }
@@ -159,5 +152,57 @@ public class UserService {
             .message("Search completed successfully")
             .status(200)
             .build();
+    }
+
+    public Page<MyPostResponseDto> findUserPosts(Long userId, Pageable pageable) {
+
+        Optional<User> userOptional = userRepository.findById(userId);
+
+        if (userOptional == null || userOptional.isEmpty()) {
+            throw new UserException(UserErrorMessages.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+
+        User user = userOptional.get();
+
+        Page<Post> posts = postRepository.findAllByUser_IdAndDeletedAtIsNullOrderByIdDesc(user.getId(), pageable);
+        if (posts == null || posts.isEmpty()) {
+            throw new UserException(UserErrorMessages.USER_POSTS_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+        List<MyPostResponseDto> postDtos = new ArrayList<>();
+        for (Post post : posts) {
+            MyPostResponseDto postDto = new MyPostResponseDto();
+            postDto.setPostId(post.getId());
+            postDto.setTitle(post.getTitle());
+            postDto.setContent(post.getContent());
+            postDto.setCategory(post.getCategory());
+
+            postDto.setCreatedAt(post.getCreatedAt().toString());
+            postDto.setLikeCount(post.getLikeCount());
+
+            postDtos.add(postDto);
+        }
+
+        Pageable pageRequest = PageRequest.of(posts.getNumber(), posts.getSize(), posts.getSort());
+        Page<MyPostResponseDto> postDtoPage = new PageImpl<>(postDtos, pageRequest, posts.getTotalElements());
+
+        return postDtoPage;
+    }
+
+    public Page<MyCommentResponseDto> findUserComments(Long userId, Pageable pageable) {
+
+        Optional<User> userOptional = userRepository.findById(userId);
+
+        if (userOptional == null || userOptional.isEmpty()) {
+            throw new UserException(UserErrorMessages.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+
+        User user = userOptional.get();
+
+        Page<MyCommentResponseDto> comments = commentRepository.findAllByUser_IdAndDeletedAtIsNull(user.getId(), pageable);
+        if (comments == null || comments.isEmpty()) {
+            throw new UserException(UserErrorMessages.USER_COMMENTS_NOT_FOUNT, HttpStatus.NOT_FOUND);
+        }
+
+        return comments;
     }
 }

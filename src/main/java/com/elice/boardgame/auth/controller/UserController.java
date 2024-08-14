@@ -1,9 +1,6 @@
 package com.elice.boardgame.auth.controller;
 
-import com.elice.boardgame.auth.dto.MyCommentResponseDto;
-import com.elice.boardgame.auth.dto.MyPostResponseDto;
-import com.elice.boardgame.auth.dto.UpdateUserDTO;
-import com.elice.boardgame.auth.dto.UserInfoResponseDto;
+import com.elice.boardgame.auth.dto.*;
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.service.UserService;
 import com.elice.boardgame.common.annotation.CurrentUser;
@@ -11,6 +8,7 @@ import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.common.dto.SearchRequest;
 import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.common.dto.PaginationRequest;
+
 import com.elice.boardgame.post.dto.CommentDto;
 import com.elice.boardgame.post.dto.PostDto;
 import com.elice.boardgame.post.entity.Comment;
@@ -85,12 +83,42 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<CommonResponse<FriendInfoResponseDto>> getFriendInfo(@PathVariable Long userId) {
+
+        FriendInfoResponseDto friendInfoResponseDto = userService.findUserByUserId(userId);
+
+        CommonResponse<FriendInfoResponseDto> response = CommonResponse.<FriendInfoResponseDto>builder()
+                .payload(friendInfoResponseDto)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PutMapping("/my")
+    public ResponseEntity<CommonResponse<String>> updateUser(
+            @CurrentUser User user,
+            @RequestBody UpdateUserDTO updateUserDTO) {
+
+        try {
+            userService.updateUser(user, updateUserDTO);
+            return new ResponseEntity<>(CommonResponse.<String>builder()
+                    .payload("User information updated successfully")
+                    .build(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(CommonResponse.<String>builder()
+                    .payload("Failed to update user information")
+                    .build(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping("/user/search")
     public CommonResponse<Page<SearchResponse>> searchUsers(@ModelAttribute SearchRequest searchRequest) {
         Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize());
         String keyword = searchRequest.getKeyword();
         return userService.searchUsersByKeyword(keyword, pageable);
     }
+
 
     @PutMapping("/me")
     public ResponseEntity<String> updateUser(
@@ -103,5 +131,6 @@ public class UserController {
         } catch (Exception e) {
             return new ResponseEntity<>("회원 정보 업데이트 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
     }
 }
