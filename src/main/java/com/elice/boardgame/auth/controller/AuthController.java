@@ -9,6 +9,8 @@ import com.elice.boardgame.common.annotation.CurrentUser;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,8 +19,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 public class AuthController {
+
     private final JoinService joinService;
     private final UserRepository userRepository;
 
@@ -39,7 +43,8 @@ public class AuthController {
         if (customUserDetails != null) {
             User user = userRepository.findByUsername(customUserDetails.getUsername());
             if (user != null) {
-                return "User: " + user.getUsername() + ", Role: " + customUserDetails.getAuthorities().toString() + ", Age: " + user.getAge();
+                return "User: " + user.getUsername() + ", Role: "
+                    + customUserDetails.getAuthorities().toString() + ", Age: " + user.getAge();
             }
         }
         return "User not authenticated";
@@ -70,7 +75,6 @@ public class AuthController {
 
     @GetMapping("/admin-check")
     public ResponseEntity<Boolean> adminCheck(@CurrentUser User user) {
-
         if (user == null) {
             return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
         } else if (user != null && user.getId() != null) {
