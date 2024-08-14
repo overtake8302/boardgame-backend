@@ -74,12 +74,9 @@ public class PostService {
         post.setUser(currentUser);
 
         List<GameProfilePic> pics = boardGame.getGameProfilePics();
-        log.info("pics : {} ", pics);
         if (pics != null && !pics.isEmpty()) {
             post.setGameImageUrl(boardGame.getGameProfilePics().get(0).getPicAddress());
-            log.info("Game Image URL : {} ", post.getGameImageUrl());
         }
-
 
         return postRepository.save(post);
     }
@@ -112,6 +109,7 @@ public class PostService {
         }
 
         PostDto postDto = new PostDto();
+        postDto.setPostId(post.getId());
         postDto.setTitle(post.getTitle());
         postDto.setContent(post.getContent());
         postDto.setCategory(post.getCategory());
@@ -209,6 +207,9 @@ public class PostService {
             throw new RuntimeException("작성자만 게시글을 삭제할 수 있습니다!");
         }
 
+        post.setBoardGame(boardGameRepository.findByGameIdAndDeletedAtIsNull(postDetails.getGameId()));
+        post.setGameName(post.getBoardGame().getName());
+        post.setGameImageUrl(post.getBoardGame().getGameProfilePics().get(0).getPicAddress());
         post.setTitle(postDetails.getTitle());
         post.setContent(postDetails.getContent());
         post.setCategory(postDetails.getCategory());

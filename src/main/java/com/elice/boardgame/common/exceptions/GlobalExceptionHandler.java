@@ -15,7 +15,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Object> handleRuntimeException(RuntimeException ex, WebRequest request) {
-        log.info("RuntimeException {}", ex);
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("error", "Internal Server Error");
         responseBody.put("message", ex.getMessage());
