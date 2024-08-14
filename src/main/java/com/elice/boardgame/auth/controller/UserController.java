@@ -1,7 +1,6 @@
 package com.elice.boardgame.auth.controller;
 
-import com.elice.boardgame.auth.dto.UpdateUserDTO;
-import com.elice.boardgame.auth.dto.UserInfoResponseDto;
+import com.elice.boardgame.auth.dto.*;
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.service.UserService;
 import com.elice.boardgame.common.annotation.CurrentUser;
@@ -9,9 +8,6 @@ import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.common.dto.SearchRequest;
 import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.common.dto.PaginationRequest;
-import com.elice.boardgame.post.dto.CommentDto;
-import com.elice.boardgame.post.dto.PostDto;
-import com.elice.boardgame.post.entity.Comment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,7 +37,7 @@ public class UserController {
     }
 
     @GetMapping("/my/posts")
-    public ResponseEntity<CommonResponse<Page<PostDto>>> getMyPosts(
+    public ResponseEntity<CommonResponse<Page<MyPostResponseDto>>> getMyPosts(
             @CurrentUser User user,
             @ModelAttribute PaginationRequest paginationRequest) {
 
@@ -50,9 +46,9 @@ public class UserController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<PostDto> myPosts = userService.findMyPosts(user, pageable);
+        Page<MyPostResponseDto> myPosts = userService.findMyPosts(user, pageable);
 
-        CommonResponse<Page<PostDto>> response = CommonResponse.<Page<PostDto>>builder()
+        CommonResponse<Page<MyPostResponseDto>> response = CommonResponse.<Page<MyPostResponseDto>>builder()
                 .payload(myPosts)
                 .build();
 
@@ -60,7 +56,7 @@ public class UserController {
     }
 
     @GetMapping("/my/comments")
-    public ResponseEntity<CommonResponse<Page<CommentDto>>> getMyComments(
+    public ResponseEntity<CommonResponse<Page<MyCommentResponseDto>>> getMyComments(
             @CurrentUser User user,
             @ModelAttribute PaginationRequest paginationRequest) {
 
@@ -69,9 +65,9 @@ public class UserController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<CommentDto> myComments = userService.findMyComments(user, pageable);
+        Page<MyCommentResponseDto> myComments = userService.findMyComments(user, pageable);
 
-        CommonResponse<Page<CommentDto>> response = CommonResponse.<Page<CommentDto>>builder()
+        CommonResponse<Page<MyCommentResponseDto>> response = CommonResponse.<Page<MyCommentResponseDto>>builder()
                 .payload(myComments)
                 .build();
 
@@ -79,12 +75,12 @@ public class UserController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<CommonResponse<UserInfoResponseDto>> getUserInfo(@PathVariable Long userId) {
+    public ResponseEntity<CommonResponse<FriendInfoResponseDto>> getFriendInfo(@PathVariable Long userId) {
 
-        UserInfoResponseDto userInfoResponseDto = userService.findUserByUserId(userId);
+        FriendInfoResponseDto friendInfoResponseDto = userService.findUserByUserId(userId);
 
-        CommonResponse<UserInfoResponseDto> response = CommonResponse.<UserInfoResponseDto>builder()
-                .payload(userInfoResponseDto)
+        CommonResponse<FriendInfoResponseDto> response = CommonResponse.<FriendInfoResponseDto>builder()
+                .payload(friendInfoResponseDto)
                 .build();
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -107,10 +103,48 @@ public class UserController {
         }
     }
 
-    @GetMapping("/search")
+    @GetMapping("/user/search")
     public CommonResponse<Page<SearchResponse>> searchUsers(@ModelAttribute SearchRequest searchRequest) {
         Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize());
         String keyword = searchRequest.getKeyword();
         return userService.searchUsersByKeyword(keyword, pageable);
+    }
+
+    @GetMapping("/user/{userId}/posts")
+    public ResponseEntity<CommonResponse<Page<MyPostResponseDto>>> getUserPosts(
+            @PathVariable Long userId,
+            @ModelAttribute PaginationRequest paginationRequest) {
+
+        int page = paginationRequest.getPage() == 0 ? 0 : paginationRequest.getPage();
+        int size = paginationRequest.getSize() == 0 ? 12 : paginationRequest.getSize();
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<MyPostResponseDto> myPosts = userService.findUserPosts(userId, pageable);
+
+        CommonResponse<Page<MyPostResponseDto>> response = CommonResponse.<Page<MyPostResponseDto>>builder()
+                .payload(myPosts)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{userId}/comments")
+    public ResponseEntity<CommonResponse<Page<MyCommentResponseDto>>> getUserComments(
+            @PathVariable Long userId,
+            @ModelAttribute PaginationRequest paginationRequest) {
+
+        int page = paginationRequest.getPage() == 0 ? 0 : paginationRequest.getPage();
+        int size = paginationRequest.getSize() == 0 ? 12 : paginationRequest.getSize();
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<MyCommentResponseDto> myComments = userService.findUserComments(userId, pageable);
+
+        CommonResponse<Page<MyCommentResponseDto>> response = CommonResponse.<Page<MyCommentResponseDto>>builder()
+                .payload(myComments)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

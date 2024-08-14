@@ -170,7 +170,7 @@ public class    BoardGameController {
 
 
     @PostMapping("/view")
-    public ResponseEntity<Void> incrementViewCount(@RequestHeader("visitorId") @NotBlank String visitorId, @RequestHeader("game_id") @Min(1) Long gameId) {
+    public ResponseEntity<Void> incrementViewCount(@RequestHeader("visitor-id") @NotBlank String visitorId, @RequestHeader("game-id") @Min(1) Long gameId) {
         boardGameService.incrementViewCount(visitorId, gameId);
         return new ResponseEntity<>(HttpStatus.OK);
     }

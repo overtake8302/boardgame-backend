@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRepository {
     List<Post> findTop10ByBoardGameGameIdAndCategoryAndDeletedAtIsNullOrderByIdDesc(Long gameId, String category);
 
-    Page<Post> findAllByUser_IdAndDeletedAtIsNull(Long id, Pageable pageable);
+    Page<Post> findAllByUser_IdAndDeletedAtIsNullOrderByIdDesc(Long id, Pageable pageable);
 
     Post findByIdAndDeletedAtIsNull(Long postId);
 }

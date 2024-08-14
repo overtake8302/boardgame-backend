@@ -9,7 +9,7 @@ import com.elice.boardgame.game.dto.GameListResponseDto;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.dto.HomeGamesResponseDto;
 import com.elice.boardgame.game.entity.*;
-import com.elice.boardgame.post.dto.CommentDto;
+import com.elice.boardgame.game.dto.GameCommentDto;
 import com.elice.boardgame.post.entity.QComment;
 import com.elice.boardgame.post.entity.QPost;
 import com.querydsl.core.BooleanBuilder;
@@ -112,6 +112,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         List<BoardGame> boardGames = queryFactory
             .selectFrom(boardGame)
             .where(boardGame.gameId.in(boardGameIds)
+                .and(boardGame.deletedAt.isNull())
                 .and(boardGame.gameId.notIn(likedGameIds)))
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
@@ -121,6 +122,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
             .select(boardGame.count())
             .from(boardGame)
             .where(boardGame.gameId.in(boardGameIds)
+                .and(boardGame.deletedAt.isNull())  // deletedAt이 null인 경우만 필터링
                 .and(boardGame.gameId.notIn(likedGameIds)))
             .fetchOne();
 
@@ -425,7 +427,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         }
 
         List<HomeGamesResponseDto> results = query
-                .limit(5)
+                .limit(10)
                 .fetch();
 
 
@@ -569,25 +571,26 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
     }
 
     @Override
-    public List<CommentDto> findComentsByGameId(Long gameId) {
+    public List<GameCommentDto> findComentsByGameId(Long gameId) {
 
         QBoardGame boardGame = QBoardGame.boardGame;
         QPost post = QPost.post;
         QComment comment = QComment.comment;
         QUser user = QUser.user;
 
-        List<CommentDto> commentDtos = queryFactory
-                .select(Projections.fields(CommentDto.class,
+        List<GameCommentDto> commentDtos = queryFactory
+                .select(Projections.fields(GameCommentDto.class,
                         comment.id.as("id"),
                         user.id.as("userId"),
                         comment.content.as("content"),
-                        user.username.as("userName"))
+                        user.username.as("userName"),
+                        post.id.as("postId"))
                 )
                 .from(comment)
                 .leftJoin(comment.user, user)
                 .leftJoin(comment.post, post)
                 .leftJoin(post.boardGame, boardGame)
-                .where(comment.post.boardGame.gameId.eq(gameId))
+                .where(comment.post.boardGame.gameId.eq(gameId).and(comment.deletedAt.isNull()))
                 .limit(10)
                 .fetch();
 

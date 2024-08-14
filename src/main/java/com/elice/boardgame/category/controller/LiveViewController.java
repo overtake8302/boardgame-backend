@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -27,9 +28,9 @@ public class LiveViewController {
 
     //뷰 스코어 추가
     @PutMapping("/add")
-    public void addViewScore(@RequestBody BoardGame game, HttpServletRequest request) {
+    public void addViewScore(@RequestParam Long gameId, HttpServletRequest request) {
         String ipAddress = request.getRemoteAddr();
-        liveViewService.addViewScore(game, ipAddress);
+        liveViewService.addViewScore(gameId, ipAddress);
     }
 
     @Scheduled(cron = "0 0 4 * * ?")

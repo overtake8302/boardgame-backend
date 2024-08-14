@@ -6,6 +6,7 @@ import com.elice.boardgame.category.dto.RecentlyViewGameDto;
 import com.elice.boardgame.category.service.LikeGenreService;
 import com.elice.boardgame.common.annotation.CurrentUser;
 import com.elice.boardgame.common.dto.CommonResponse;
+import com.elice.boardgame.common.dto.PaginationRequest;
 import com.elice.boardgame.game.dto.GameResponseDto;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +41,7 @@ public class LikeGenreController {
     public ResponseEntity<CommonResponse<List<GenreDto>>> getGenres(@CurrentUser User user) {
         List<GenreDto> genreDtos = likeGenreService.getGenres(user.getId());
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.maxAge(30, TimeUnit.SECONDS))
+            .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
             .body(CommonResponse.<List<GenreDto>>builder()
                 .payload(genreDtos)
                 .message("")
@@ -52,13 +53,12 @@ public class LikeGenreController {
     public ResponseEntity<CommonResponse<Page<GameResponseDto>>> getGames(
         @RequestParam String type,
         @CurrentUser User user,
-        @RequestParam int page,
-        @RequestParam int size) {
+        @RequestParam PaginationRequest paginationRequest) {
 
-        Page<GameResponseDto> games = likeGenreService.gameGet(type, user, page, size);
+        Page<GameResponseDto> games = likeGenreService.gameGet(type, user, paginationRequest);
 
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.maxAge(30, TimeUnit.SECONDS))
+            .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
             .body(CommonResponse.<Page<GameResponseDto>>builder()
                 .payload(games)
                 .message("")
@@ -71,7 +71,7 @@ public class LikeGenreController {
         List<RecentlyViewGameDto> dtos = likeGenreService.recentlyViewPosts(visitorId);
 
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.maxAge(30, TimeUnit.SECONDS))
+            .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
             .body(CommonResponse.<List<RecentlyViewGameDto>>builder()
                 .payload(dtos)
                 .message("")

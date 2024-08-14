@@ -132,10 +132,10 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<CommonResponse<Page<SearchResponse>>> searchPosts(@ModelAttribute SearchRequest searchRequest) {
+    public ResponseEntity<CommonResponse<Page<SearchPostResponse>>> searchPosts(@ModelAttribute SearchRequest searchRequest) {
         Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize());
         String keyword = searchRequest.getKeyword();
-        CommonResponse<Page<SearchResponse>> response = postService.searchPostsByKeyword(keyword, pageable);
+        CommonResponse<Page<SearchPostResponse>> response = postService.searchPostsByKeyword(keyword, pageable);
         return ResponseEntity.ok(response);
     }
 }
