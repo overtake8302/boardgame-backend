@@ -23,7 +23,7 @@ public class GameFilterController {
     public ResponseEntity<CommonResponse<List<GameResponseDto>>> getFilteredBoardGames(BoardGameFilterDto filterDTO) {
         List<GameResponseDto> gameResponseDtos = gameFilterService.getFilteredBoardGames(filterDTO);
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.maxAge(60, TimeUnit.SECONDS))
+            .cacheControl(CacheControl.maxAge(3, TimeUnit.SECONDS))
             .body(CommonResponse.<List<GameResponseDto>>builder()
                 .payload(gameResponseDtos)
                 .message("")

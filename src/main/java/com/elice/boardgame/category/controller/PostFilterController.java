@@ -29,7 +29,7 @@ public class PostFilterController {
         PostPageDto<PostListResponseDto> postPageDto = postFilterService.find(boardRequestDto);
 
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
+            .cacheControl(CacheControl.maxAge(3, TimeUnit.SECONDS))
             .body(CommonResponse.<PostPageDto<PostListResponseDto>>builder()
                 .payload(postPageDto)
                 .message("")

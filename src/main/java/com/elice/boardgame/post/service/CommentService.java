@@ -51,6 +51,7 @@ public class CommentService {
         }
 
         Comment comment = new Comment();
+        comment.setId(commentDto.getId());
         comment.setContent(commentDto.getContent());
         comment.setPost(postRepository.findById(postId).orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다!")));
         comment.setUser(user);

@@ -137,6 +137,7 @@ public class PostService {
 
         postDto.setComments(post.getComments().stream().map(comment -> {
             CommentDto commentDto = new CommentDto();
+            commentDto.setId(comment.getId());
             commentDto.setContent(comment.getContent());
             if (comment.getUser() != null) {
                 commentDto.setUserId(comment.getUser().getId());

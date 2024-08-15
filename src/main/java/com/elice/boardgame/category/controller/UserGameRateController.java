@@ -28,7 +28,7 @@ public class UserGameRateController {
     public ResponseEntity<CommonResponse<RatingCountDto>> getGamesByRating(@RequestParam Double rate, @CurrentUser User user) {
         RatingCountDto gamesByRating = userGameRateService.getGamesByRating(user.getId(), rate);
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.maxAge(30, TimeUnit.SECONDS))
+            .cacheControl(CacheControl.maxAge(3, TimeUnit.SECONDS))
             .body(CommonResponse.<RatingCountDto>builder()
                 .payload(gamesByRating)
                 .message("")
