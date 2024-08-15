@@ -11,6 +11,7 @@ import com.elice.boardgame.post.service.PostService;
 import com.elice.boardgame.post.service.S3Uploader;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Page;
@@ -74,7 +75,7 @@ public class PostController {
     }
 
     //  조회수 증가
-    @PostMapping("/{post_id}/increment-view")
+    /*@PostMapping("/{post_id}/increment-view")
     public ResponseEntity<PostDto> incrementViewAndGetPost(@PathVariable("post_id") Long id) {
         try {
             PostDto postDto = postService.incrementViewAndGetPost(id);
@@ -86,6 +87,11 @@ public class PostController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }*/
+
+     @PostMapping("/{post_id}/increment-view")
+    public void incrementViewAndGetPost(@RequestHeader("visitor-id") @NotBlank String visitorId, @RequestHeader("post-id") @Min(1) Long postId) {
+        postService.incrementViewAndGetPost(visitorId, postId);
     }
 
     //  좋아요~

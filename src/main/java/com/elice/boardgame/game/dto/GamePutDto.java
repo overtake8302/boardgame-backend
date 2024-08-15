@@ -33,7 +33,6 @@ public class GamePutDto {
     @NotNull
     private Enums.AgeLimit ageLimit;
 
-    @Min(1)
     @Max(2100000000)
     private int price;
 

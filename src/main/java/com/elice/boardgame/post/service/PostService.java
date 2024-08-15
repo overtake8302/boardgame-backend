@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.elice.boardgame.post.repository.PostVisitorRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -49,6 +50,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final AuthService authService;
     private final PostLikeRepository postLikeRepository;
+    private final PostVisitorRepository postVisitorRepository;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -92,21 +94,32 @@ public class PostService {
     }
 
     //  카테고리별로 게시글 조회
-    public Post getPostById(Long id) {
+    /*public Post getPostById(Long id) {
         return postRepository.findById(id).orElseThrow(() -> new NoSuchElementException("게시글을 찾을 수 없습니다!"));
+    }*/
+
+    public Post getPostById(Long id) {
+
+        Post post = postRepository.findPostById(id);
+
+        if (post == null) {
+            new NoSuchElementException("게시글을 찾을 수 없습니다!");
+        }
+
+        return post;
     }
 
     @Transactional
     public PostDto getPostDtoById(Long id) {
         Post post = getPostById(id);
 
-        View view = post.getView();
+        /*View view = post.getView();
         if (view == null) {
             view = new View();
             view.setPost(post);
             view.setViewCount(0);
             post.setView(view);
-        }
+        }*/
 
         PostDto postDto = new PostDto();
         postDto.setPostId(post.getId());
@@ -139,7 +152,8 @@ public class PostService {
 
         postDto.setGameImageUrl(post.getGameImageUrl());
 
-        postDto.setViewCount(post.getView().getViewCount()+1);
+//        postDto.setViewCount(post.getView().getViewCount()+1);
+        postDto.setViewCount(post.getView());
         postDto.setCreatedAt(post.getCreatedAt().format(formatter));
         postDto.setLikeCount(postLikeRepository.countLikesByPostId(post.getId()));
 
@@ -148,19 +162,21 @@ public class PostService {
 
     //  조회수
     @Transactional
-    public PostDto incrementViewAndGetPost(Long id) {
+    public PostDto incrementViewAndGetPost(String visitorId ,Long id) {
         Post post = getPostById(id);
         if (post == null) {
             throw new NoSuchElementException("게시글을 찾을 수 없습니다!");
         }
 
-        View view = post.getView();
+        postVisitorRepository.insertIgnore(visitorId, id);
+
+        /*View view = post.getView();
         if (view == null) {
             view = new View(post, 0);
             post.setView(view);
         } else {
             view.setViewCount(view.getViewCount() + 1);
-        }
+        }*/
 
         postRepository.save(post);
 

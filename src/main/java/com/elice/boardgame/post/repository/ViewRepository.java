@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ViewRepository extends JpaRepository<View, Long> {
-    Optional<View> findByPostId(Long postId);
+//    Optional<View> findByPostId(Long postId);
 }
