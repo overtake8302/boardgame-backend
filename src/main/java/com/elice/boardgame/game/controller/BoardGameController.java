@@ -43,7 +43,7 @@ public class    BoardGameController {
     public ResponseEntity<CommonResponse<GameResponseDto>> postGame(
             @RequestPart("gamePostDto") @Validated GamePostDto gamePostDto,
             BindingResult bindingResult,
-            @RequestPart(value = "file", required = false) List<MultipartFile> files,
+            @RequestPart(value = "file") List<MultipartFile> files,
             @CurrentUser User user
     ) throws IOException {
 
