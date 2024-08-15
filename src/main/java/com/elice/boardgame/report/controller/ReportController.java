@@ -1,6 +1,8 @@
 package com.elice.boardgame.report.controller;
 
+import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.category.dto.PostPageDto;
+import com.elice.boardgame.common.annotation.CurrentUser;
 import com.elice.boardgame.common.dto.CommonResponse;
 import com.elice.boardgame.common.dto.PaginationRequest;
 import com.elice.boardgame.report.dto.ReportCreateRequestDto;
@@ -41,8 +43,9 @@ public class ReportController {
     @PostMapping("/send")
     public void sendReport(
         @RequestPart("reportData") ReportCreateRequestDto requestDto,
-        @RequestPart("attachments") List<MultipartFile> attachments) {
-        reportService.sendReport(requestDto, attachments);
+        @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments,
+        @CurrentUser User user) {
+        reportService.sendReport(requestDto, attachments, user);
     }
 
     @PutMapping

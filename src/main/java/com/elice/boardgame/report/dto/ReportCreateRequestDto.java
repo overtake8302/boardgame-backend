@@ -6,9 +6,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class ReportCreateRequestDto {
-    private Long reporterId;
-    private Long reportedUserId;
     private Long reportedPostId;
+    private Long reportedGameId;
     private String reportReason;
     private List<MultipartFile> attachments;
 }

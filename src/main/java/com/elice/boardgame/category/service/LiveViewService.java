@@ -106,7 +106,7 @@ public class LiveViewService {
     }
 
     public List<GameResponseDto> getLiveViewRanking() {
-        List<LiveViewRanking> liveViews = liveViewRankingRepository.findAllByOrderBySumScoreDesc();
+        List<LiveViewRanking> liveViews = liveViewRankingRepository.find();
         List<BoardGame> boardGames = new ArrayList<>();
 
         for (LiveViewRanking liveView : liveViews) {
