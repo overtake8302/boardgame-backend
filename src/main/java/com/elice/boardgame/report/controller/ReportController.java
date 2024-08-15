@@ -31,6 +31,8 @@ public class ReportController {
     @GetMapping
     public CommonResponse<PostPageDto<ReportDto>> findReports(@RequestParam String status,
         PaginationRequest paginationRequest) {
+
+        System.out.println(paginationRequest.getPage() + paginationRequest.getSize());
         PostPageDto<ReportDto> reportDtos = reportService.find(status, paginationRequest);
 
         return CommonResponse.<PostPageDto<ReportDto>>builder()
