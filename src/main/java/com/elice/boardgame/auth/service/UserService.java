@@ -205,4 +205,15 @@ public class UserService {
 
         return comments;
     }
+
+    public void withdrawUser(User user) {
+        if (user == null) {
+            throw new UserException(UserErrorMessages.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+
+        // User의 상태를 'withdraw'로 변경
+        user.setUserState("withdraw");
+
+        userRepository.save(user);
+    }
 }

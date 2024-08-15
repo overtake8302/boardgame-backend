@@ -133,4 +133,19 @@ public class UserController {
         }
 
     }
+
+    @PutMapping("/withdraw")
+    public ResponseEntity<CommonResponse<String>> withdrawUser(
+            @CurrentUser User user) {
+        try {
+            userService.withdrawUser(user);
+            return new ResponseEntity<>(CommonResponse.<String>builder()
+                    .payload("User successfully withdrawn")
+                    .build(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(CommonResponse.<String>builder()
+                    .payload("Failed to withdraw user")
+                    .build(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

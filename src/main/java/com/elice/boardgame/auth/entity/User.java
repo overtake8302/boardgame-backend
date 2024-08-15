@@ -27,4 +27,7 @@ public class User {
 
     @Column(nullable = true)
     private String name;
+
+    @Column(nullable = true)
+    private String userState;
 }
