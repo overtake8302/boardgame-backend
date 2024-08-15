@@ -15,7 +15,7 @@ public class PostListMapper {
             post.getTitle(),
             post.getUser().getUsername(),
             post.getCreatedAt(),
-            (long) post.getView().getViewCount(),
+            (long) post.getView(),
             post.getLikeCount(),
             (long) post.getComments().size()
         ));

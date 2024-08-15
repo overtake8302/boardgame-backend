@@ -12,4 +12,5 @@ public interface CustomPostRepository {
     Page<Post> search(Pageable pageable, String query, String boardType, String sortBy);
     Page<SearchPostResponse> searchPostsByKeyword(String keyword, Pageable pageable);
     List<PostsByGame> findTop10ByBoardGameGameIdAndCategoryAndDeletedAtIsNullOrderByIdDesc(Long gameId, String category);
+    Post findPostById(Long id);
 }

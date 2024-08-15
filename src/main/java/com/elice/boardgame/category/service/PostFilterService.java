@@ -4,6 +4,7 @@ import com.elice.boardgame.category.dto.BoardRequestDto;
 import com.elice.boardgame.category.dto.PostListResponseDto;
 import com.elice.boardgame.category.dto.PostPageDto;
 import com.elice.boardgame.category.mapper.PostListMapper;
+import com.elice.boardgame.post.dto.PostDto;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.repository.PostRepository;
 import java.util.List;

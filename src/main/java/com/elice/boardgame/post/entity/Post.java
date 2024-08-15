@@ -52,8 +52,10 @@ public class Post extends BaseEntity {
     @Column(name = "like_count")
     private Long likeCount;
 
-    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private View view;
+    /*@OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private View view;*/
+
+    private Long view;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JsonManagedReference("post")
