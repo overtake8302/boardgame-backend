@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRepository {
-    List<Post> findTop10ByBoardGameGameIdAndCategoryAndDeletedAtIsNullOrderByIdDesc(Long gameId, String category);
 
     Page<Post> findAllByUser_IdAndDeletedAtIsNullOrderByIdDesc(Long id, Pageable pageable);
 

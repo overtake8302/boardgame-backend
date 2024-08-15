@@ -22,6 +22,7 @@ import com.elice.boardgame.game.entity.*;
 import com.elice.boardgame.game.mapper.BoardGameHistoryMapper;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
 import com.elice.boardgame.game.repository.*;
+import com.elice.boardgame.post.dto.PostDto;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.repository.CommentRepository;
 import com.elice.boardgame.post.repository.PostRepository;
@@ -393,18 +394,9 @@ public class BoardGameService {
     }
 
     public List<PostsByGame> getTop10Posts(Long gameId, String category) {
-        List<Post> posts = postRepository.findTop10ByBoardGameGameIdAndCategoryAndDeletedAtIsNullOrderByIdDesc(gameId, category);
-        List<PostsByGame> postDtos = new ArrayList<>();
-        for (Post post : posts) {
-            PostsByGame postDto = new PostsByGame();
-            postDto.setPostId(post.getId());
-            postDto.setCategory(post.getCategory());
-            postDto.setTitle(post.getTitle());
-            postDto.setContent(post.getContent());
-            postDto.setCreatedAt(post.getCreatedAt().format(formatter));
-            postDtos.add(postDto);
-        }
-        return postDtos;
+        List<PostsByGame> posts = postRepository.findTop10ByBoardGameGameIdAndCategoryAndDeletedAtIsNullOrderByIdDesc(gameId, category);
+
+        return posts;
     }
 
     public Page<SearchResponse> searchByKeyword(String keyword, Pageable pageable) {

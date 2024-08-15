@@ -13,8 +13,6 @@ public class PostDto {
     private String title;
     private String category;
     private int viewCount;
-    private List<String> imageUrls = new ArrayList<>();
-    private List<String> imageNames = new ArrayList<>();
     private Long userId;
     private String userName;
     private List<CommentDto> comments;

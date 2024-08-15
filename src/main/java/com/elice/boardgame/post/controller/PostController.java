@@ -120,7 +120,6 @@ public class PostController {
     public ResponseEntity<Post> updatePostByCategory(
             @PathVariable("post_id") Long id,
             @RequestBody PostDto postDetails) {
-        log.info("PostDto {}",postDetails);
         Post updatedPost = postService.updatePost(id, postDetails);
         return ResponseEntity.ok(updatedPost);
     }

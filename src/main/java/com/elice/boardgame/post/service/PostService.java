@@ -19,11 +19,15 @@ import com.elice.boardgame.post.repository.PostRepository;
 import com.elice.boardgame.game.entity.GameProfilePic;
 import com.elice.boardgame.auth.service.AuthService;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -70,11 +74,21 @@ public class PostService {
         post.setUser(currentUser);
 
         List<GameProfilePic> pics = boardGame.getGameProfilePics();
-        if (pics != null && pics.contains(0)) {
+        if (pics != null && !pics.isEmpty()) {
             post.setGameImageUrl(boardGame.getGameProfilePics().get(0).getPicAddress());
         }
 
         return postRepository.save(post);
+    }
+
+    private String saveImage(String base64Image) throws IOException {
+        byte[] decodedBytes = Base64.getDecoder().decode(base64Image);
+        String imageName = UUID.randomUUID().toString().substring(0, 8) + ".png";
+        File file = new File("src/main/resources/" + imageName);
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(decodedBytes);
+        }
+        return imageName;
     }
 
     //  카테고리별로 게시글 조회
@@ -95,6 +109,7 @@ public class PostService {
         }
 
         PostDto postDto = new PostDto();
+        postDto.setPostId(post.getId());
         postDto.setTitle(post.getTitle());
         postDto.setContent(post.getContent());
         postDto.setCategory(post.getCategory());
@@ -192,6 +207,9 @@ public class PostService {
             throw new RuntimeException("작성자만 게시글을 삭제할 수 있습니다!");
         }
 
+        post.setBoardGame(boardGameRepository.findByGameIdAndDeletedAtIsNull(postDetails.getGameId()));
+        post.setGameName(post.getBoardGame().getName());
+        post.setGameImageUrl(post.getBoardGame().getGameProfilePics().get(0).getPicAddress());
         post.setTitle(postDetails.getTitle());
         post.setContent(postDetails.getContent());
         post.setCategory(postDetails.getCategory());
