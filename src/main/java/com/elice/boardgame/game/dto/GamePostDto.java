@@ -6,6 +6,7 @@ import com.elice.boardgame.game.annotation.YouTubeLink;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -38,6 +39,7 @@ public class GamePostDto {
     private Enums.AgeLimit ageLimit;
 
     @Min(1)
+    @Max(2100000000)
     private int price;
 
     private String designer;

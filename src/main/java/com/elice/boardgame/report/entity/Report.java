@@ -3,6 +3,7 @@ package com.elice.boardgame.report.entity;
 import com.elice.boardgame.auth.entity.User;
 
 import com.elice.boardgame.common.entity.BaseEntity;
+import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.post.entity.Post;
 import jakarta.persistence.*;
 import java.util.List;
@@ -32,7 +33,11 @@ public class Report extends BaseEntity {
     private User reportedUser;
 
     @ManyToOne
-    @JoinColumn(name = "reported_post_id")
+    @JoinColumn(name = "game_id")
+    private BoardGame reportedGame;
+
+    @ManyToOne
+    @JoinColumn(name = "post_id")
     private Post reportedPost;
 
     private String reportStatus;

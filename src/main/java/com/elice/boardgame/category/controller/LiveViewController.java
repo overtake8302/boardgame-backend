@@ -33,7 +33,8 @@ public class LiveViewController {
         liveViewService.addViewScore(gameId, ipAddress);
     }
 
-    @Scheduled(cron = "0 0 4 * * ?")
+    //정각 한시간마다 업데이트
+    @Scheduled(cron = "0 0 * * * ?")
     @PutMapping("/score")
     public void updateLiveViewScore() {
         liveViewService.updateLiveViewScore();

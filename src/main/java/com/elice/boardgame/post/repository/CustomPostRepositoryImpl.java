@@ -3,6 +3,9 @@ package com.elice.boardgame.post.repository;
 import static com.elice.boardgame.post.entity.QPost.post;
 
 import com.elice.boardgame.common.dto.SearchResponse;
+import com.elice.boardgame.game.dto.PostsByGame;
+import com.elice.boardgame.game.entity.QBoardGame;
+import com.elice.boardgame.post.dto.PostDto;
 import com.elice.boardgame.post.dto.SearchPostResponse;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.entity.QPost;
@@ -95,6 +98,28 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
             .fetchCount();
 
         return new PageImpl<>(results, pageable, total);
+    }
+
+    @Override
+    public List<PostsByGame> findTop10ByBoardGameGameIdAndCategoryAndDeletedAtIsNullOrderByIdDesc(Long gameId, String category) {
+
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QPost post = QPost.post;
+
+        List<PostsByGame> result = queryFactory
+                .select(Projections.bean(PostsByGame.class,
+                                post.id.as("id"),
+                                post.category.as("category"),
+                                post.title.as("title"),
+                                post.content.as("content"),
+                                post.createdAt.stringValue().as("createdAt")
+                        )
+                        )
+                .from(post)
+                .where(post.boardGame.gameId.eq(gameId).and(post.category.eq(category)))
+                .fetch();
+
+        return result;
     }
 
 }

@@ -7,5 +7,5 @@ import com.elice.boardgame.game.entity.BoardGame;
 
 public interface CustomLiveViewRankingRepository {
     Optional<LiveViewRanking> findByGame(BoardGame game);
-    List<LiveViewRanking> findAllByOrderBySumScoreDesc();
+    List<LiveViewRanking> find();
 }

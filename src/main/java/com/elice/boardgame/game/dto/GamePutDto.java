@@ -2,6 +2,8 @@ package com.elice.boardgame.game.dto;
 
 import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.game.annotation.YouTubeLink;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -31,7 +33,8 @@ public class GamePutDto {
     @NotNull
     private Enums.AgeLimit ageLimit;
 
-    @NotNull
+    @Min(1)
+    @Max(2100000000)
     private int price;
 
     private String designer;
@@ -47,10 +50,6 @@ public class GamePutDto {
 
     @YouTubeLink
     private String youtubeLink;
-
-    /*private int likeCount;
-
-    private Double averageRate;*/
 
     private List<Long> gameGenreIds = new ArrayList<>();
 }

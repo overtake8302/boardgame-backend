@@ -24,13 +24,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(responseBody, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException ex, WebRequest request) {
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("error", "Not Found");
-        responseBody.put("message", ex.getMessage());
-
-        return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+    @ExceptionHandler(GenreNotFoundException.class)
+    public ResponseEntity<CommonResponse<String>> handleGenreNotFoundException(GenreNotFoundException ex) {
+        CommonResponse<String> response = CommonResponse.<String>builder()
+            .payload(null)
+            .message(ex.getMessage())
+            .status(HttpStatus.NOT_FOUND.value())
+            .build();
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)

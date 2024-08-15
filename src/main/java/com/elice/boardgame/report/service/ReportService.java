@@ -5,6 +5,7 @@ import com.elice.boardgame.auth.repository.UserRepository;
 import com.elice.boardgame.category.dto.PostPageDto;
 import com.elice.boardgame.common.dto.PaginationRequest;
 import com.elice.boardgame.common.exceptions.ReportNotFoundException;
+import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.repository.PostRepository;
@@ -35,6 +36,8 @@ public class ReportService {
 
     private final UserRepository userRepository;
 
+    private final BoardGameRepository boardGameRepository;
+
     private final ReportS3Service reportS3Service;
 
     public PostPageDto<ReportDto> find(String status, PaginationRequest paginationRequest) {
@@ -59,9 +62,9 @@ public class ReportService {
 
         List<ReportDto> content = reports.getContent().stream().map(report -> new ReportDto(
             report.getReportId(),
-            report.getReporter().getUsername(),
-            report.getReportedUser() != null ? report.getReportedUser().getUsername() : null,
+            report.getReporter().getId(),
             report.getReportedPost() != null ? report.getReportedPost().getId() : null,
+            report.getReportedGame() != null ? report.getReportedGame().getGameId() : null,
             report.getReportStatus(),
             report.getReportReason(),
             report.getAttachments().stream()
@@ -79,9 +82,9 @@ public class ReportService {
 
         List<ReportDto> content = reports.getContent().stream().map(report -> new ReportDto(
             report.getReportId(),
-            report.getReporter().getUsername(),
-            report.getReportedUser() != null ? report.getReportedUser().getUsername() : null,
+            report.getReporter().getId(),
             report.getReportedPost() != null ? report.getReportedPost().getId() : null,
+            report.getReportedGame() != null ? report.getReportedGame().getGameId() : null,
             report.getReportStatus(),
             report.getReportReason(),
             report.getAttachments().stream()
@@ -94,36 +97,37 @@ public class ReportService {
     }
 
     @Transactional
-    public void sendReport(ReportCreateRequestDto requestDto, List<MultipartFile> attachments) {
+    public void sendReport(ReportCreateRequestDto requestDto, List<MultipartFile> attachments, User user) {
         Report report = new Report();
+
+        report.setReporter(user);
         report.setAttachments(new ArrayList<>());
-
-        User reporter = userRepository.findById(requestDto.getReporterId()).orElseThrow();
-        report.setReporter(reporter);
-
-        User reportedUser = requestDto.getReportedUserId() != null
-            ? userRepository.findById(requestDto.getReportedUserId()).orElse(null)
-            : null;
-        report.setReportedUser(reportedUser);
 
         Post post = requestDto.getReportedPostId() != null
             ? postRepository.findById(requestDto.getReportedPostId()).orElse(null)
             : null;
         report.setReportedPost(post);
 
-        if (reportedUser == null && post == null) {
-            throw new ReportNotFoundException("reportedUser와 post 중 하나는 반드시 존재해야 합니다.");
+        BoardGame game = requestDto.getReportedGameId() != null
+            ? boardGameRepository.findById(requestDto.getReportedGameId()).orElse(null)
+            : null;
+        report.setReportedGame(game);
+
+        if (post == null && game == null) {
+            throw new ReportNotFoundException("Post와 Game 중 하나는 반드시 존재해야 합니다.");
         }
 
         report.setReportReason(requestDto.getReportReason());
         report.setReportStatus("진행 전");
 
-        attachments.forEach(file -> {
-            ReportAttachment attachment = new ReportAttachment();
-            attachment.setReport(report);
-            attachment.setAttachmentUrl(reportS3Service.uploadFile(file));
-            report.getAttachments().add(attachment);
-        });
+        if (attachments != null && !attachments.isEmpty()) {
+            attachments.forEach(file -> {
+                ReportAttachment attachment = new ReportAttachment();
+                attachment.setReport(report);
+                attachment.setAttachmentUrl(reportS3Service.uploadFile(file));
+                report.getAttachments().add(attachment);
+            });
+        }
 
         reportRepository.save(report);
     }

@@ -13,6 +13,7 @@ import com.elice.boardgame.game.dto.GameCommentDto;
 import com.elice.boardgame.post.entity.QComment;
 import com.elice.boardgame.post.entity.QPost;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -28,6 +29,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -266,22 +269,26 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 )
                 .fetch();
 
-        for (GameResponseDto result : results) {
-            List<String> profilePics = queryFactory
-                    .select(gameProfilePic.picAddress)
-                    .from(gameProfilePic)
-                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId())
-                            .and(gameProfilePic.isActive.eq(true)))
-                    .fetch();
-            result.setGameProfilePics(profilePics);
+        JPAQuery<Tuple> picQuery = queryFactory
+                .select(gameProfilePic.picAddress, gameProfilePic.boardGame.gameId)
+                .from(gameProfilePic)
+                .where(gameProfilePic.isActive.eq(true));
 
-            List<GameGenre> genres = queryFactory
-                    .select(gameGenre)
-                    .from(gameGenre)
-                    .where(gameGenre.boardGame.gameId.eq(result.getGameId()))
-                    .fetch();
-            result.setGameGenres(genres);
+        List<Tuple> picResult = picQuery.fetch();
+
+        Map<Long, List<String>> gamePicsMap = picResult.stream()
+                .collect(Collectors.groupingBy(
+                        tuple -> tuple.get(gameProfilePic.boardGame.gameId),
+                        Collectors.mapping(tuple -> tuple.get(gameProfilePic.picAddress), Collectors.toList())
+                ));
+
+        for (GameResponseDto dto : results) {
+            List<String> pics = gamePicsMap.get(dto.getGameId());
+            if (pics != null) {
+                dto.setGameProfilePics(pics);
+            }
         }
+
 
         long total = queryFactory
                 .select(boardGame.count())
@@ -315,7 +322,6 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .from(boardGame)
                 .leftJoin(boardGame.gameRates, gameRate)
                 .leftJoin(boardGame.gameVisitors, gameVisitor)
-                .leftJoin(boardGame.gameProfilePics, gameProfilePic)
                 .leftJoin(boardGame.gameLikes, gameLike)
                 .where(boardGame.deletedAt.isNull())
                 .groupBy(
@@ -348,14 +354,24 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        for (GameListResponseDto result : results) {
-            List<String> profilePics = queryFactory
-                    .select(gameProfilePic.picAddress)
-                    .from(gameProfilePic)
-                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId())
-                            .and(gameProfilePic.isActive.eq(true)))
-                    .fetch();
-            result.setGameProfilePics(profilePics);
+        JPAQuery<Tuple> picQuery = queryFactory
+                .select(gameProfilePic.picAddress, gameProfilePic.boardGame.gameId)
+                .from(gameProfilePic)
+                .where(gameProfilePic.isActive.eq(true));
+
+        List<Tuple> picResult = picQuery.fetch();
+
+        Map<Long, List<String>> gamePicsMap = picResult.stream()
+                .collect(Collectors.groupingBy(
+                        tuple -> tuple.get(gameProfilePic.boardGame.gameId),
+                        Collectors.mapping(tuple -> tuple.get(gameProfilePic.picAddress), Collectors.toList())
+                ));
+
+        for (GameListResponseDto dto : results) {
+            List<String> pics = gamePicsMap.get(dto.getGameId());
+            if (pics != null) {
+                dto.setGameProfilePics(pics);
+            }
         }
 
         long total = queryFactory
@@ -431,22 +447,26 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .fetch();
 
 
-        for (HomeGamesResponseDto result : results) {
-            List<String> profilePics = queryFactory
-                    .select(gameProfilePic.picAddress)
-                    .from(gameProfilePic)
-                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId())
-                            .and(gameProfilePic.isActive.eq(true)))
-                    .fetch();
-            result.setGameProfilePics(profilePics);
+        JPAQuery<Tuple> picQuery = queryFactory
+                .select(gameProfilePic.picAddress, gameProfilePic.boardGame.gameId)
+                .from(gameProfilePic)
+                .where(gameProfilePic.isActive.eq(true));
 
-            List<GameGenre> genres = queryFactory
-                    .select(gameGenre)
-                    .from(gameGenre)
-                    .where(gameGenre.boardGame.gameId.eq(result.getGameId()))
-                    .fetch();
-            result.setGameGenres(genres);
+        List<Tuple> picResult = picQuery.fetch();
+
+        Map<Long, List<String>> gamePicsMap = picResult.stream()
+                .collect(Collectors.groupingBy(
+                        tuple -> tuple.get(gameProfilePic.boardGame.gameId),
+                        Collectors.mapping(tuple -> tuple.get(gameProfilePic.picAddress), Collectors.toList())
+                ));
+
+        for (HomeGamesResponseDto dto : results) {
+            List<String> pics = gamePicsMap.get(dto.getGameId());
+            if (pics != null) {
+                dto.setGameProfilePics(pics);
+            }
         }
+
 
         return results;
     }
@@ -543,22 +563,26 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        for (GameResponseDto result : results) {
-            List<String> profilePics = queryFactory
-                    .select(gameProfilePic.picAddress)
-                    .from(gameProfilePic)
-                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId())
-                            .and(gameProfilePic.isActive.eq(true)))
-                    .fetch();
-            result.setGameProfilePics(profilePics);
+        JPAQuery<Tuple> picQuery = queryFactory
+                .select(gameProfilePic.picAddress, gameProfilePic.boardGame.gameId)
+                .from(gameProfilePic)
+                .where(gameProfilePic.isActive.eq(true));
 
-            List<GameGenre> genres = queryFactory
-                    .select(gameGenre)
-                    .from(gameGenre)
-                    .where(gameGenre.boardGame.gameId.eq(result.getGameId()))
-                    .fetch();
-            result.setGameGenres(genres);
+        List<Tuple> picResult = picQuery.fetch();
+
+        Map<Long, List<String>> gamePicsMap = picResult.stream()
+                .collect(Collectors.groupingBy(
+                        tuple -> tuple.get(gameProfilePic.boardGame.gameId),
+                        Collectors.mapping(tuple -> tuple.get(gameProfilePic.picAddress), Collectors.toList())
+                ));
+
+        for (GameResponseDto dto : results) {
+            List<String> pics = gamePicsMap.get(dto.getGameId());
+            if (pics != null) {
+                dto.setGameProfilePics(pics);
+            }
         }
+
 
         long total = queryFactory
                 .select(boardGame.count())
@@ -655,15 +679,26 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        for (GameListResponseDto result : results) {
-            List<String> profilePics = queryFactory
-                    .select(gameProfilePic.picAddress)
-                    .from(gameProfilePic)
-                    .where(gameProfilePic.boardGame.gameId.eq(result.getGameId())
-                            .and(gameProfilePic.isActive.eq(true)))
-                    .fetch();
-            result.setGameProfilePics(profilePics);
+        JPAQuery<Tuple> picQuery = queryFactory
+                .select(gameProfilePic.picAddress, gameProfilePic.boardGame.gameId)
+                .from(gameProfilePic)
+                .where(gameProfilePic.isActive.eq(true));
+
+        List<Tuple> picResult = picQuery.fetch();
+
+        Map<Long, List<String>> gamePicsMap = picResult.stream()
+                .collect(Collectors.groupingBy(
+                        tuple -> tuple.get(gameProfilePic.boardGame.gameId),
+                        Collectors.mapping(tuple -> tuple.get(gameProfilePic.picAddress), Collectors.toList())
+                ));
+
+        for (GameListResponseDto dto : results) {
+            List<String> pics = gamePicsMap.get(dto.getGameId());
+            if (pics != null) {
+                dto.setGameProfilePics(pics);
+            }
         }
+
 
         long total = queryFactory
                 .select(boardGame.count())
