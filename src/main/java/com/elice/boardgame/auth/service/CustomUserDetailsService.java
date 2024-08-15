@@ -19,7 +19,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsernameAndUserStateIsNull(username);
 
         if (user != null) {
             //UserDetails에 담아서 return하면 AutneticationManager가 검증 함
