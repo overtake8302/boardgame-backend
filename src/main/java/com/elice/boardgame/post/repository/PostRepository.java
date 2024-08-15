@@ -12,7 +12,7 @@ public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRep
 
     Page<Post> findAllByUser_IdAndDeletedAtIsNullOrderByIdDesc(Long id, Pageable pageable);
 
-    Post findByIdAndDeletedAtIsNull(Long postId);
+    Post findByIdAndDeletedAtIsNull(Long id);
 
 
 }

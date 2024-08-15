@@ -70,6 +70,7 @@ public class PostService {
         Post post = new Post();
         post.setTitle(postDto.getTitle());
         post.setContent(postDto.getContent());
+        log.info("createPost : {}", postDto.getContent());
         post.setCategory(postDto.getCategory());
         post.setGameName(boardGame.getName());
         post.setBoardGame(boardGame);
@@ -79,18 +80,12 @@ public class PostService {
         if (pics != null && !pics.isEmpty()) {
             post.setGameImageUrl(boardGame.getGameProfilePics().get(0).getPicAddress());
         }
+        log.info("Saving post to repository");
+        Post savedPost = postRepository.save(post);
+        log.info("Post saved with ID: {}", savedPost.getId());
+        log.info("Post saved with ID: {}", savedPost.getContent());
 
-        return postRepository.save(post);
-    }
-
-    private String saveImage(String base64Image) throws IOException {
-        byte[] decodedBytes = Base64.getDecoder().decode(base64Image);
-        String imageName = UUID.randomUUID().toString().substring(0, 8) + ".png";
-        File file = new File("src/main/resources/" + imageName);
-        try (FileOutputStream fos = new FileOutputStream(file)) {
-            fos.write(decodedBytes);
-        }
-        return imageName;
+        return savedPost;
     }
 
     //  카테고리별로 게시글 조회
@@ -125,6 +120,7 @@ public class PostService {
         postDto.setPostId(post.getId());
         postDto.setTitle(post.getTitle());
         postDto.setContent(post.getContent());
+        log.info("getPostDtoById : {}", postDto.getContent());
         postDto.setCategory(post.getCategory());
         postDto.setGameName(post.getGameName());
         postDto.setUserId(post.getUserId());
@@ -221,7 +217,7 @@ public class PostService {
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다!"));
 
         if (!post.getUser().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("작성자만 게시글을 삭제할 수 있습니다!");
+            throw new RuntimeException("작성자만 게시글을 수정할 수 있습니다!");
         }
 
         post.setBoardGame(boardGameRepository.findByGameIdAndDeletedAtIsNull(postDetails.getGameId()));
