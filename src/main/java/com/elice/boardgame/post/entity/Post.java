@@ -37,7 +37,7 @@ public class Post extends BaseEntity {
     private BoardGame boardGame;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
 
     private String category;
