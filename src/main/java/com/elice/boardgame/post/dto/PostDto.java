@@ -12,7 +12,7 @@ public class PostDto {
     private String content;
     private String title;
     private String category;
-    private int viewCount;
+    private Long viewCount;
     private Long userId;
     private String userName;
     private List<CommentDto> comments;

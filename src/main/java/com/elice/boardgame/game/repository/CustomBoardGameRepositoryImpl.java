@@ -443,7 +443,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         }
 
         List<HomeGamesResponseDto> results = query
-                .limit(10)
+                .limit(15)
                 .fetch();
 
 

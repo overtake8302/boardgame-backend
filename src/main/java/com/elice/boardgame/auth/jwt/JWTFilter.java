@@ -195,7 +195,8 @@ public class JWTFilter extends OncePerRequestFilter {
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
 
-        User user = userRepository.findByUsername(username);
+//        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsernameAndUserStateIsNull(username);
         if (user == null) {
             filterChain.doFilter(request, response);
             return;

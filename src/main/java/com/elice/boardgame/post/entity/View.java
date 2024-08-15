@@ -17,12 +17,12 @@ public class View {
     @Column(name = "view_count")
     private int viewCount;
 
-    @ManyToOne
+   /* @ManyToOne
     @JoinColumn(name = "post_id", nullable = false, insertable = true, updatable = true)
     private Post post;
 
     public View(Post post, int viewCount) {
         this.post = post;
         this.viewCount = viewCount;
-    }
+    }*/
 }

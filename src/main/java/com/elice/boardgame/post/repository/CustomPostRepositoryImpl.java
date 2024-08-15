@@ -7,13 +7,21 @@ import com.elice.boardgame.game.dto.PostsByGame;
 import com.elice.boardgame.game.entity.QBoardGame;
 import com.elice.boardgame.post.dto.PostDto;
 import com.elice.boardgame.post.dto.SearchPostResponse;
-import com.elice.boardgame.post.entity.Post;
-import com.elice.boardgame.post.entity.QPost;
+import com.elice.boardgame.post.entity.*;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.group.GroupBy;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -29,6 +37,8 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
     @Override
     public Page<Post> search(Pageable pageable, String query, String boardType, String sortBy) {
         QPost post = QPost.post;
+        QPostVisitor postVisitor = QPostVisitor.postVisitor;
+        QComment comment = QComment.comment;
 
         BooleanBuilder whereClause = new BooleanBuilder();
 
@@ -45,12 +55,46 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         }
 
         List<Post> posts = queryFactory
-            .selectFrom(post)
+                .select(Projections.fields(Post.class,
+                        post.id.as("id"),
+                        post.category.as("category"),
+                        post.title.as("title"),
+                        post.user.as("user"),
+                        post.createdAt.as("createdAt"),
+                        post.likeCount.as("likeCount"),
+                    Expressions.as(
+                            JPAExpressions
+                                .select(postVisitor.id.countDistinct())
+                                .from(postVisitor)
+                                .where(postVisitor.post.id.eq(post.id)),
+                        "view"
+                            )
+
+                ))
+            .from(post)
             .where(whereClause)
             .orderBy(getSortOrder(sortBy))
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
+
+        List<Comment> comments = queryFactory
+                .selectFrom(comment)
+                .where(comment.post.id.in(posts.stream().map(Post::getId).collect(Collectors.toList()))
+                        .and(comment.deletedAt.isNull()))
+                .fetch();
+
+        Map<Long, List<Comment>> commentsMap = comments.stream()
+                .collect(Collectors.groupingBy(commentIn -> commentIn.getPost().getId()));
+
+        posts.forEach(postIn -> {
+            List<Comment> postComments = commentsMap.get(postIn.getId());
+            if (postComments == null) {
+                postComments = new ArrayList<>();
+            }
+            postIn.setComments(postComments);
+        });
+
 
         long total = queryFactory
             .select(post.count())
@@ -69,7 +113,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
             case "추천순":
                 return post.likeCount.desc();
             case "조회순":
-                return post.view.viewCount.desc();
+                return post.view.desc();
             case "최신순":
             default:
                 return post.createdAt.desc();
@@ -108,7 +152,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         List<PostsByGame> result = queryFactory
                 .select(Projections.bean(PostsByGame.class,
-                                post.id.as("id"),
+                                post.id.as("postId"),
                                 post.category.as("category"),
                                 post.title.as("title"),
                                 post.content.as("content"),
@@ -122,4 +166,43 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         return result;
     }
 
+    @Override
+    public Post findPostById(Long id) {
+
+        QPost post = QPost.post;
+        QPostVisitor postVisitor = QPostVisitor.postVisitor;
+        QComment comment = QComment.comment;
+
+        Post result = queryFactory
+                .select(Projections.fields(Post.class,
+                        post.id.as("id"),
+                        post.category.as("category"),
+                        post.title.as("title"),
+                        post.user.as("user"),
+                        post.createdAt.as("createdAt"),
+                        post.likeCount.as("likeCount"),
+                        Expressions.as(
+                                JPAExpressions
+                                        .select(postVisitor.id.countDistinct())
+                                        .from(postVisitor)
+                                        .where(postVisitor.post.id.eq(post.id)),
+                                "view"
+                        ),
+                        post.gameName.as("gameName"),
+                        post.boardGame.as("boardGame")
+                ))
+                .from(post)
+                .where(post.id.eq(id))
+                .fetchOne();
+
+        List<Comment> comments = queryFactory
+                .selectFrom(QComment.comment)
+                .where(QComment.comment.post.id.eq(id)
+                        .and(QComment.comment.deletedAt.isNull()))
+                .fetch();
+
+        result.setComments(comments);
+
+        return result;
+    }
 }

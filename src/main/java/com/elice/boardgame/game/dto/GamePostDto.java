@@ -23,10 +23,6 @@ public class GamePostDto {
     @NotBlank
     private String name;
 
-//    private List<GameProfilePic> gameProfilePic;
-
-    //장르 추가하기
-
     private Enums.PlayTime playTime;
 
     @JoinColumn(name = "release_date")
@@ -38,7 +34,6 @@ public class GamePostDto {
     @NotNull
     private Enums.AgeLimit ageLimit;
 
-    @Min(1)
     @Max(2100000000)
     private int price;
 
