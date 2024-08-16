@@ -37,10 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -234,7 +231,7 @@ public class BoardGameService {
     }
 
     @Transactional
-    public GameResponseDto editGameV2(GamePutDto gamePutDto, List<MultipartFile> files, User user) throws IOException {
+    public synchronized GameResponseDto editGameV2(GamePutDto gamePutDto, List<MultipartFile> files, User user) throws IOException {
 
         if (user == null) {
             throw new UserException(UserErrorMessages.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -256,9 +253,9 @@ public class BoardGameService {
         }
 
         List<GameGenre> oldGenres = foundGame.getGameGenres();
-
-
-        for (GameGenre oldGenre : oldGenres) {
+        Iterator<GameGenre> genreIterator = oldGenres.iterator();
+        while (genreIterator.hasNext()) {
+            GameGenre oldGenre = genreIterator.next();
             gameGenreRepository.delete(oldGenre);
         }
 
@@ -266,29 +263,67 @@ public class BoardGameService {
         target.setEditBy(user);
 
         List<GameProfilePic> oldPics = target.getGameProfilePics();
-        for (GameProfilePic pic : oldPics) {
-            if (pic.getIsActive()) {
-                pic.setIsActive(false);
-                pic.setGameHistory(history);
-                gameProfilePicRepository.save(pic);
+        if (oldPics != null && !oldPics.isEmpty()) {
+            for (GameProfilePic pic : oldPics) {
+                if (pic.getIsActive()) {
+                    pic.setGameHistory(history);
+                    gameProfilePicRepository.save(pic);
+                }
+            }
+        }
+
+        List<GameProfilePic> newPics = new ArrayList<>();
+
+        if (gamePutDto.getGameProfilePics() != null && !gamePutDto.getGameProfilePics().isEmpty()) {
+            List<String> newPicUrl = gamePutDto.getGameProfilePics();
+
+            for (GameProfilePic oldPic : oldPics) {
+                for (String url : newPicUrl) {
+                    if (oldPic.getPicAddress().equals(url)) {
+                        newPics.add(oldPic);
+                        oldPic.setIsActive(true);
+                        break;
+                    } else {
+                        oldPic.setIsActive(false);
+                    }
+                }
+                gameProfilePicRepository.save(oldPic);
             }
         }
 
         if (files != null && !files.isEmpty()) {
 
-            List<GameProfilePic> pics = new ArrayList<>();
+            if (gamePutDto.getGameProfilePics() == null || gamePutDto.getGameProfilePics().isEmpty()) {
+                for (GameProfilePic oldPic : oldPics) {
+                    oldPic.setIsActive(false);
+                    gameProfilePicRepository.save(oldPic);
+                    }
+
+            }
 
             for (MultipartFile file : files) {
                 GameProfilePic pic = gameProfilePicService.save(file, target);
-                pics.add(pic);
+                newPics.add(pic);
             }
-
-            target.setGameProfilePics(pics);
         }
-        
+
+        if ((files == null || files.isEmpty()) && (gamePutDto.getGameProfilePics() == null || gamePutDto.getGameProfilePics().isEmpty())) {
+            List<GameProfilePic> removeTargetPic = target.getGameProfilePics();
+            Iterator<GameProfilePic> picIterator = removeTargetPic.iterator();
+            while (picIterator.hasNext()) {
+                GameProfilePic pic = picIterator.next();
+                if (pic.getIsActive()) {
+                    pic.setIsActive(false);
+                    picIterator.remove();
+                }
+            }
+        }
+
+        target.setGameProfilePics(newPics);
+
         List<GameGenre> genres = new ArrayList<>();
 
-        if (genres != null || !genres.isEmpty()) {
+        if (gamePutDto.getGameGenreIds() != null && !gamePutDto.getGameGenreIds().isEmpty()) {
             for (Long id : gamePutDto.getGameGenreIds()) {
                 GenreDto genreDto = genreService.findById(id);
                 Genre genre = genreMapper.toEntity(genreDto);
@@ -314,6 +349,7 @@ public class BoardGameService {
 
         return boardGameMapper.boardGameToGameResponseDto(target);
     }
+
 
 
     public Page<GameResponseDto> findGameByName(String keyword, Pageable pageable) {

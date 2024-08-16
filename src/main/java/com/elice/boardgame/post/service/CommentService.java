@@ -93,8 +93,10 @@ public class CommentService {
         Comment existingComment = commentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid comment ID"));
 
-        if (!existingComment.getUser().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("작성자만 댓글을 삭제할 수 있습니다!");
+        if (!currentUser.getRole().equals("ROLE_ADMIN")) {
+            if (!existingComment.getUser().getId().equals(currentUser.getId())) {
+                throw new RuntimeException("관리자 또는 작성자만 댓글을 삭제할 수 있습니다!");
+            }
         }
 
         commentRepository.delete(existingComment);
@@ -191,8 +193,10 @@ public class CommentService {
         Comment reply = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글의 ID가 올바르지 않습니다!"));
 
-        if (!reply.getUser().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("작성자만 대댓글을 삭제할 수 있습니다!");
+        if (!currentUser.getRole().equals("ROLE_ADMIN")) {
+            if (!reply.getUser().getId().equals(currentUser.getId())) {
+                throw new RuntimeException("작성자만 대댓글을 삭제할 수 있습니다!");
+            }
         }
 
         commentRepository.delete(reply);

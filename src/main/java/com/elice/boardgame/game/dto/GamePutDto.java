@@ -51,4 +51,6 @@ public class GamePutDto {
     private String youtubeLink;
 
     private List<Long> gameGenreIds = new ArrayList<>();
+
+    private List<String> gameProfilePics;
 }

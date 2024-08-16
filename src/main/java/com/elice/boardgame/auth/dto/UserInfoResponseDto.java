@@ -1,7 +1,5 @@
 package com.elice.boardgame.auth.dto;
 
-import com.elice.boardgame.post.dto.CommentDto;
-import com.elice.boardgame.post.dto.PostDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,15 +11,10 @@ import java.util.List;
 public class UserInfoResponseDto {
 
     private Long id;
-
     private String username;
-
     private String role;
-
     private Integer age;
-
     private String phonenumber;
-
     private String name;
-
+    private String profileImageUrl; // 프로필 사진 URL 필드 추가
 }
