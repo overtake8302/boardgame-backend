@@ -11,6 +11,7 @@ import com.elice.boardgame.common.dto.CommonResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,12 +41,27 @@ public class AuthController {
         this.joinService = joinService;
     }
 
+<<<<<<< HEAD
         @Operation(summary = "회원 가입", description = "사용자 회원 가입을 처리합니다.")
         @ApiResponses(value = {
                 @ApiResponse(responseCode = "200", description = "회원 가입 성공"),
                 @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content),
                 @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
     })
+=======
+    @Operation(
+            summary = "회원 가입",
+            description = "사용자 회원 가입을 처리합니다.",
+            parameters = {
+                    @Parameter(name = "username", description = "아이디", required = true, schema = @Schema(type = "string", example = "id1234")),
+                    @Parameter(name = "password", description = "비밀번호", required = true, schema = @Schema(type = "string", example = "password123")),
+                    @Parameter(name = "age", description = "사용자 나이", required = false, schema = @Schema(type = "integer", example = "25")),
+                    @Parameter(name = "phonenumber", description = "사용자 전화번호", required = false, schema = @Schema(type = "string", example = "010-1234-5678")),
+                    @Parameter(name = "name", description = "사용자 이름", required = false, schema = @Schema(type = "string", example = "elice")),
+                    @Parameter(name = "profileImage", description = "프로필 이미지", required = false, schema = @Schema(type = "string", format = "binary"))
+            }
+    )
+>>>>>>> c217bea304cab3e1169453246269c56eb63312fb
     @PostMapping("/join")
     public ResponseEntity<String> joinProcess(
             @Parameter(description = "사용자 이름", required = true) @RequestParam("username") String username,
