@@ -3,18 +3,23 @@ package com.elice.boardgame.auth.service;
 import com.elice.boardgame.auth.dto.JoinDTO;
 import com.elice.boardgame.auth.entity.User;
 import com.elice.boardgame.auth.repository.UserRepository;
+import com.elice.boardgame.post.service.S3Uploader;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Service
 public class JoinService {
-
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final S3Uploader s3Uploader; // S3Uploader 주입
 
-    public JoinService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public JoinService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, S3Uploader s3Uploader) {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.s3Uploader = s3Uploader;
     }
 
     public void joinProcess(JoinDTO joinDTO) {
@@ -23,6 +28,7 @@ public class JoinService {
         Integer age = joinDTO.getAge();
         String phonenumber = joinDTO.getPhonenumber();
         String name = joinDTO.getName();
+        MultipartFile profileImage = joinDTO.getProfileImage(); // 이미지 파일 받기
 
         // 사용자 이름 및 비밀번호 유효성 검사
         validateUsername(username);
@@ -51,6 +57,20 @@ public class JoinService {
             user.setName(name);
         }
 
+        // 이미지 업로드 처리
+        if (profileImage != null && !profileImage.isEmpty()) {
+            try {
+                String imageUrl = s3Uploader.uploadFile(profileImage);
+                user.setProfileImageUrl(imageUrl); // User 클래스에 profileImageUrl 필드가 필요함
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 업로드에 실패했습니다.", e);
+            }
+        }
+
+        System.out.println("sage : " + joinDTO.getAge());
+        System.out.println("sphone : " + joinDTO.getPhonenumber());
+        System.out.println("sname :" + joinDTO.getName());
+        System.out.println("surl : " + joinDTO.getProfileImage());
         userRepository.save(user);
     }
 
