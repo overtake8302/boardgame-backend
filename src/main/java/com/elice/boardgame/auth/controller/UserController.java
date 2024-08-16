@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/users")
@@ -95,21 +96,28 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/my")
-    public ResponseEntity<CommonResponse<String>> updateUser(
+    @PutMapping("/me")
+    public ResponseEntity<String> updateUser(
             @CurrentUser User user,
-            @RequestBody UpdateUserDTO updateUserDTO) {
+            @RequestParam(value = "age", required = false) Integer age,
+            @RequestParam(value = "phonenumber", required = false) String phonenumber,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "profileImage", required = false) MultipartFile profileImage){
 
-        try {
-            userService.updateUser(user, updateUserDTO);
-            return new ResponseEntity<>(CommonResponse.<String>builder()
-                    .payload("User information updated successfully")
-                    .build(), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(CommonResponse.<String>builder()
-                    .payload("Failed to update user information")
-                    .build(), HttpStatus.BAD_REQUEST);
-        }
+        UpdateUserDTO updateUserDTO = new UpdateUserDTO();
+        updateUserDTO.setAge(age);
+        updateUserDTO.setPhonenumber(phonenumber);
+        updateUserDTO.setName(name);
+        updateUserDTO.setProfileImage(profileImage);
+
+        System.out.println("cage : " + updateUserDTO.getAge());
+        System.out.println("cphone : " + updateUserDTO.getPhonenumber());
+        System.out.println("cname :" + updateUserDTO.getName());
+        System.out.println("curl : " + updateUserDTO.getProfileImage());
+
+
+        userService.updateUser(user, updateUserDTO);
+        return ResponseEntity.ok("update ok");
     }
 
     @GetMapping("/user/search")
@@ -117,21 +125,6 @@ public class UserController {
         Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize());
         String keyword = searchRequest.getKeyword();
         return userService.searchUsersByKeyword(keyword, pageable);
-    }
-
-
-    @PutMapping("/me")
-    public ResponseEntity<String> updateUser(
-            @Valid @RequestBody UpdateUserDTO updateUserDTO,
-            @CurrentUser User currentUser) {
-
-        try {
-            userService.updateUser(currentUser, updateUserDTO);
-            return new ResponseEntity<>("회원 정보가 성공적으로 업데이트되었습니다.", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("회원 정보 업데이트 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
     }
 
     @PutMapping("/withdraw")
