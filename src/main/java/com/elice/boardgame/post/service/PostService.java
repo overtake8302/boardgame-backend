@@ -83,16 +83,6 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    private String saveImage(String base64Image) throws IOException {
-        byte[] decodedBytes = Base64.getDecoder().decode(base64Image);
-        String imageName = UUID.randomUUID().toString().substring(0, 8) + ".png";
-        File file = new File("src/main/resources/" + imageName);
-        try (FileOutputStream fos = new FileOutputStream(file)) {
-            fos.write(decodedBytes);
-        }
-        return imageName;
-    }
-
     //  카테고리별로 게시글 조회
     /*public Post getPostById(Long id) {
         return postRepository.findById(id).orElseThrow(() -> new NoSuchElementException("게시글을 찾을 수 없습니다!"));
@@ -131,6 +121,7 @@ public class PostService {
 
         if (post.getUser() != null) {
             postDto.setUserName(post.getUser().getUsername());
+            postDto.setUserImageUrl(post.getUser().getProfileImageUrl());
         } else {
             postDto.setUserName("비회원");
         }
@@ -142,6 +133,7 @@ public class PostService {
             if (comment.getUser() != null) {
                 commentDto.setUserId(comment.getUser().getId());
                 commentDto.setUserName(comment.getUser().getUsername());
+                commentDto.setUserImageUrl(comment.getUser().getProfileImageUrl());
             } else {
                 commentDto.setUserId(null);
                 commentDto.setUserName("비회원");
@@ -221,7 +213,7 @@ public class PostService {
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다!"));
 
         if (!post.getUser().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("작성자만 게시글을 삭제할 수 있습니다!");
+            throw new RuntimeException("작성자만 게시글을 수정할 수 있습니다!");
         }
 
         post.setBoardGame(boardGameRepository.findByGameIdAndDeletedAtIsNull(postDetails.getGameId()));
