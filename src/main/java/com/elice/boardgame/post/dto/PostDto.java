@@ -3,6 +3,8 @@ package com.elice.boardgame.post.dto;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SimpleTimeZone;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,4 +23,5 @@ public class PostDto {
     private String gameImageUrl;
     private String createdAt;
     private Long likeCount;
+    private String userImageUrl;
 }

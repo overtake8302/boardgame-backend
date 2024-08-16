@@ -64,6 +64,7 @@ public class CommentService {
         responseDto.setContent(savedComment.getContent());
         responseDto.setUserId(user.getId());
         responseDto.setUserName(user.getUsername());
+        responseDto.setUserImageUrl(user.getProfileImageUrl());
         responseDto.setCreatedAt(savedComment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
         return responseDto;
@@ -122,6 +123,7 @@ public class CommentService {
         if (comment.getUser() != null) {
             dto.setUserId(comment.getUser().getId());
             dto.setUserName(comment.getUser().getUsername());
+            dto.setUserImageUrl(comment.getUser().getProfileImageUrl());
         }
         dto.setParentId(comment.getParent() != null ? comment.getParent().getId() : null);
         dto.setComInComs(
