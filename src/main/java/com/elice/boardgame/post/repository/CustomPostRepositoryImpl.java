@@ -189,7 +189,9 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                                 "view"
                         ),
                         post.gameName.as("gameName"),
-                        post.boardGame.as("boardGame")
+                        post.boardGame.as("boardGame"),
+                        post.gameImageUrl.as("gameImageUrl"),
+                        post.content.as("content")
                 ))
                 .from(post)
                 .where(post.id.eq(id))

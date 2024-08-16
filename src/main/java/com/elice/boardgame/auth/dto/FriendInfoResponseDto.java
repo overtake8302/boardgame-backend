@@ -11,4 +11,5 @@ public class FriendInfoResponseDto {
 
     private String username;
 
+    private String profileImageUrl;
 }

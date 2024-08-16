@@ -21,4 +21,5 @@ public class CommentDto {
     private List<CommentDto> replies;
     private Long likeCount;
     private Long replyLikeCount;
+    private String userImageUrl;
 }

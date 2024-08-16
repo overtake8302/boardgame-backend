@@ -13,6 +13,7 @@ import com.elice.boardgame.post.entity.Comment;
 import com.elice.boardgame.post.entity.Post;
 import com.elice.boardgame.post.repository.CommentRepository;
 import com.elice.boardgame.post.repository.PostRepository;
+import com.elice.boardgame.post.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,7 +21,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,23 +35,21 @@ public class UserService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final S3Uploader s3Uploader;
 
-    public UserInfoResponseDto getMyInfo(User user) {
+public UserInfoResponseDto getMyInfo(User user) {
+    UserInfoResponseDto userInfoResponseDto = new UserInfoResponseDto();
+    // 사용자의 정보를 UserInfoResponseDto로 매핑
+    userInfoResponseDto.setId(user.getId());
+    userInfoResponseDto.setUsername(user.getUsername());
+    userInfoResponseDto.setRole(user.getRole());
+    userInfoResponseDto.setAge(user.getAge());
+    userInfoResponseDto.setPhonenumber(user.getPhonenumber());
+    userInfoResponseDto.setName(user.getName());
+    userInfoResponseDto.setProfileImageUrl(user.getProfileImageUrl()); // 프로필 사진 URL 설정
 
-        if (user == null) {
-            throw new UserException(UserErrorMessages.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
-        }
-
-        UserInfoResponseDto userInfoResponseDto = new UserInfoResponseDto();
-        userInfoResponseDto.setId(user.getId());
-        userInfoResponseDto.setUsername(user.getUsername());
-        userInfoResponseDto.setName(user.getName());
-        userInfoResponseDto.setAge(user.getAge());
-        userInfoResponseDto.setPhonenumber(user.getPhonenumber());
-        userInfoResponseDto.setRole(user.getRole());
-
-        return userInfoResponseDto;
-    }
+    return userInfoResponseDto;
+}
 
     public Page<MyPostResponseDto> findMyPosts(User user, Pageable pageable) {
 
@@ -120,14 +121,12 @@ public class UserService {
         FriendInfoResponseDto userInfoResponseDto = new FriendInfoResponseDto();
         userInfoResponseDto.setId(user.getId());
         userInfoResponseDto.setUsername(user.getUsername());
+        userInfoResponseDto.setProfileImageUrl(user.getProfileImageUrl());
 
         return userInfoResponseDto;
     }
 
     public void updateUser(User user, UpdateUserDTO updateUserDTO) {
-        if (user == null) {
-            throw new UserException(UserErrorMessages.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
-        }
 
         if (updateUserDTO.getAge() != null) {
             user.setAge(updateUserDTO.getAge());
@@ -141,6 +140,15 @@ public class UserService {
             user.setName(updateUserDTO.getName());
         }
 
+        // 이미지 업로드 처리
+        if (updateUserDTO.getProfileImage() != null && !updateUserDTO.getProfileImage().isEmpty()) {
+            try {
+                String imageUrl = s3Uploader.uploadFile(updateUserDTO.getProfileImage());
+                user.setProfileImageUrl(imageUrl); // User 클래스에 profileImageUrl 필드가 필요함
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 업로드에 실패했습니다.", e);
+            }
+        }
         userRepository.save(user);
     }
 

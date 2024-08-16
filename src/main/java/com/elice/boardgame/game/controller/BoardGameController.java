@@ -12,6 +12,10 @@ import com.elice.boardgame.common.exceptions.GameRootException;
 import com.elice.boardgame.game.dto.*;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
 import com.elice.boardgame.game.service.BoardGameService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -39,11 +43,17 @@ public class    BoardGameController {
     private final BoardGameMapper mapper;
     private final AuthService authService;
 
+    @Operation(summary = "게임 생성", description = "게임 정보 등록을 처리 합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "게임 등록 성공"),
+            @ApiResponse(responseCode = "400", description = "필수 입력값 누락등 검증 통과 실패"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
     @PostMapping
     public ResponseEntity<CommonResponse<GameResponseDto>> postGame(
             @RequestPart("gamePostDto") @Validated GamePostDto gamePostDto,
             BindingResult bindingResult,
-            @RequestPart(value = "file") List<MultipartFile> files,
+            @RequestPart(value = "file", required = false) List<MultipartFile> files,
             @CurrentUser User user
     ) throws IOException {
 
@@ -59,6 +69,12 @@ public class    BoardGameController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "게임 단건 조회", description = "게임 id로 게임 정보를 조회 합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "게임 조회 성공"),
+            @ApiResponse(responseCode = "404", description = "삭제된 게임이나 존재하지 않는 게임 id"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
     @GetMapping("/{gameId}")
     public ResponseEntity<CommonResponse<GameResponseDto>> getGame(
             @PathVariable @Min(1) Long gameId,
@@ -76,6 +92,12 @@ public class    BoardGameController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(summary = "게임 삭제", description = "게임 id로 게임을 삭제합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "게임 삭제 성공"),
+            @ApiResponse(responseCode = "404", description = "존재 하지 않거나 이미 삭제된 게임 삭제 요청"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
     @DeleteMapping("/{gameId}")
     public ResponseEntity<CommonResponse<?>> deleteGame(@PathVariable @Min(1) Long gameId) {
 
@@ -89,6 +111,12 @@ public class    BoardGameController {
                 ,HttpStatus.OK);
     }
 
+    @Operation(summary = "게임 수정", description = "게임 id로 게임을 수정합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "게임 수정 성공"),
+            @ApiResponse(responseCode = "400", description = "필수 입력값 누락등 검증 통과 실패"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
     @PutMapping("/{gameId}")
     public ResponseEntity<CommonResponse<GameResponseDto>> putGame(
             @PathVariable Long gameId,
@@ -110,6 +138,11 @@ public class    BoardGameController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(summary = "게임 제목 검색", description = "제목으로 게임을 검색합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "검색 성공"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
     @GetMapping("/search")
     public ResponseEntity<CommonResponse<Page<SearchResponse>>> searchByKeyword(@ModelAttribute SearchRequest searchRequest) {
         String keyword = searchRequest.getKeyword();
@@ -122,6 +155,12 @@ public class    BoardGameController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(summary = "게임 좋아요", description = "좋아요, 좋아요 취소를 처리 합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "좋아요, 좋아요 취소 성공"),
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 gameId, 혹은 요청 user 확인 실패"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
     @PostMapping("/like")
     public ResponseEntity<CommonResponse<ClickLikeResponseDto>> clickLike(@RequestParam @Min(1) Long gameId, @CurrentUser User user) {
 
@@ -133,6 +172,12 @@ public class    BoardGameController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(summary = "게임 평점", description = "평점등록, 수정, 취소를 처리합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "평점 처리 성공"),
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 gameId, 혹은 요청 user 확인 실패, 정상 범위를 벗어난 평점 등록 요청"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
     @PostMapping("/rate")
     public ResponseEntity<CommonResponse<GameRateResponseDto>> postGameRate(
             @RequestParam @Min(1) Long gameId,
@@ -147,6 +192,11 @@ public class    BoardGameController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(summary = "게임 리스트 조회", description = "게임 목록을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "게임 조회 성공"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
     @GetMapping
     public ResponseEntity<CommonResponse<Page<GameListResponseDto>>> getGames(
             @ModelAttribute GamesPaginationRequest paginationRequest,
@@ -168,13 +218,19 @@ public class    BoardGameController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-
+    @Operation(summary = "게임 조회수", description = "게임 조회수를 증가 시킵니다.")
     @PostMapping("/view")
     public ResponseEntity<Void> incrementViewCount(@RequestHeader("visitor-id") @NotBlank String visitorId, @RequestHeader("game-id") @Min(1) Long gameId) {
         boardGameService.incrementViewCount(visitorId, gameId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Operation(summary = "Home용 게임 5건씩 조회", description = "Home화면에서 사용하는 조건별 게임을 5건씩 조회 합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "게임 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "정렬을 위한 필수 쿼리스트링 누락"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
     @GetMapping("/home")
     public ResponseEntity<CommonResponse<List<HomeGamesResponseDto>>> getHomeGames(
             @RequestParam @NotNull Enums.GameListSortOption sort,
@@ -190,6 +246,11 @@ public class    BoardGameController {
     }
 
 
+    @Operation(summary = "게임 정보 최초 작성자 확인", description = "게임을 삭제할 수 있는 최초 작성자인지 확인합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "확인 성공"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
     @GetMapping("/isFirstCreator")
     public ResponseEntity<Boolean> isFirstCreator(@RequestParam Long gameId, @CurrentUser User user) {
 
@@ -198,7 +259,12 @@ public class    BoardGameController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    //ToDo
+    @Operation(summary = "게임 수정 내역 조회", description = "게임 정보 수정 내역을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "수정내역이 있고, 조회에 성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 게임의 조회요청, 수정내역이 없는 게임의 내역 요청"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
     @GetMapping("/{gameId}/histories")
     public ResponseEntity<CommonResponse<Page<GameHistoriesResponseDto>>> getGameHistories(Pageable pageable,@PathVariable Long gameId) {
 
@@ -211,7 +277,12 @@ public class    BoardGameController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    //ToDo
+    @Operation(summary = "특정 버전 게임 정보 조회", description = "특정 버전의 게임 정보를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "수정내역이 있고, 조회에 성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 게임의 조회요청, 존재하지 않는 수정내역 요청"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
     @GetMapping("/history/{historyId}")
     public ResponseEntity<CommonResponse<GameHistoryResponseDto>> getGameHistory(@PathVariable Long historyId) {
 
