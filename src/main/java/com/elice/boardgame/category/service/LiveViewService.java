@@ -39,13 +39,16 @@ public class LiveViewService {
 
         BoardGame game = optionalBoardGame.orElseThrow();
 
-        Optional<LiveView> optionalEntity = liveViewRepository.findByGame(game);
+        List<LiveView> liveViews = liveViewRepository.findLiveViewsByGame(game);
 
-        LiveView liveView = optionalEntity.orElse(new LiveView());
-
-        if (liveView.getIpAddress() != null && liveView.getIpAddress().equals(ipAddress)) {
-            return;
+        for (LiveView liveView: liveViews) {
+            if (liveView.getIpAddress() != null && liveView.getIpAddress().equals(ipAddress)) {
+                return;
+            }
         }
+
+        LiveView liveView = new LiveView();
+
         LocalDate now = LocalDate.now();
 
         liveView.setGame(game);

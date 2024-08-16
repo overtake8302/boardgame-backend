@@ -11,5 +11,5 @@ import software.amazon.awssdk.services.s3.endpoints.internal.Value.Bool;
 
 @Repository
 public interface LiveViewRepository extends JpaRepository<LiveView, Long> {
-    Optional<LiveView> findByGame(BoardGame game);
+    List<LiveView> findLiveViewsByGame(BoardGame game);
 }
