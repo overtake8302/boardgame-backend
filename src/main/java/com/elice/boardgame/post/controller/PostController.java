@@ -47,8 +47,6 @@ public class PostController {
             PostDto postDto = new PostDto();
             postDto.setTitle(title);
             postDto.setContent(content);
-            log.info("content : {}", content);
-            log.info("postDto.getContent : {}", postDto.getContent());
             postDto.setCategory(category);
             postDto.setGameName(gameName);
             postDto.setGameId(gameId);
