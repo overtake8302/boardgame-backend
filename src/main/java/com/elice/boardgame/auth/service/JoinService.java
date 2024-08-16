@@ -67,10 +67,6 @@ public class JoinService {
             }
         }
 
-        System.out.println("sage : " + joinDTO.getAge());
-        System.out.println("sphone : " + joinDTO.getPhonenumber());
-        System.out.println("sname :" + joinDTO.getName());
-        System.out.println("surl : " + joinDTO.getProfileImage());
         userRepository.save(user);
     }
 
