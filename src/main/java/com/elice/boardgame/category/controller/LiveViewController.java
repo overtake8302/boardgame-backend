@@ -39,9 +39,11 @@ public class LiveViewController {
         @ApiResponse(responseCode = "400", description = "잘못된 요청"),
         @ApiResponse(responseCode = "404", description = "게임을 찾을 수 없음")
     })
-    @PutMapping("/add")
     public void addViewScore(@RequestParam Long gameId, HttpServletRequest request) {
-        String ipAddress = request.getRemoteAddr();
+        String ipAddress = request.getHeader("X-Forwarded-For");
+        if (ipAddress == null || ipAddress.isEmpty()) {
+            ipAddress = request.getRemoteAddr();
+        }
         liveViewService.addViewScore(gameId, ipAddress);
     }
 
