@@ -42,8 +42,13 @@ public class LiveViewController {
     @PutMapping("/add")
     public void addViewScore(@RequestParam Long gameId, HttpServletRequest request) {
         String ipAddress = request.getHeader("X-Forwarded-For");
-        if (ipAddress == null || ipAddress.isEmpty()) {
-            ipAddress = request.getRemoteAddr();
+        if (ipAddress != null && !ipAddress.isEmpty()) {
+            ipAddress = ipAddress.split(",")[0].trim();
+        } else {
+            ipAddress = request.getHeader("X-Real-IP");
+            if (ipAddress == null || ipAddress.isEmpty()) {
+                ipAddress = request.getRemoteAddr();
+            }
         }
         liveViewService.addViewScore(gameId, ipAddress);
     }
