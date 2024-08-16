@@ -133,24 +133,5 @@ public class AuthController {
 
         return new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
     }
-
-    @Operation(summary = "회원 탈퇴", description = "사용자의 계정을 탈퇴 처리합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "회원 탈퇴 성공"),
-            @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
-    })
-    @PutMapping("/withdraw")
-    public ResponseEntity<CommonResponse<String>> withdrawUser(@CurrentUser User user, HttpServletResponse response) {
-        try {
-            authService.withdrawUser(user, response);
-            return new ResponseEntity<>(CommonResponse.<String>builder()
-                    .payload("User successfully withdrawn and logged out")
-                    .build(), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(CommonResponse.<String>builder()
-                    .payload("Failed to withdraw user")
-                    .build(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 }
 
