@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,25 +40,24 @@ public class LiveViewService {
 
         BoardGame game = optionalBoardGame.orElseThrow();
 
-        Optional<LiveView> optionalEntity = liveViewRepository.findByGame(game);
+        List<LiveView> liveViews = liveViewRepository.findLiveViewsByGame(game);
 
-        LiveView liveView = optionalEntity.orElse(new LiveView());
-
-        if (liveView.getIpAddress() != null && liveView.getIpAddress().equals(ipAddress)) {
-            return;
+        for (LiveView liveView: liveViews) {
+            if (liveView.getIpAddress() != null && liveView.getIpAddress().equals(ipAddress)) {
+                return;
+            }
         }
-        LocalDate now = LocalDate.now();
+
+        LiveView liveView = new LiveView();
 
         liveView.setGame(game);
-        liveView.setCreatedAt(now.atStartOfDay());
         liveView.setViewScore(8L);
         liveView.setIpAddress(ipAddress);
 
         liveViewRepository.save(liveView);
     }
 
-
-    public void updateViewScores() {
+    public void updateLiveViewScore() {
         LocalDateTime currentDateTime = LocalDateTime.now();
 
         List<LiveView> dataList = liveViewRepository.findAll();
@@ -65,9 +65,7 @@ public class LiveViewService {
         for (LiveView data : dataList) {
             LocalDateTime dateTime = data.getCreatedAt();
             Duration duration = Duration.between(dateTime, currentDateTime);
-
             long hours = duration.toHours();
-
             if (hours <= 12) {
                 data.setViewScore(8L);
             } else if (hours <= 24) {
@@ -96,7 +94,8 @@ public class LiveViewService {
                 Collectors.summingLong(LiveView::getViewScore)));
 
         viewCounts.forEach((game, sumScore) -> {
-            Optional<LiveViewRanking> optionalEntity = liveViewRankingRepository.findByGame(game);
+            Optional<LiveViewRanking> optionalEntity = liveViewRankingRepository.findByGame(
+                game);
             LiveViewRanking ranking;
             if (optionalEntity.isPresent()) {
                 ranking = optionalEntity.get();

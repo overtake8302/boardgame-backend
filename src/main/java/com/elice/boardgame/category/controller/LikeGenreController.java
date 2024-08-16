@@ -69,7 +69,7 @@ public class LikeGenreController {
             .body(CommonResponse.<List<GenreDto>>builder().payload(genreDtos).message("").status(200).build());
     }
 
-    @Operation(summary = "게임 조회", description = "유저의 좋아요 또는 평점에 기반하여 게임 목록을 조회합니다.", parameters = {
+    @Operation(summary = "추천 게임 조회", description = "유저의 좋아요 또는 평점에 기반하여 게임 목록을 조회합니다.", parameters = {
         @Parameter(name = "type", description = "조회할 게임 목록의 타입 (예: 'like','rate','genre/rate','genre')", required = true, schema = @Schema(type = "String", example = "like")),
         @Parameter(name = "page", description = "페이지 번호", required = true, schema = @Schema(type = "Integer", example = "0")),
         @Parameter(name = "size", description = "페이지당 항목 수", required = true, schema = @Schema(type = "Integer", example = "10"))
