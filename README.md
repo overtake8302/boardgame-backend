@@ -24,6 +24,57 @@
 
 ---
 
+# 기능
+## 회원
++ 회원가입
++ 회원 role 구분 (admin, user)
++ 회원 탈퇴
++ jwt쿠키와 토큰을 통한 로그인 / 로그 아웃
++ 회원 정보 조회
++ 회원 정보 수정
++ 관리자 신고 처리
++ 관리자 장르 관리
+
+## 소셜
++ 친구 추가
++ 친구 조회
++ 친구 삭제
++ 다른 유저가 작성한 게시글
++ 다른 유저가 작성한 댓글
+
+## 게임
++ 게임 등록
++ 게임 조회
++ 게임 삭제
++ 게임 수정
++ 게임 수정 히스토리
++ 게임 좋아요, 평점 기능
++ 게임 조회수
+
+## 카테고리
++ 장르 등록
++ 장르 삭제
++ 장르 수정
++ 게임 필터링 (별점, 인기순, 최신순, 인원수 장르, 연령, 플레이 타임)
++ 대시보드
++ 최근 조회한 게임
++ 좋아요를 누른 게임
++ 좋아하는 장르
++ 좋아하는 장르 기반 추천
+
+## 커뮤니티
++ 카테고리별 게시글 조회
++ 연관 게임과 카테고리를 선택하여 게시글 작성
++ 댓글 작성
++ 답글 작성
++ 게시글 좋아요 기능
++ 댓글 좋아요 기능
++ 조회수 기능
++ 게시글 검색
++ 게시글 정렬
+
+---
+
 # Tech Stack
 ## Communications
 [![Communications](https://skillicons.dev/icons?i=gitlab,discord,notion)](https://skillicons.dev)  
@@ -32,7 +83,7 @@
 ## Database
 [![Database](https://skillicons.dev/icons?i=mysql)](https://skillicons.dev)  
 ## Infrastructure
-[![Infrastructure](https://skillicons.dev/icons?i=gcp,aws)](https://skillicons.dev)  
+[![Infrastructure](https://skillicons.dev/icons?i=gcp,aws,nginx)](https://skillicons.dev)  
 
 ---
 
