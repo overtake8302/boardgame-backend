@@ -9,8 +9,11 @@ import com.elice.boardgame.game.dto.GameResponseDto;
 import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
 import com.elice.boardgame.game.repository.BoardGameRepository;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,14 +40,17 @@ public class LiveViewService {
 
         BoardGame game = optionalBoardGame.orElseThrow();
 
-        Optional<LiveView> optionalEntity = liveViewRepository.findByGame(game);
+        List<LiveView> liveViews = liveViewRepository.findLiveViewsByGame(game);
 
-        LiveView liveView = optionalEntity.orElse(new LiveView());
-
-        if (liveView.getIpAddress() != null && liveView.getIpAddress().equals(ipAddress)) {
-            return;
+        for (LiveView liveView: liveViews) {
+            if (liveView.getIpAddress() != null && liveView.getIpAddress().equals(ipAddress)) {
+                return;
+            }
         }
-        LocalDate now = LocalDate.now();
+
+        LiveView liveView = new LiveView();
+
+        LocalDate now = LocalDate.now(ZoneId.of("Asia/Seoul"));
 
         liveView.setGame(game);
         liveView.setCreatedAt(now.atStartOfDay());
@@ -54,28 +60,28 @@ public class LiveViewService {
         liveViewRepository.save(liveView);
     }
 
-
     public void updateLiveViewScore() {
-        LocalDate currentDate = LocalDate.now();
+        LocalDateTime currentDateTime = LocalDateTime.now();
 
         List<LiveView> dataList = liveViewRepository.findAll();
 
         for (LiveView data : dataList) {
-            LocalDate date = LocalDate.from(data.getCreatedAt());
-            Period period = Period.between(date, currentDate);
-
-            int days = period.getDays();
-
-            if (days <= 7) {
+            LocalDateTime dateTime = data.getCreatedAt();
+            Duration duration = Duration.between(dateTime, currentDateTime);
+            long hours = duration.toHours();
+            if (hours <= 12) {
                 data.setViewScore(8L);
-            } else if (days <= 14) {
+            } else if (hours <= 24) {
+                data.setViewScore(6L);
+            } else if (hours <= 48) {
                 data.setViewScore(4L);
-            } else if (days <= 21) {
+            } else if (hours <= 168) {
                 data.setViewScore(2L);
-            } else if (days <= 30) {
-                liveViewRepository.delete(data);
-            } else {
+            } else if (hours <= 336) {
                 data.setViewScore(1L);
+            } else {
+                liveViewRepository.delete(data);
+                continue;
             }
 
             liveViewRepository.save(data);
@@ -91,7 +97,8 @@ public class LiveViewService {
                 Collectors.summingLong(LiveView::getViewScore)));
 
         viewCounts.forEach((game, sumScore) -> {
-            Optional<LiveViewRanking> optionalEntity = liveViewRankingRepository.findByGame(game);
+            Optional<LiveViewRanking> optionalEntity = liveViewRankingRepository.findByGame(
+                game);
             LiveViewRanking ranking;
             if (optionalEntity.isPresent()) {
                 ranking = optionalEntity.get();

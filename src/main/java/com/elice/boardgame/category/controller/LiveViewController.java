@@ -41,7 +41,16 @@ public class LiveViewController {
     })
     @PutMapping("/add")
     public void addViewScore(@RequestParam Long gameId, HttpServletRequest request) {
-        String ipAddress = request.getRemoteAddr();
+        String ipAddress = request.getHeader("X-Forwarded-For");
+        System.out.println(ipAddress);
+        if (ipAddress != null && !ipAddress.isEmpty()) {
+            ipAddress = ipAddress.split(",")[0].trim();
+        } else {
+            ipAddress = request.getHeader("X-Real-IP");
+            if (ipAddress == null || ipAddress.isEmpty()) {
+                ipAddress = request.getRemoteAddr();
+            }
+        }
         liveViewService.addViewScore(gameId, ipAddress);
     }
 
@@ -51,11 +60,11 @@ public class LiveViewController {
         @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     @Scheduled(cron = "0 0 * * * ?")
-    @PutMapping("/score")
     public void updateLiveViewScore() {
         liveViewService.updateLiveViewScore();
         liveViewService.updateRanking();
     }
+
 
     @Operation(summary = "인기순위 목록 조회", description = "실시간 인기순위 게임 목록을 조회합니다.")
     @ApiResponses(value = {
