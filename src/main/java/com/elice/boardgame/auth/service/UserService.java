@@ -121,6 +121,7 @@ public UserInfoResponseDto getMyInfo(User user) {
         FriendInfoResponseDto userInfoResponseDto = new FriendInfoResponseDto();
         userInfoResponseDto.setId(user.getId());
         userInfoResponseDto.setUsername(user.getUsername());
+        userInfoResponseDto.setProfileImageUrl(user.getProfileImageUrl());
 
         return userInfoResponseDto;
     }
