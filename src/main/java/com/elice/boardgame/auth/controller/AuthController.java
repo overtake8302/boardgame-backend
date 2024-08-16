@@ -79,7 +79,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "현재 사용자 정보 반환"),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자", content = @Content)
     })
-    @GetMapping("/test/me")
+    @GetMapping("/user/check")
     public String getCurrentUserInfo(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         if (customUserDetails != null) {
             User user = userRepository.findByUsername(customUserDetails.getUsername());
