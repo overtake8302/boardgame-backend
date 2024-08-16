@@ -70,7 +70,6 @@ public class PostService {
         Post post = new Post();
         post.setTitle(postDto.getTitle());
         post.setContent(postDto.getContent());
-        log.info("createPost : {}", postDto.getContent());
         post.setCategory(postDto.getCategory());
         post.setGameName(boardGame.getName());
         post.setBoardGame(boardGame);
@@ -80,12 +79,8 @@ public class PostService {
         if (pics != null && !pics.isEmpty()) {
             post.setGameImageUrl(boardGame.getGameProfilePics().get(0).getPicAddress());
         }
-        log.info("Saving post to repository");
-        Post savedPost = postRepository.save(post);
-        log.info("Post saved with ID: {}", savedPost.getId());
-        log.info("Post saved with ID: {}", savedPost.getContent());
 
-        return savedPost;
+        return postRepository.save(post);
     }
 
     //  카테고리별로 게시글 조회
@@ -120,13 +115,13 @@ public class PostService {
         postDto.setPostId(post.getId());
         postDto.setTitle(post.getTitle());
         postDto.setContent(post.getContent());
-        log.info("getPostDtoById : {}", postDto.getContent());
         postDto.setCategory(post.getCategory());
         postDto.setGameName(post.getGameName());
         postDto.setUserId(post.getUserId());
 
         if (post.getUser() != null) {
             postDto.setUserName(post.getUser().getUsername());
+            postDto.setUserImageUrl(post.getUser().getProfileImageUrl());
         } else {
             postDto.setUserName("비회원");
         }
@@ -138,6 +133,7 @@ public class PostService {
             if (comment.getUser() != null) {
                 commentDto.setUserId(comment.getUser().getId());
                 commentDto.setUserName(comment.getUser().getUsername());
+                commentDto.setUserImageUrl(comment.getUser().getProfileImageUrl());
             } else {
                 commentDto.setUserId(null);
                 commentDto.setUserName("비회원");

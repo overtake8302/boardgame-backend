@@ -77,21 +77,21 @@ public class PostController {
     }
 
     //  조회수 증가
-    /*@PostMapping("/{post_id}/increment-view")
-    public ResponseEntity<PostDto> incrementViewAndGetPost(@PathVariable("post_id") Long id) {
-        try {
-            PostDto postDto = postService.incrementViewAndGetPost(id);
-            if (postDto == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
-            return ResponseEntity.ok(postDto);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }*/
+//    @PostMapping("/{post_id}/increment-view")
+//    public ResponseEntity<PostDto> incrementViewAndGetPost(@PathVariable("post_id") Long id) {
+//        try {
+//            PostDto postDto = postService.incrementViewAndGetPost(id);
+//            if (postDto == null) {
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+//            }
+//            return ResponseEntity.ok(postDto);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+//        }
+//    }
 
-     @PostMapping("/{post_id}/increment-view")
+    @PostMapping("/{post_id}/increment-view")
     public void incrementViewAndGetPost(@RequestHeader("visitor-id") @NotBlank String visitorId, @RequestHeader("post-id") @Min(1) Long postId) {
         postService.incrementViewAndGetPost(visitorId, postId);
     }

@@ -40,23 +40,6 @@ public class Post extends BaseEntity {
     @Column(columnDefinition = "LONGTEXT")
     private String content;
 
-    @Override
-    public String toString() {
-        return "Post{" +
-                "id=" + id +
-                ", user=" + user +
-                ", boardGame=" + boardGame +
-                ", content='" + content + '\'' +
-                ", category='" + category + '\'' +
-                ", title='" + title + '\'' +
-                ", gameName='" + gameName + '\'' +
-                ", gameImageUrl='" + gameImageUrl + '\'' +
-                ", likeCount=" + likeCount +
-                ", view=" + view +
-                ", comments=" + comments +
-                '}';
-    }
-
     private String category;
     private String title;
 
