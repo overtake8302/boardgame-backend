@@ -51,7 +51,6 @@ public class LiveViewController {
                 ipAddress = request.getRemoteAddr();
             }
         }
-        System.out.println(ipAddress);
         liveViewService.addViewScore(gameId, ipAddress);
     }
 
@@ -62,7 +61,6 @@ public class LiveViewController {
     })
     @Scheduled(cron = "0 0 * * * ?")
     public void updateLiveViewScore() {
-        System.out.println("Scheduled task is running");
         liveViewService.updateLiveViewScore();
         liveViewService.updateRanking();
     }
