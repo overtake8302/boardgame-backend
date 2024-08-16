@@ -40,11 +40,11 @@ public class AuthController {
         this.joinService = joinService;
     }
 
-    @Operation(summary = "회원 가입", description = "사용자 회원 가입을 처리합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "회원 가입 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content),
-            @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
+        @Operation(summary = "회원 가입", description = "사용자 회원 가입을 처리합니다.")
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "회원 가입 성공"),
+                @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content),
+                @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
     })
     @PostMapping("/join")
     public ResponseEntity<String> joinProcess(
