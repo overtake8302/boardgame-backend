@@ -50,10 +50,7 @@ public class LiveViewService {
 
         LiveView liveView = new LiveView();
 
-        LocalDate now = LocalDate.now(ZoneId.of("Asia/Seoul"));
-
         liveView.setGame(game);
-        liveView.setCreatedAt(now.atStartOfDay());
         liveView.setViewScore(8L);
         liveView.setIpAddress(ipAddress);
 
