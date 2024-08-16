@@ -149,11 +149,6 @@ public UserInfoResponseDto getMyInfo(User user) {
                 throw new RuntimeException("이미지 업로드에 실패했습니다.", e);
             }
         }
-        System.out.println("sage : " + updateUserDTO.getAge());
-        System.out.println("sphone : " + updateUserDTO.getPhonenumber());
-        System.out.println("sname :" + updateUserDTO.getName());
-        System.out.println("surl : " + updateUserDTO.getProfileImage());
-
         userRepository.save(user);
     }
 
