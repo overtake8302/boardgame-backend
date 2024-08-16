@@ -96,7 +96,7 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/me")
+    @PutMapping("/test/me")
     public ResponseEntity<String> updateUser(
             @CurrentUser User user,
             @RequestParam(value = "age", required = false) Integer age,
