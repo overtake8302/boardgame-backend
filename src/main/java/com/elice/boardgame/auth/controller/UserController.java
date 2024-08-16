@@ -148,4 +148,42 @@ public class UserController {
                     .build(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/{userId}/posts")
+    public ResponseEntity<CommonResponse<Page<MyPostResponseDto>>> getUserPosts(
+            @PathVariable Long userId,
+            @ModelAttribute PaginationRequest paginationRequest) {
+
+        int page = paginationRequest.getPage() == 0 ? 0 : paginationRequest.getPage();
+        int size = paginationRequest.getSize() == 0 ? 12 : paginationRequest.getSize();
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<MyPostResponseDto> userPosts = userService.findUserPosts(userId, pageable);
+
+        CommonResponse<Page<MyPostResponseDto>> response = CommonResponse.<Page<MyPostResponseDto>>builder()
+                .payload(userPosts)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{userId}/comments")
+    public ResponseEntity<CommonResponse<Page<MyCommentResponseDto>>> getMyComments(
+            @PathVariable Long userId,
+            @ModelAttribute PaginationRequest paginationRequest) {
+
+        int page = paginationRequest.getPage() == 0 ? 0 : paginationRequest.getPage();
+        int size = paginationRequest.getSize() == 0 ? 12 : paginationRequest.getSize();
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<MyCommentResponseDto> userComments = userService.findUserComments(userId, pageable);
+
+        CommonResponse<Page<MyCommentResponseDto>> response = CommonResponse.<Page<MyCommentResponseDto>>builder()
+                .payload(userComments)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
