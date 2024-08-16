@@ -18,7 +18,7 @@
 # Entity Relationship Diagram
 
 ### 보드게임 관련 테이블
-<img src="/uploads/f1729b65450a9a1a9928967b951d59c1/ERD-boardgame.png" width="70%">
+![gameErd.png](./gameErd.png)
 
 ### 게시판 관련 테이블
 <img src="/uploads/dfb58707880f30188d4da7725bd26c66/ERD-post.png" width="70%">
