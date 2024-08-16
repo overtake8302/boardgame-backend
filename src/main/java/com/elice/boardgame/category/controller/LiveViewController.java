@@ -37,7 +37,7 @@ public class LiveViewController {
     @Scheduled(cron = "0 0 * * * ?")
     @PutMapping("/score")
     public void updateLiveViewScore() {
-        liveViewService.updateLiveViewScore();
+        liveViewService.updateViewScores();
         liveViewService.updateRanking();
     }
 
