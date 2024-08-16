@@ -77,13 +77,13 @@
 
 # Tech Stack
 ## Communications
-[![Communications](https://skillicons.dev/icons?i=gitlab,discord,notion)](https://skillicons.dev)  
+[![Communications](https://skillicons.dev/icons?i=gitlab,discord,notion&theme=light)](https://skillicons.dev)  
 ## Server
-[![Server](https://skillicons.dev/icons?i=java,spring)](https://skillicons.dev)   
+[![Server](https://skillicons.dev/icons?i=java,spring&theme=light)](https://skillicons.dev)   
 ## Database
-[![Database](https://skillicons.dev/icons?i=mysql)](https://skillicons.dev)  
+[![Database](https://skillicons.dev/icons?i=mysql&theme=light)](https://skillicons.dev)  
 ## Infrastructure
-[![Infrastructure](https://skillicons.dev/icons?i=gcp,aws,nginx)](https://skillicons.dev)  
+[![Infrastructure](https://skillicons.dev/icons?i=gcp,aws,nginx&theme=light)](https://skillicons.dev)  
 
 ---
 
