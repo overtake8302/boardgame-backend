@@ -79,6 +79,7 @@ package com.elice.boardgame.common.config;
 
 //import com.elice.boardgame.auth.OAuth2.CustomSuccessHandler;
 //import com.elice.boardgame.auth.OAuth2.service.CustomOAuth2UserService;
+
 import com.elice.boardgame.auth.jwt.JWTFilter;
 import com.elice.boardgame.auth.jwt.JWTUtil;
 import com.elice.boardgame.auth.jwt.LoginFilter;
@@ -86,6 +87,7 @@ import com.elice.boardgame.auth.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -105,14 +107,14 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
-//    private final CustomOAuth2UserService customOAuth2UserService;
+    //    private final CustomOAuth2UserService customOAuth2UserService;
 //    private final CustomSuccessHandler customSuccessHandler;
     private final UserRepository userRepository;  // 필드로 추가
 
     // 생성자
     public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil,
 //                          CustomOAuth2UserService customOAuth2UserService, CustomSuccessHandler customSuccessHandler,
-                          UserRepository userRepository) {
+        UserRepository userRepository) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
 //        this.customOAuth2UserService = customOAuth2UserService;
@@ -135,9 +137,9 @@ public class SecurityConfig {
 
         // CSRF 및 기본 설정 비활성화
         http
-                .csrf((auth) -> auth.disable())
-                .formLogin((auth) -> auth.disable())
-                .httpBasic((auth) -> auth.disable());
+            .csrf((auth) -> auth.disable())
+            .formLogin((auth) -> auth.disable())
+            .httpBasic((auth) -> auth.disable());
 
         //cors설정
         /*http
@@ -163,8 +165,10 @@ public class SecurityConfig {
 
         // JWT 필터 추가
         http
-                .addFilterBefore(new JWTFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(new JWTFilter(jwtUtil, userRepository),
+                UsernamePasswordAuthenticationFilter.class)
+            .addFilterAt(new LoginFilter(authenticationManager(), jwtUtil),
+                UsernamePasswordAuthenticationFilter.class);
 
 //        // OAuth2 로그인 구성
 //        http
@@ -176,17 +180,42 @@ public class SecurityConfig {
 
         // 권한 규칙 설정
         http
-                .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join", "/test", "/logout").permitAll()
-//                        .requestMatchers("/admin").hasRole("ADMIN")
-                        .anyRequest().permitAll()
-                );
+            .authorizeHttpRequests((auth) -> auth
+                .requestMatchers(HttpMethod.GET, "/game/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/game/view").permitAll()
+                .requestMatchers(HttpMethod.POST, "/game/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/game/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/game/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/post/like").authenticated()
+                .requestMatchers(HttpMethod.POST, "/post/insert").authenticated()
+                .requestMatchers(HttpMethod.GET, "/post/*/editok").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/post/*/delete").authenticated()
+                .requestMatchers(HttpMethod.GET, "/admin-check").authenticated()
+                .requestMatchers(HttpMethod.POST, "/user/logout").authenticated()
+                .requestMatchers(HttpMethod.GET, "/user/check").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/users/withdraw").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/users/update").authenticated()
+                .requestMatchers(HttpMethod.GET, "/users/my/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/report/send").authenticated()
+                .requestMatchers(HttpMethod.GET, "/recommend/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "genre").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/genre/*").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/genre/*").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/comments/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/comments/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/comments/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/social/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/social/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/report").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/report").hasRole("ADMIN")
+                .anyRequest().permitAll()
+            );
 
         // 세션 관리 설정
         http
-                .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
+            .sessionManagement((session) -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            );
 
         return http.build();
     }
