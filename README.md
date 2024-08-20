@@ -8,7 +8,7 @@
 
 ## 팀 소개
 - 엘리스 Cloud 트랙 3기 3차 프로젝트 10팀  
-- 개발기간 : 2024.07.22 ~ 2024.18.16
+- 개발기간 : 2024.07.22 ~ 2024.08.16
 - 노션 팀페이지 : https://www.notion.so/elice-track/10-cab424f1cfbb4e1b9393d64640f2c286?pvs=4
 - 서버 도메인 : http://kdt-cloud-3-team10-final.elicecoding.com/
 ---
