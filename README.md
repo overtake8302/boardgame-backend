@@ -9,7 +9,6 @@
 ## 팀 소개
 - 엘리스 Cloud 트랙 3기 3차 프로젝트 10팀  
 - 개발기간 : 2024.07.22 ~ 2024.08.16
-- 노션 팀페이지 : https://www.notion.so/elice-track/10-cab424f1cfbb4e1b9393d64640f2c286?pvs=4
 - 서버 도메인 : http://kdt-cloud-3-team10-final.elicecoding.com/
 ---
 
@@ -90,13 +89,13 @@
 # Entity Relationship Diagram
 
 ### 보드게임 관련 테이블
-<img src="/uploads/f1729b65450a9a1a9928967b951d59c1/ERD-boardgame.png" width="50%">
+<img width="653" alt="ERD-boardgame" src="https://github.com/user-attachments/assets/0be89e26-e8ac-403e-b477-6ec3bff95c50">
 
 ### 게시판 관련 테이블
-<img src="/uploads/dfb58707880f30188d4da7725bd26c66/ERD-post.png" width="50%">
+<img width="605" alt="ERD-post" src="https://github.com/user-attachments/assets/8674b9ac-ff47-46e6-a95c-c9c90d7d7052">
 
 ### 유저 관련 테이블
-<img src="/uploads/08b4def289b1d5edc5860dbb7d70e455/ERD-user.png" width="50%">
+<img width="575" alt="ERD-user" src="https://github.com/user-attachments/assets/5ff9a578-d587-45ec-879f-18622003b90f">
 
 ---
 
