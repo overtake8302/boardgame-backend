@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,13 +36,14 @@ public class GamePutDto {
     private Enums.AgeLimit ageLimit;
 
     @Max(2100000000)
+    @Min(1)
     private int price;
 
     private String designer;
 
     private String artwork;
 
-    private String releaseDate;
+    private LocalDate releaseDate;
 
     @NotNull
     private Enums.Difficulty difficulty;

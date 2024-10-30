@@ -18,7 +18,7 @@ public class GameVisitor extends BaseEntity {
     private GameVisitorId id;
 
     @MapsId("gameId")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id")
     private BoardGame boardGame;
 

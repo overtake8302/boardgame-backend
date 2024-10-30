@@ -18,7 +18,7 @@ public class GameLike extends BaseEntity {
     @EmbeddedId
     private GameLikePK gameLikePK;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("gameId")
     @JoinColumn(name = "game_id")
     private BoardGame boardGame;

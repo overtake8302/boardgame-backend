@@ -28,11 +28,11 @@ public class Post extends BaseEntity {
     @Column(name = "post_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id", nullable = false)
     private BoardGame boardGame;
 
@@ -57,7 +57,7 @@ public class Post extends BaseEntity {
 
     private Long view;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference("post")
     private List<Comment> comments = new ArrayList<>();
 

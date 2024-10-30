@@ -13,6 +13,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,8 +27,7 @@ public class GamePostDto {
 
     private Enums.PlayTime playTime;
 
-    @JoinColumn(name = "release_date")
-    private String releaseDate;
+    private LocalDate releaseDate;
 
     @NotNull
     private Enums.PlayNum playNum;
@@ -35,6 +36,7 @@ public class GamePostDto {
     private Enums.AgeLimit ageLimit;
 
     @Max(2100000000)
+    @Min(1)
     private int price;
 
     private String designer;

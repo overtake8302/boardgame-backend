@@ -142,6 +142,7 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
         QGameGenre gameGenre = QGameGenre.gameGenre;
         QGameLike gameLike = QGameLike.gameLike;
+        QGenre genre = QGenre.genre1;
 
         List<String> profilePics = queryFactory
                 .select(gameProfilePic.picAddress)
@@ -153,6 +154,8 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
         List<GameGenre> genres = queryFactory
                 .select(gameGenre)
                 .from(gameGenre)
+                .innerJoin(gameGenre.genre, genre).fetchJoin()
+                .innerJoin(gameGenre.boardGame, boardGame).fetchJoin()
                 .where(gameGenre.boardGame.gameId.eq(gameId))
                 .fetch();
 
@@ -196,8 +199,6 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .from(boardGame)
                 .leftJoin(boardGame.gameRates, gameRate)
                 .leftJoin(boardGame.gameVisitors, gameVisitor)
-                .leftJoin(boardGame.gameProfilePics, gameProfilePic) // 프로필 사진 조인
-                .leftJoin(boardGame.gameGenres, gameGenre)// 장르 조인
                 .leftJoin(boardGame.gameLikes, gameLike)
                 .where(boardGame.deletedAt.isNull()
                         .and(boardGame.gameId.eq(gameId)))

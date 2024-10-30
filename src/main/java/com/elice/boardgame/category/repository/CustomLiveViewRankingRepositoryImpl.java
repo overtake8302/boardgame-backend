@@ -31,6 +31,7 @@ public class CustomLiveViewRankingRepositoryImpl implements CustomLiveViewRankin
         QBoardGame boardGame = QBoardGame.boardGame;
         List<LiveViewRanking> rankings = jpaQueryFactory.selectFrom(liveViewRanking)
             .innerJoin(liveViewRanking.game, boardGame).fetchJoin()
+            .where(boardGame.deletedAt.isNull())
             .orderBy(liveViewRanking.sumScore.desc())
             .limit(10)
             .fetch();

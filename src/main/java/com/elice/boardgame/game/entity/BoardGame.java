@@ -12,6 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +50,7 @@ public class BoardGame extends BaseEntity {
     private String artwork;
 
     @Column(name = "release_date")
-    private String releaseDate;
+    private LocalDate releaseDate;
 
     @Enumerated(EnumType.STRING)
     private Enums.Difficulty difficulty;
