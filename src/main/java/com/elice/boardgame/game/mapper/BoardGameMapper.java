@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class BoardGameMapper {
@@ -42,6 +44,12 @@ public class BoardGameMapper {
     public GameResponseDto boardGameToGameResponseDto(BoardGame boardGame) {
 
         return boardGameRepository.getGameResponseDtoByGameIdAndDeletedAtIsNull(boardGame.getGameId());
+
+    }
+
+    public List<GameResponseDto> boardGameIdsToGameResponseDto(List<Long> gameIds) {
+
+        return boardGameRepository.getGameResponseDtosByGameIds(gameIds);
 
     }
 

@@ -58,10 +58,10 @@ public class BoardGame extends BaseEntity {
     @Column(length = 500, name = "youtube_link")
     private String youtubeLink;
 
-    @OneToMany(mappedBy = "boardGame", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "boardGame", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<GameLike> gameLikes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "boardGame", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "boardGame", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<GameRate> gameRates = new ArrayList<>();
 
     @OneToMany(mappedBy = "boardGame")
@@ -72,17 +72,17 @@ public class BoardGame extends BaseEntity {
     @JsonManagedReference
     private List<GameGenre> gameGenres;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id")
     private List<GameVisitor> gameVisitors;
 
     private Long views;
 
-    @ManyToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User firstCreator;
 
-    @ManyToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "editor_id")
     private User editBy;
 

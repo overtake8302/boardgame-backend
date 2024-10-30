@@ -23,7 +23,7 @@ public class GameLike extends BaseEntity {
     @JoinColumn(name = "game_id")
     private BoardGame boardGame;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "user_id")
     private User user;

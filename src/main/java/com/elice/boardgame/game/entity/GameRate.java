@@ -20,7 +20,7 @@ public class GameRate extends BaseEntity {
     @Column(name = "rate_id")
     private Long rateId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

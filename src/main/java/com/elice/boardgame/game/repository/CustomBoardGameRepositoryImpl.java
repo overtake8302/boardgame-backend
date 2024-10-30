@@ -3,6 +3,7 @@ package com.elice.boardgame.game.repository;
 import com.elice.boardgame.auth.entity.QUser;
 import com.elice.boardgame.category.entity.GameGenre;
 import com.elice.boardgame.category.entity.QGameGenre;
+import com.elice.boardgame.category.entity.QGenre;
 import com.elice.boardgame.common.dto.SearchResponse;
 import com.elice.boardgame.common.enums.Enums;
 import com.elice.boardgame.game.dto.GameListResponseDto;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -707,5 +709,99 @@ public class CustomBoardGameRepositoryImpl implements CustomBoardGameRepository 
                 .fetchOne();
 
         return new PageImpl<>(results, pageable, total);
+    }
+
+    @Override
+    public List<GameResponseDto> getGameResponseDtosByGameIds(List<Long> gameIds) {
+        QBoardGame boardGame = QBoardGame.boardGame;
+        QGameRate gameRate = QGameRate.gameRate;
+        QGameVisitor gameVisitor = QGameVisitor.gameVisitor;
+        QGameProfilePic gameProfilePic = QGameProfilePic.gameProfilePic;
+        QGameGenre gameGenre = QGameGenre.gameGenre;
+        QGameLike gameLike = QGameLike.gameLike;
+        QGenre gameGenreGenre = QGenre.genre1;
+
+        List<GameResponseDto> results = queryFactory
+                .select(Projections.bean(GameResponseDto.class,
+                        boardGame.gameId.as("gameId"),
+                        boardGame.name.as("name"),
+                        new CaseBuilder()
+                                .when(boardGame.playTime.eq(Enums.PlayTime.SHORT)).then("30분 이하")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.MEDIUM)).then("30분 ~ 1시간")
+                                .when(boardGame.playTime.eq(Enums.PlayTime.LONG)).then("1시간 이상")
+                                .otherwise(boardGame.playTime.stringValue()).as("playTime"),
+                        new CaseBuilder()
+                                .when(boardGame.playNum.eq(Enums.PlayNum.ONE_PLAYER)).then("1인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.TWO_PLAYERS)).then("2인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.THREE_PLAYERS)).then("3인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FOUR_PLAYERS)).then("4인용")
+                                .when(boardGame.playNum.eq(Enums.PlayNum.FIVE_PLUS_PLAYERS)).then("5인 이상")
+                                .otherwise(boardGame.playNum.stringValue()).as("playNum"),
+                        new CaseBuilder()
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_ALL)).then("전체 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_12_PLUS)).then("12세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_15_PLUS)).then("15세 이용가")
+                                .when(boardGame.ageLimit.eq(Enums.AgeLimit.AGE_18_PLUS)).then("청소년 이용 불가")
+                                .otherwise(boardGame.ageLimit.stringValue()).as("ageLimit"),
+                        new CaseBuilder()
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.EASY)).then("쉬움")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.MEDIUM)).then("보통")
+                                .when(boardGame.difficulty.eq(Enums.Difficulty.HARD)).then("어려움")
+                                .otherwise(boardGame.difficulty.stringValue()).as("difficulty"),
+                        boardGame.price.as("price"),
+                        boardGame.designer.as("designer"),
+                        boardGame.artwork.as("artwork"),
+                        boardGame.releaseDate.as("releaseDate"),
+                        boardGame.publisher.as("publisher"),
+                        boardGame.youtubeLink.as("youtubeLink"),
+                        gameLike.countDistinct().intValue().as("likeCount"),
+                        gameRate.rate.avg().as("averageRate"),
+                        gameVisitor.countDistinct().as("views")
+                ))
+                .from(boardGame)
+                .leftJoin(boardGame.gameRates, gameRate)
+                .leftJoin(boardGame.gameVisitors, gameVisitor)
+                .leftJoin(boardGame.gameLikes, gameLike)
+                .where(boardGame.deletedAt.isNull()
+                        .and(boardGame.gameId.in(gameIds)))
+                .groupBy(boardGame.gameId)
+                .fetch();
+
+        List<GameProfilePic> profilePics = queryFactory
+                .select(gameProfilePic)
+                .from(gameProfilePic)
+                .leftJoin(gameProfilePic.boardGame, boardGame).fetchJoin()
+                .where(gameProfilePic.boardGame.gameId.in(gameIds)
+                        .and(gameProfilePic.isActive.eq(true)))
+                .fetch();
+
+        List<GameGenre> genres = queryFactory
+                .select(gameGenre)
+                .from(gameGenre)
+                .leftJoin(gameGenre.boardGame, boardGame).fetchJoin()
+                .leftJoin(gameGenre.genre,gameGenreGenre).fetchJoin()
+                .where(gameGenre.boardGame.gameId.in(gameIds))
+                .fetch();
+
+        if (results != null) {
+           for (GameResponseDto responseDto : results) {
+               List<GameGenre> gameGenres = new ArrayList<>();
+               List<String> picUrls = new ArrayList<>();
+               for (GameGenre genre : genres) {
+                    if (responseDto.getGameId().equals(genre.getBoardGame().getGameId())) {
+                        gameGenres.add(genre);
+                    }
+               }
+               for (GameProfilePic pic : profilePics) {
+                   if (responseDto.getGameId().equals(pic.getBoardGame().getGameId())) {
+                       picUrls.add(pic.getPicAddress());
+                   }
+               }
+               responseDto.setGameGenres(gameGenres);
+               responseDto.setGameProfilePics(picUrls);
+           }
+        }
+
+        return results;
     }
 }

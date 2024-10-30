@@ -10,10 +10,7 @@ import com.elice.boardgame.game.entity.BoardGame;
 import com.elice.boardgame.game.mapper.BoardGameMapper;
 import com.elice.boardgame.game.repository.BoardGameRepository;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -111,20 +108,17 @@ public class LiveViewService {
 
     public List<GameResponseDto> getLiveViewRanking() {
         List<LiveViewRanking> liveViews = liveViewRankingRepository.find();
-        List<BoardGame> boardGames = new ArrayList<>();
+        List<Long> boardGameIds = new ArrayList<>();
 
         for (LiveViewRanking liveView : liveViews) {
-            BoardGame boardGame = liveView.getGame();
-            if (boardGame == null) {
+            Long gameId = liveView.getGame().getGameId();
+            if (gameId == null) {
                 throw new BoardGameNotFoundException("해당 보드게임이 존재하지 않습니다.");
             }
-            boardGames.add(boardGame);
+            boardGameIds.add(gameId);
         }
 
-        List<GameResponseDto> dtos = new ArrayList<>();
-        for (BoardGame game : boardGames) {
-            dtos.add(boardGameMapper.boardGameToGameResponseDto(game));
-        }
+        List<GameResponseDto> dtos = boardGameMapper.boardGameIdsToGameResponseDto(boardGameIds);
 
         return dtos;
     }

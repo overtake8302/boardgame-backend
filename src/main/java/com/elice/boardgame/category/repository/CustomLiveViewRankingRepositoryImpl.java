@@ -1,5 +1,6 @@
 package com.elice.boardgame.category.repository;
 
+import com.elice.boardgame.game.entity.QBoardGame;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -27,7 +28,9 @@ public class CustomLiveViewRankingRepositoryImpl implements CustomLiveViewRankin
     @Override
     public List<LiveViewRanking> find() {
         QLiveViewRanking liveViewRanking = QLiveViewRanking.liveViewRanking;
+        QBoardGame boardGame = QBoardGame.boardGame;
         List<LiveViewRanking> rankings = jpaQueryFactory.selectFrom(liveViewRanking)
+            .innerJoin(liveViewRanking.game, boardGame).fetchJoin()
             .orderBy(liveViewRanking.sumScore.desc())
             .limit(10)
             .fetch();

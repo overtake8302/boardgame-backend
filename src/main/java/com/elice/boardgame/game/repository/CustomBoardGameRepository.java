@@ -26,4 +26,5 @@ public interface CustomBoardGameRepository {
     List<GameCommentDto> findComentsByGameId(Long gameId);
 
     Page<GameListResponseDto> findByNameContainingAndDeletedAtIsNull(Pageable pageable, Enums.GameListSortOption sortBy, String keyword);
+    List<GameResponseDto> getGameResponseDtosByGameIds(List<Long> gameIds);
 }

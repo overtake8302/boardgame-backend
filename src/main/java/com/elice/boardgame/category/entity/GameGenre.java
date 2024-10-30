@@ -18,7 +18,6 @@ import lombok.Setter;
 @Table(name = "game_genre")
 @Getter
 @Setter
-@RequiredArgsConstructor
 public class GameGenre implements Serializable {
 
     @EmbeddedId
