@@ -9,7 +9,6 @@
 ## 팀 소개
 - 엘리스 Cloud 트랙 3기 3차 프로젝트 10팀  
 - 개발기간 : 2024.07.22 ~ 2024.08.16
-- 서버 도메인 : http://kdt-cloud-3-team10-final.elicecoding.com/
 ---
 
 # 프로젝트 소개
